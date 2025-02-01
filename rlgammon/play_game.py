@@ -1,11 +1,11 @@
-from rlgammon.env import BackgammonEnv
+from rlgammon.environment import BackgammonEnv
 import random
 
 
 def play_game():
     env = BackgammonEnv()
     env.reset()
-    # print(env.get_legal_moves([5, 6]))
+    # print(environment.get_legal_moves([5, 6]))
     # None * 2
     done = False
     trunc = False
