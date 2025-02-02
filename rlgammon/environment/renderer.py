@@ -1,38 +1,24 @@
+# TODO add separate color variables for pieces (checkers or whatever) and studs
+
 import pygame
 import sys
 import math
 
+from rlgammon.environment.render_data.colors import Colors
+from rlgammon.environment.render_data.board_parameters import BoardParameters
+
 
 class BackgammonRenderer:
-    def __init__(self, width=900, height=600):
+    def __init__(self):
         pygame.init()
-        self.width = width
-        self.height = height
-        self.screen = pygame.display.set_mode((width, height))
+        self.screen = pygame.display.set_mode((BoardParameters.screen_width, BoardParameters.screen_height))
         pygame.display.set_caption("Backgammon")
         self.clock = pygame.time.Clock()
 
-        # Colors
-        self.bg_color = (34, 139, 34)  # dark green background
-        self.triangle_color1 = (222, 184, 135)  # light brown
-        self.triangle_color2 = (139, 69, 19)  # dark brown
-        self.bar_color = (105, 105, 105)  # gray for the bar
-        self.white_color = (255, 255, 255)
-        self.black_color = (0, 0, 0)
-        self.outline_color = (0, 0, 0)
-
-        # Board geometry parameters:
-        self.margin = 50
-        self.board_width = 700
-        self.board_height = 500
-        self.bar_width = 50
-        # Off-board column width:
-        self.off_width = 60
-
         # The triangle (point) areas:
-        self.triangle_height = (self.board_height // 2) - 20
+        self.triangle_height = (BoardParameters.board_height // 2) - 20
         # There are 12 triangles per half.
-        self.triangle_width = (self.board_width - self.bar_width) / 12
+        self.triangle_width = (BoardParameters.board_width - BoardParameters.bar_width) / 12
 
         # Prepare a font for drawing numbers on overloaded stacks.
         self.font = pygame.font.SysFont(None, 20)
@@ -62,8 +48,8 @@ class BackgammonRenderer:
             # Use the appropriate color for the count marker:
             # (Here we simply use white if count is positive, black if negative; in our calls we already pass abs(count))
             pygame.draw.circle(self.screen, color, (int(center_x), int(center_y)), piece_radius)
-            pygame.draw.circle(self.screen, self.outline_color, (int(center_x), int(center_y)), piece_radius, 1)
-            text = self.font.render(f"{count}", True, self.outline_color)
+            pygame.draw.circle(self.screen, Colors.outline_color, (int(center_x), int(center_y)), piece_radius, 1)
+            text = self.font.render(f"{count}", True, Colors.outline_color)
             text_rect = text.get_rect(center=(center_x, center_y))
             self.screen.blit(text, text_rect)
         else:
@@ -73,7 +59,7 @@ class BackgammonRenderer:
                 else:
                     center_y = start_y - j * (piece_diameter + spacing) - piece_radius
                 pygame.draw.circle(self.screen, color, (int(center_x), int(center_y)), piece_radius)
-                pygame.draw.circle(self.screen, self.outline_color, (int(center_x), int(center_y)), piece_radius, 1)
+                pygame.draw.circle(self.screen, Colors.outline_color, (int(center_x), int(center_y)), piece_radius, 1)
 
     def render(self, positions, bar, off, wait=True):
         """
@@ -96,37 +82,37 @@ class BackgammonRenderer:
             raise ValueError("off must be a list of length 2")
 
         # Clear the screen.
-        self.screen.fill(self.bg_color)
+        self.screen.fill(Colors.bg_color)
 
         # Draw the board playing area.
-        board_rect = pygame.Rect(self.margin, self.margin, self.board_width, self.board_height)
-        pygame.draw.rect(self.screen, self.bg_color, board_rect)
-        pygame.draw.rect(self.screen, self.outline_color, board_rect, 3)
+        board_rect = pygame.Rect(BoardParameters.margin, BoardParameters.margin, BoardParameters.board_width, BoardParameters.board_height)
+        pygame.draw.rect(self.screen, Colors.bg_color, board_rect)
+        pygame.draw.rect(self.screen, Colors.outline_color, board_rect, 3)
 
         # Draw the central bar.
-        bar_x = self.margin + (self.board_width - self.bar_width) / 2
-        bar_rect = pygame.Rect(bar_x, self.margin, self.bar_width, self.board_height)
-        pygame.draw.rect(self.screen, self.bar_color, bar_rect)
-        pygame.draw.rect(self.screen, self.outline_color, bar_rect, 2)
+        bar_x = BoardParameters.margin + (BoardParameters.board_width - BoardParameters.bar_width) / 2
+        bar_rect = pygame.Rect(bar_x, BoardParameters.margin, BoardParameters.bar_width, BoardParameters.board_height)
+        pygame.draw.rect(self.screen, Colors.bar_color, bar_rect)
+        pygame.draw.rect(self.screen, Colors.outline_color, bar_rect, 2)
 
         # Draw the off-board column to the right of the board.
-        off_rect = pygame.Rect(self.margin + self.board_width, self.margin, self.off_width, self.board_height)
-        pygame.draw.rect(self.screen, self.bg_color, off_rect)
-        pygame.draw.rect(self.screen, self.outline_color, off_rect, 3)
+        off_rect = pygame.Rect(BoardParameters.margin + BoardParameters.board_width, BoardParameters.margin, BoardParameters.off_width, BoardParameters.board_height)
+        pygame.draw.rect(self.screen, Colors.bg_color, off_rect)
+        pygame.draw.rect(self.screen, Colors.outline_color, off_rect, 3)
 
         # --- Draw the triangles for the points ---
-        triangle_colors = [self.triangle_color1, self.triangle_color2]
+        triangle_colors = [Colors.triangle_color1, Colors.triangle_color2]
 
         # Top half: points 13-24 (drawn left-to-right)
         for i in range(12):
             if i < 6:
                 # Left quadrant (points 13-18)
-                x = self.margin + i * self.triangle_width
+                x = BoardParameters.margin + i * self.triangle_width
             else:
                 # Right quadrant (points 19-24)
-                x = self.margin + ((self.board_width - self.bar_width) / 2) + self.bar_width + (
+                x = BoardParameters.margin + ((BoardParameters.board_width - BoardParameters.bar_width) / 2) + BoardParameters.bar_width + (
                             i - 6) * self.triangle_width
-            y = self.margin
+            y = BoardParameters.margin
             points = [
                 (x, y),  # left corner of the base
                 (x + self.triangle_width, y),  # right corner of the base
@@ -134,18 +120,18 @@ class BackgammonRenderer:
             ]
             color = triangle_colors[i % 2]
             pygame.draw.polygon(self.screen, color, points)
-            pygame.draw.polygon(self.screen, self.outline_color, points, 1)
+            pygame.draw.polygon(self.screen, Colors.outline_color, points, 1)
 
         # Bottom half: points 1-12 (drawn right-to-left in each quadrant so they mirror the top)
         for i in range(12):
             if i < 6:
                 # Bottom right quadrant: corresponds to points 6 to 1 (reverse order)
-                x = self.margin + ((self.board_width - self.bar_width) / 2) + self.bar_width + (
+                x = BoardParameters.margin + ((BoardParameters.board_width - BoardParameters.bar_width) / 2) + BoardParameters.bar_width + (
                             5 - i) * self.triangle_width
             else:
                 # Bottom left quadrant: corresponds to points 12 to 7 (reverse order)
-                x = self.margin + (11 - i) * self.triangle_width
-            y = self.margin + self.board_height
+                x = BoardParameters.margin + (11 - i) * self.triangle_width
+            y = BoardParameters.margin + BoardParameters.board_height
             points = [
                 (x, y),  # left corner of the base (bottom)
                 (x + self.triangle_width, y),  # right corner
@@ -153,7 +139,7 @@ class BackgammonRenderer:
             ]
             color = triangle_colors[i % 2]
             pygame.draw.polygon(self.screen, color, points)
-            pygame.draw.polygon(self.screen, self.outline_color, points, 1)
+            pygame.draw.polygon(self.screen, Colors.outline_color, points, 1)
 
         # --- Draw the checkers on the board ---
         piece_radius = int(self.triangle_width * 0.4)
@@ -173,19 +159,19 @@ class BackgammonRenderer:
             if positions[idx] == 0:
                 continue
             # For top triangles, positive means white, negative means black.
-            piece_color = self.white_color if positions[idx] > 0 else self.black_color
+            piece_color = Colors.white_color if positions[idx] > 0 else Colors.black_color
 
             i = idx - 12
             if i < 6:
                 # Left quadrant (points 13-18)
-                center_x = self.margin + i * self.triangle_width + self.triangle_width / 2
+                center_x = BoardParameters.margin + i * self.triangle_width + self.triangle_width / 2
             else:
                 # Right quadrant (points 19-24)
-                center_x = self.margin + ((self.board_width - self.bar_width) / 2) + self.bar_width + (
+                center_x = BoardParameters.margin + ((BoardParameters.board_width - BoardParameters.bar_width) / 2) + BoardParameters.bar_width + (
                             i - 6) * self.triangle_width + self.triangle_width / 2
 
             # For top triangles, pieces are stacked downward from near the base (the top edge).
-            start_y = self.margin + top_base_offset
+            start_y = BoardParameters.margin + top_base_offset
             self.draw_stack(center_x, start_y, count, piece_radius, top_available, "top", piece_color)
 
         # Bottom half: points 1-12 (indices 0 to 11)
@@ -193,41 +179,41 @@ class BackgammonRenderer:
             count = abs(positions[idx])
             if positions[idx] == 0:
                 continue
-            piece_color = self.white_color if positions[idx] > 0 else self.black_color
+            piece_color = Colors.white_color if positions[idx] > 0 else Colors.black_color
 
             if idx < 6:
                 # Bottom right quadrant: points 6 to 1 (reverse order)
                 i = 5 - idx
-                center_x = self.margin + ((
-                                                      self.board_width - self.bar_width) / 2) + self.bar_width + i * self.triangle_width + self.triangle_width / 2
+                center_x = BoardParameters.margin + ((
+                                                      BoardParameters.board_width - BoardParameters.bar_width) / 2) + BoardParameters.bar_width + i * self.triangle_width + self.triangle_width / 2
             else:
                 # Bottom left quadrant: points 12 to 7 (reverse order)
                 i = 11 - idx
-                center_x = self.margin + i * self.triangle_width + self.triangle_width / 2
+                center_x = BoardParameters.margin + i * self.triangle_width + self.triangle_width / 2
 
             # For bottom triangles, pieces are stacked upward from near the base (the bottom edge).
-            start_y = self.margin + self.board_height - bottom_base_offset
+            start_y = BoardParameters.margin + BoardParameters.board_height - bottom_base_offset
             self.draw_stack(center_x, start_y, count, piece_radius, bottom_available, "bottom", piece_color)
 
         # --- Draw the checkers on the bar ---
-        bar_center_x = self.margin + self.board_width / 2
+        bar_center_x = BoardParameters.margin + BoardParameters.board_width / 2
         # Top bar (black pieces):
-        top_bar_available = self.board_height / 2 - top_base_offset
-        self.draw_stack(bar_center_x, self.margin + top_base_offset, bar[1], piece_radius, top_bar_available, "top", self.black_color)
+        top_bar_available = BoardParameters.board_height / 2 - top_base_offset
+        self.draw_stack(bar_center_x, BoardParameters.margin + top_base_offset, bar[1], piece_radius, top_bar_available, "top", Colors.black_color)
         # Bottom bar (white pieces):
-        bottom_bar_available = self.board_height / 2 - bottom_base_offset
-        self.draw_stack(bar_center_x, self.margin + self.board_height - bottom_base_offset, bar[0], piece_radius,
-                        bottom_bar_available, "bottom", self.white_color)
+        bottom_bar_available = BoardParameters.board_height / 2 - bottom_base_offset
+        self.draw_stack(bar_center_x, BoardParameters.margin + BoardParameters.board_height - bottom_base_offset, bar[0], piece_radius,
+                        bottom_bar_available, "bottom", Colors.white_color)
 
         # --- Draw the off-board column (beared off pieces) ---
-        off_center_x = self.margin + self.board_width + self.off_width / 2
+        off_center_x = BoardParameters.margin + BoardParameters.board_width + BoardParameters.off_width / 2
         # For black off checkers (draw from the top of the off column downward)
-        off_top_available = self.board_height / 2 - top_base_offset
-        self.draw_stack(off_center_x, self.margin + top_base_offset, off[1], piece_radius, off_top_available, "top", self.black_color)
+        off_top_available = BoardParameters.board_height / 2 - top_base_offset
+        self.draw_stack(off_center_x, BoardParameters.margin + top_base_offset, off[1], piece_radius, off_top_available, "top", Colors.black_color)
         # For white off checkers (draw from the bottom of the off column upward)
-        off_bottom_available = self.board_height / 2 - bottom_base_offset
-        self.draw_stack(off_center_x, self.margin + self.board_height - bottom_base_offset, off[0], piece_radius,
-                        off_bottom_available, "bottom", self.white_color)
+        off_bottom_available = BoardParameters.board_height / 2 - bottom_base_offset
+        self.draw_stack(off_center_x, BoardParameters.margin + BoardParameters.board_height - bottom_base_offset, off[0], piece_radius,
+                        off_bottom_available, "bottom", Colors.white_color)
 
         pygame.display.flip()
 
