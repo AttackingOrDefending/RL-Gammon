@@ -4,6 +4,7 @@ import math
 
 from rlgammon.environment.render_data.colors import Colors
 from rlgammon.environment.render_data.board_parameters import BoardParameters
+from rlgammon.environment.drawer.drawer import Drawer
 
 
 class BackgammonRenderer:
@@ -16,15 +17,18 @@ class BackgammonRenderer:
         # Prepare a font for drawing numbers on overloaded stacks.
         self.font = pygame.font.SysFont(None, 20)
 
+        # Init drawer class used for drawing objects on the pyme display
+        self.drawer = Drawer(self.screen)
+
     def draw_stack(self, center_x, start_y, count, piece_radius, available_space, orientation, color):
         """
         Draw a vertical stack of checkers at the given x, starting from start_y.
         If count is too high to fit within available_space using the standard spacing,
-        then draw only one checker with the count drawn on it.
+        then drawer only one checker with the count drawn on it.
 
         :param center_x: x-coordinate for the centers of the checkers.
         :param start_y: starting y coordinate (for top triangles, this is from the top; for bottom triangles, from the bottom).
-        :param count: number of checkers to draw.
+        :param count: number of checkers to drawer.
         :param piece_radius: radius of a checker.
         :param available_space: vertical space available for stacking.
         :param orientation: "top" means stacking downward; "bottom" means stacking upward.
@@ -59,19 +63,6 @@ class BackgammonRenderer:
                                    (int(center_x), int(center_y)), piece_radius, 1)
 
     def render(self, positions, bar, off, wait=True):
-        """
-        Render the backgammon board.
-
-        :param positions: List of 24 integers. For each point:
-                          positive → white pieces, negative → black pieces.
-                          positions[0] is point 1; positions[23] is point 24.
-        :param bar: List of 2 integers: [white_on_bar, black_on_bar].
-                      (By convention, black pieces on the bar are drawn on the top half,
-                       white pieces on the bottom half.)
-        :param off: List of 2 integers: [white_off, black_off] to be drawn in an extra column.
-        :param wait: If True, waits for a key press or window close.
-        """
-
         if len(positions) != 24:
             raise ValueError("positions must be a list of length 24")
         if len(bar) != 2:
@@ -83,23 +74,14 @@ class BackgammonRenderer:
         self.screen.fill(Colors.bg_color)
 
         # Draw the board playing area.
-        board_rect = pygame.Rect(BoardParameters.margin, BoardParameters.margin,
-                                 BoardParameters.board_width, BoardParameters.board_height)
-        pygame.draw.rect(self.screen, Colors.bg_color, board_rect)
-        pygame.draw.rect(self.screen, Colors.outline_color, board_rect, 3)
+        self.drawer.draw_playing_board()
 
         # Draw the central bar.
-        bar_x = BoardParameters.margin + (BoardParameters.board_width - BoardParameters.bar_width) / 2
-        bar_rect = pygame.Rect(bar_x, BoardParameters.margin,
-                               BoardParameters.bar_width, BoardParameters.board_height)
-        pygame.draw.rect(self.screen, Colors.bar_color, bar_rect)
-        pygame.draw.rect(self.screen, Colors.outline_color, bar_rect, 2)
+        bar_x = BoardParameters.margin + (BoardParameters.board_width - BoardParameters.bar_width) // 2
+        self.drawer.draw_central_bar(bar_x)
 
         # Draw the off-board column to the right of the board.
-        off_rect = pygame.Rect(BoardParameters.margin + BoardParameters.board_width,
-                               BoardParameters.margin, BoardParameters.off_width, BoardParameters.board_height)
-        pygame.draw.rect(self.screen, Colors.bg_color, off_rect)
-        pygame.draw.rect(self.screen, Colors.outline_color, off_rect, 3)
+        self.drawer.draw_off_board_column()
 
         # --- Draw the triangles for the points ---
         triangle_colors = [Colors.triangle_color1, Colors.triangle_color2]
@@ -210,11 +192,11 @@ class BackgammonRenderer:
 
         # --- Draw the off-board column (beared off pieces) ---
         off_center_x = BoardParameters.margin + BoardParameters.board_width + BoardParameters.off_width / 2
-        # For black off checkers (draw from the top of the off column downward)
+        # For black off checkers (drawer from the top of the off column downward)
         off_top_available = BoardParameters.board_height / 2 - top_base_offset
         self.draw_stack(off_center_x, BoardParameters.margin + top_base_offset, off[1], piece_radius,
                         off_top_available,"top", Colors.player2_checker_color)
-        # For white off checkers (draw from the bottom of the off column upward)
+        # For white off checkers (drawer from the bottom of the off column upward)
         off_bottom_available = BoardParameters.board_height / 2 - bottom_base_offset
         self.draw_stack(off_center_x, BoardParameters.margin + BoardParameters.board_height - bottom_base_offset, off[0],
                         piece_radius, off_bottom_available, "bottom", Colors.player1_checker_color)
