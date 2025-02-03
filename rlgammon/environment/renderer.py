@@ -87,42 +87,10 @@ class BackgammonRenderer:
         triangle_colors = [Colors.triangle_color1, Colors.triangle_color2]
 
         # Top half: points 13-24 (drawn left-to-right)
-        for i in range(12):
-            if i < 6:
-                # Left quadrant (points 13-18)
-                x = BoardParameters.margin + i * BoardParameters.triangle_width
-            else:
-                # Right quadrant (points 19-24)
-                x = (BoardParameters.margin + ((BoardParameters.board_width - BoardParameters.bar_width) / 2) +
-                     BoardParameters.bar_width + (i - 6) * BoardParameters.triangle_width)
-            y = BoardParameters.margin
-            points = [
-                (x, y),  # left corner of the base
-                (x + BoardParameters.triangle_width, y),  # right corner of the base
-                (x + BoardParameters.triangle_width / 2, y + BoardParameters.triangle_height)  # apex
-            ]
-            color = triangle_colors[i % 2]
-            pygame.draw.polygon(self.screen, color, points)
-            pygame.draw.polygon(self.screen, Colors.outline_color, points, 1)
+        self.render_top_triangles()
 
         # Bottom half: points 1-12 (drawn right-to-left in each quadrant so they mirror the top)
-        for i in range(12):
-            if i < 6:
-                # Bottom right quadrant: corresponds to points 6 to 1 (reverse order)
-                x = (BoardParameters.margin + ((BoardParameters.board_width - BoardParameters.bar_width) / 2) +
-                     BoardParameters.bar_width + (5 - i) * BoardParameters.triangle_width)
-            else:
-                # Bottom left quadrant: corresponds to points 12 to 7 (reverse order)
-                x = BoardParameters.margin + (11 - i) * BoardParameters.triangle_width
-            y = BoardParameters.margin + BoardParameters.board_height
-            points = [
-                (x, y),  # left corner of the base (bottom)
-                (x + BoardParameters.triangle_width, y),  # right corner
-                (x + BoardParameters.triangle_width / 2, y - BoardParameters.triangle_height)  # apex (pointing upward)
-            ]
-            color = triangle_colors[i % 2]
-            pygame.draw.polygon(self.screen, color, points)
-            pygame.draw.polygon(self.screen, Colors.outline_color, points, 1)
+        self.render_bottom_triangles()
 
         # --- Draw the checkers on the board ---
         piece_radius = int(BoardParameters.triangle_width * 0.4)
@@ -212,6 +180,39 @@ class BackgammonRenderer:
                     if event.type == pygame.KEYDOWN:
                         return
                 self.clock.tick(30)
+
+    def render_top_triangles(self):
+        for i in range(BoardParameters.triangle_count_per_side):
+            if i < BoardParameters.triangle_width // 2:
+                # Left quadrant (points 13-18)
+                x = BoardParameters.margin + i * BoardParameters.triangle_width
+            else:
+                # Right quadrant (points 19-24)
+                x = (BoardParameters.margin + ((BoardParameters.board_width - BoardParameters.bar_width) / 2) +
+                     BoardParameters.bar_width + (i - 6) * BoardParameters.triangle_width)
+            y = BoardParameters.margin
+            self.drawer.draw_triangle(Colors.triangle_colors[i % 2], self.get_point_from_coordinates(x, y))
+
+    def render_bottom_triangles(self):
+        for i in range(BoardParameters.triangle_count_per_side):
+            if i < BoardParameters.triangle_width // 2:
+                # Bottom right quadrant: corresponds to points 6 to 1 (reverse order)
+                x = (BoardParameters.margin + ((BoardParameters.board_width - BoardParameters.bar_width) / 2) +
+                     BoardParameters.bar_width + (5 - i) * BoardParameters.triangle_width)
+            else:
+                # Bottom left quadrant: corresponds to points 12 to 7 (reverse order)
+                x = BoardParameters.margin + (11 - i) * BoardParameters.triangle_width
+            y = BoardParameters.margin + BoardParameters.board_height
+            self.drawer.draw_triangle(Colors.triangle_colors[i % 2], self.get_point_from_coordinates(x, y))
+
+
+    @staticmethod
+    def get_point_from_coordinates(x, y):
+        return [
+            (x, y),  # left corner of the base
+            (x + BoardParameters.triangle_width, y),  # right corner of the base
+            (x + BoardParameters.triangle_width // 2, y + BoardParameters.triangle_height)  # apex
+        ]
 
 
 if __name__ == "__main__":

@@ -50,5 +50,6 @@ class Drawer:
         pg.draw.rect(self.screen, Colors.bg_color, off_rect)
         pg.draw.rect(self.screen, Colors.outline_color, off_rect, 3)
 
-    def draw_triangle(self):
-        raise NotImplementedError
+    def draw_triangle(self, triangle_color: tuple, points: list):
+        pg.draw.polygon(self.screen, triangle_color, points)
+        pg.draw.polygon(self.screen, Colors.outline_color, points, 1)
