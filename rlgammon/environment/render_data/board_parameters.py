@@ -13,5 +13,5 @@ class BoardParameters:
     board_height: int = 500                             # height of the playable board
     bar_width: int = 50                                 # width of the central, dividing bar
     off_width: int = 60                                 # off-board column width:
-    triangle_height: int = (board_height // 2) - 20     # The triangle (point) areas:
-    triangle_width = (board_width - bar_width) // 12    # There are 12 triangles per half.
+    triangle_height: float = (board_height / 2) - 20     # The triangle (point) areas:
+    triangle_width: float = (board_width - bar_width) / 12    # There are 12 triangles per half.

@@ -1,6 +1,7 @@
 import pygame
 import sys
 import math
+import time
 
 from rlgammon.environment.render_data.colors import Colors
 from rlgammon.environment.render_data.board_parameters import BoardParameters
@@ -12,7 +13,6 @@ class BackgammonRenderer:
         pygame.init()
         self.screen = pygame.display.set_mode((BoardParameters.screen_width, BoardParameters.screen_height))
         pygame.display.set_caption("Backgammon")
-        self.clock = pygame.time.Clock()
 
         # Prepare a font for drawing numbers on overloaded stacks.
         self.font = pygame.font.SysFont(None, 20)
@@ -62,7 +62,7 @@ class BackgammonRenderer:
                 pygame.draw.circle(self.screen, Colors.outline_color,
                                    (int(center_x), int(center_y)), piece_radius, 1)
 
-    def render(self, positions, bar, off, wait=True):
+    def render(self, positions, bar, off, render_duration_in_s=2):
         if len(positions) != 24:
             raise ValueError("positions must be a list of length 24")
         if len(bar) != 2:
@@ -169,21 +169,20 @@ class BackgammonRenderer:
         self.draw_stack(off_center_x, BoardParameters.margin + BoardParameters.board_height - bottom_base_offset, off[0],
                         piece_radius, off_bottom_available, "bottom", Colors.player1_checker_color)
 
-        pygame.display.flip()
 
-        if wait:
-            while True:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        pygame.quit()
-                        sys.exit()
-                    if event.type == pygame.KEYDOWN:
-                        return
-                self.clock.tick(30)
+        start_time = time.time()
+        while time.time() - start_time < render_duration_in_s:
+            pygame.display.flip()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    return
 
     def render_top_triangles(self):
         for i in range(BoardParameters.triangle_count_per_side):
-            if i < BoardParameters.triangle_width // 2:
+            if i < BoardParameters.triangle_count_per_side // 2:
                 # Left quadrant (points 13-18)
                 x = BoardParameters.margin + i * BoardParameters.triangle_width
             else:
@@ -191,11 +190,12 @@ class BackgammonRenderer:
                 x = (BoardParameters.margin + ((BoardParameters.board_width - BoardParameters.bar_width) / 2) +
                      BoardParameters.bar_width + (i - 6) * BoardParameters.triangle_width)
             y = BoardParameters.margin
-            self.drawer.draw_triangle(Colors.triangle_colors[i % 2], self.get_point_from_coordinates(x, y))
+            self.drawer.draw_triangle(Colors.triangle_colors[i % 2],
+                                      self.get_point_from_coordinates(x, y, isBottom=False))
 
     def render_bottom_triangles(self):
         for i in range(BoardParameters.triangle_count_per_side):
-            if i < BoardParameters.triangle_width // 2:
+            if i < BoardParameters.triangle_count_per_side // 2:
                 # Bottom right quadrant: corresponds to points 6 to 1 (reverse order)
                 x = (BoardParameters.margin + ((BoardParameters.board_width - BoardParameters.bar_width) / 2) +
                      BoardParameters.bar_width + (5 - i) * BoardParameters.triangle_width)
@@ -203,15 +203,16 @@ class BackgammonRenderer:
                 # Bottom left quadrant: corresponds to points 12 to 7 (reverse order)
                 x = BoardParameters.margin + (11 - i) * BoardParameters.triangle_width
             y = BoardParameters.margin + BoardParameters.board_height
-            self.drawer.draw_triangle(Colors.triangle_colors[i % 2], self.get_point_from_coordinates(x, y))
+            self.drawer.draw_triangle(Colors.triangle_colors[i % 2],
+                                      self.get_point_from_coordinates(x, y, isBottom=True))
 
 
     @staticmethod
-    def get_point_from_coordinates(x, y):
+    def get_point_from_coordinates(x: int, y: int, isBottom: bool):
         return [
             (x, y),  # left corner of the base
             (x + BoardParameters.triangle_width, y),  # right corner of the base
-            (x + BoardParameters.triangle_width // 2, y + BoardParameters.triangle_height)  # apex
+            (x + BoardParameters.triangle_width / 2, y + ((-1) ** isBottom) * BoardParameters.triangle_height)  # apex
         ]
 
 
