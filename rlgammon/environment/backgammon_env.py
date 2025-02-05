@@ -1,6 +1,6 @@
 import gymnasium as gym
 from rlgammon.environment import backgammon as bg
-from rlgammon.environment import renderer
+from rlgammon.environment import human_renderer
 import numpy as np
 import random
 
@@ -51,10 +51,10 @@ class BackgammonEnv(gym.Env):
 
     def render(self, mode='human'):
         if mode == 'human':
-            render = renderer.BackgammonRenderer()
+            render = human_renderer.BackgammonRenderer()
             render.render(self.backgammon.board, self.backgammon.bar, self.backgammon.off)
         else:
-            print(self.backgammon.render_backgammon_board_aligned())
+            print(self.backgammon.render())
 
     def seed(self, seed=None):
         if seed is not None:
