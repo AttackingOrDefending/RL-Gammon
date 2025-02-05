@@ -51,5 +51,25 @@ class Drawer:
         pg.draw.rect(self.screen, Colors.outline_color, off_rect, 3)
 
     def draw_triangle(self, triangle_color: tuple, points: list):
+        """
+        TODO
+
+        :param triangle_color:
+        :param points:
+        :return:
+        """
+
         pg.draw.polygon(self.screen, triangle_color, points)
         pg.draw.polygon(self.screen, Colors.outline_color, points, 1)
+
+    def draw_checker(self, checker_color: tuple, checker_position: tuple):
+        """
+        TODO
+
+        :param checker_color:
+        :param checker_position:
+        :return:
+        """
+
+        pg.draw.circle(self.screen, checker_color, checker_position, BoardParameters.checker_radius)
+        pg.draw.circle(self.screen, Colors.outline_color, checker_position, BoardParameters.checker_radius, 1)
