@@ -1,12 +1,11 @@
 from rlgammon.environment import BackgammonEnv
-import random
+from rlgammon.agents.random_agent import RandomAgent
 
 
 def play_game():
     env = BackgammonEnv()
     env.reset()
-    # print(environment.get_legal_moves([5, 6]))
-    # None * 2
+    agent = RandomAgent()
     done = False
     trunc = False
     i = 0
@@ -21,14 +20,9 @@ def play_game():
         dice = env.roll_dice()
         print(f"Color: {'White' if i%2==1 else 'Black'} Roll: {dice}")
         while dice:
-            actions_per_roll = env.get_legal_moves(dice)
-            print(actions_per_roll)
-            actions = []
-            for roll in dice:
-                actions += list(map(lambda move: (roll, move), actions_per_roll[roll]))
-            if not actions:
+            roll, action = agent.choose_move(env, dice)
+            if roll is None:
                 break
-            roll, action = random.choice(actions)
             dice.remove(roll)
             _, reward, done, trunc, _ = env.step(action)
             print(f"Reward: {reward}")

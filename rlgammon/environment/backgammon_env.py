@@ -62,4 +62,8 @@ class BackgammonEnv(gym.Env):
             np.random.seed(seed)
 
     def get_legal_moves(self, dice):
-        return self.backgammon.get_legal_moves(dice)
+        actions_per_roll = self.backgammon.get_legal_moves(dice)
+        actions = []
+        for roll in dice:
+            actions += list(map(lambda move: (roll, move), actions_per_roll[roll]))
+        return actions
