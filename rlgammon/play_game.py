@@ -1,5 +1,4 @@
 """Plays a game of backgammon."""
-
 import random
 
 from rlgammon.environment import BackgammonEnv
@@ -31,6 +30,11 @@ def play_game() -> None:
             roll, action = random.choice(actions)
             dice.remove(roll)
             _, reward, done, trunc, _ = env.step(action)
+
+            env.render(mode="human")
+
+            print(f"Reward: {reward}")
+
         if not done and not trunc:
             env.flip()
     env.render(mode="text")

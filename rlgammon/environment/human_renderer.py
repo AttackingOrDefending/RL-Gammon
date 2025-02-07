@@ -1,292 +1,307 @@
-"""Module for rendering the backgammon board using pygame."""
-
-import math
+import pygame as pg
 import sys
+import math
+import time
 
-import pygame
-
-from rlgammon.environment.render_data import BoardParameters, Colors
-from rlgammon.rlgammon_types import Bar, Board, Off, Orientation
-
-QUARTER_BOARD_SIZE = 6  # Number of points in each quarter of the board
-
-
-def get_x_top(i: int) -> float:
-    """
-    Calculate the x-coordinate for the top triangles.
-
-    :param i: index of the triangle (0-11)
-    :return: x-coordinate for the triangle's position
-
-    Variables:
-    - x: The calculated x-coordinate for the triangle
-    """
-    x: float
-    if i < QUARTER_BOARD_SIZE:
-        # Left quadrant (points 13-18)
-        x = BoardParameters.margin + i * BoardParameters.triangle_width
-    else:
-        # Right quadrant (points 19-24)
-        x = (BoardParameters.margin + ((BoardParameters.board_width - BoardParameters.bar_width) / 2) +
-             BoardParameters.bar_width + (i - 6) * BoardParameters.triangle_width)
-    return x
+from rlgammon.environment.render_data.board_parameters import BoardParameters
+from rlgammon.environment.render_data.colors import Colors
+from rlgammon.environment.drawer.drawer import Drawer
+from rlgammon.environment.text_handler.text_handler import TextHandler
+from rlgammon.environment.helpers.orientations import Orientations
 
 
 class BackgammonRenderer:
-    """Class for rendering the backgammon board using pygame."""
+    """
+    Class used to render the backgammon board in a human friendly way using pygame.
+    """
 
-    def __init__(self) -> None:
+    def __init__(self):
         """
-        Initialize the backgammon renderer.
-
-        Variables:
-        - screen: Pygame display surface for rendering
-        - clock: Pygame clock for controlling frame rate
-        - font: Pygame font for rendering text
+        Initialize the Renderer by setting up the pygame screen and initializing helper classes.
         """
-        pygame.init()
-        self.screen = pygame.display.set_mode((BoardParameters.screen_width, BoardParameters.screen_height))
-        pygame.display.set_caption("Backgammon")
-        self.clock = pygame.time.Clock()
-        self.font = pygame.font.SysFont(None, 20)
 
-    def draw_stack(self, center_x: float, start_y: float, count: int, piece_radius: int, available_space: float,
-                   orientation: Orientation, color: tuple[int, int, int]) -> None:
+        pg.init()
+        self.screen = pg.display.set_mode((BoardParameters.screen_width, BoardParameters.screen_height))
+        pg.display.set_caption("Backgammon")
+
+        # Prepare a font for drawing numbers on overloaded stacks.
+        self.text_handler = TextHandler(self.screen, pg.font.SysFont(None, 20))
+        
+        # Init drawer class used for drawing objects on the pygame display
+        self.drawer = Drawer(self.screen)
+
+    def render(self, positions: list, bar: list, off: list, render_duration_in_s: float = 2.0):
         """
-        Draw a vertical stack of checkers at the given x, starting from start_y.
+        Main render method, displaying the entire board with the provided state, for the specified amount of time.
 
-        :param center_x: x-coordinate for the centers of the checkers
-        :param start_y: starting y coordinate (top for top triangles, bottom for bottom triangles)
-        :param count: number of checkers to draw
-        :param piece_radius: radius of a checker
-        :param available_space: vertical space available for stacking
-        :param orientation: "top" for stacking downward, "bottom" for stacking upward
-        :param color: RGB color tuple for the checker
-
-        Variables:
-        - spacing: Space between checkers in the stack
-        - piece_diameter: Full diameter of a checker piece
-        - max_fit: Maximum number of checkers that can fit in the available space
-        - center_y: y-coordinate for the center of each checker
-        - text: Rendered text surface for checker count
-        - text_rect: Rectangle for positioning the rendered text
+        :param positions: a list with the checkers in the 24 board positions
+        :param bar: a list with the amount of checkers of either players in the bar section of the board
+        :param off: a list with the amount of checkers of either players in the borne-off section of the board
+        :param render_duration_in_s: the duration for which to render the board in seconds
         """
-        spacing = 1  # reduced spacing so more checkers can fit
-        piece_diameter = piece_radius * 2
-        max_fit = math.floor(available_space / (piece_diameter + spacing))
-        if count > max_fit > 0:
-            center_y = start_y + piece_radius if orientation == Orientation.TOP else start_y - piece_radius
-            pygame.draw.circle(self.screen, color, (int(center_x), int(center_y)), piece_radius)
-            pygame.draw.circle(self.screen, Colors.outline_color,
-                               (int(center_x), int(center_y)), piece_radius, 1)
-            text = self.font.render(f"{count}", True, Colors.outline_color)
-            text_rect = text.get_rect(center=(center_x, center_y))
-            self.screen.blit(text, text_rect)
-        else:
-            for j in range(count):
-                if orientation == Orientation.TOP:
-                    center_y = start_y + j * (piece_diameter + spacing) + piece_radius
-                else:
-                    center_y = start_y - j * (piece_diameter + spacing) - piece_radius
-                pygame.draw.circle(self.screen, color, (int(center_x), int(center_y)), piece_radius)
-                pygame.draw.circle(self.screen, Colors.outline_color,
-                                   (int(center_x), int(center_y)), piece_radius, 1)
 
-    def render(self, positions: Board, bar: Bar, off: Off, wait: bool = True) -> None:
-        """
-        Render the backgammon board.
+        # Check if the game state is valid
+        self._is_valid_input(positions, bar, off)
 
-        :param positions: 24-integer array for point positions (positive=white, negative=black)
-        :param bar: 2-integer array [white_on_bar, black_on_bar]
-        :param off: 2-integer array [white_off, black_off] for off-board pieces
-        :param wait: If True, waits for key press or window close
-
-        Variables:
-        - board_rect: Rectangle defining the main board area
-        - bar_x: x-coordinate for the central bar
-        - bar_rect: Rectangle defining the central bar area
-        - off_rect: Rectangle defining the off-board area
-        - triangle_colors: List of alternating colors for board triangles
-        - piece_radius: Radius of checker pieces
-        - top_base_offset: Offset from top edge for piece placement
-        - bottom_base_offset: Offset from bottom edge for piece placement
-        - top_available: Available vertical space in top triangles
-        - bottom_available: Available vertical space in bottom triangles
-        - points: List of coordinates defining triangle vertices
-        - x: x-coordinate for triangle positioning
-        - y: y-coordinate for triangle positioning
-        - color: Current triangle color
-        - count: Number of pieces on a point
-        - piece_color: Color for current piece being drawn
-        - center_x: x-coordinate for piece center
-        - start_y: Starting y-coordinate for piece stack
-        - i: Loop counter for triangle/point positions
-        - idx: Index for accessing board positions array
-        - bar_center_x: x-coordinate for bar piece centers
-        - top_bar_available: Available space for pieces in top bar
-        - bottom_bar_available: Available space for pieces in bottom bar
-        - off_center_x: x-coordinate for off-board piece centers
-        - off_top_available: Available space for off-board pieces at top
-        - off_bottom_available: Available space for off-board pieces at bottom
-        """
-        # Clear the screen
+        # Clear the screen.
         self.screen.fill(Colors.bg_color)
 
-        # Draw the board playing area
-        board_rect = pygame.Rect(BoardParameters.margin, BoardParameters.margin,
-                                 BoardParameters.board_width, BoardParameters.board_height)
-        pygame.draw.rect(self.screen, Colors.bg_color, board_rect)
-        pygame.draw.rect(self.screen, Colors.outline_color, board_rect, 3)
+        # Draw the board playing area.
+        self.drawer.draw_playing_board()
 
-        # Draw the central bar
-        bar_x = BoardParameters.margin + (BoardParameters.board_width - BoardParameters.bar_width) / 2
-        bar_rect = pygame.Rect(bar_x, BoardParameters.margin,
-                               BoardParameters.bar_width, BoardParameters.board_height)
-        pygame.draw.rect(self.screen, Colors.bar_color, bar_rect)
-        pygame.draw.rect(self.screen, Colors.outline_color, bar_rect, 2)
+        # Draw the central bar.
+        bar_x = BoardParameters.margin + (BoardParameters.board_width - BoardParameters.bar_width) // 2
+        self.drawer.draw_central_bar(bar_x)
 
-        # Draw the off-board column
-        off_rect = pygame.Rect(BoardParameters.margin + BoardParameters.board_width,
-                               BoardParameters.margin, BoardParameters.off_width, BoardParameters.board_height)
-        pygame.draw.rect(self.screen, Colors.bg_color, off_rect)
-        pygame.draw.rect(self.screen, Colors.outline_color, off_rect, 3)
-
-        # Draw the triangles for the points
-        triangle_colors = [Colors.triangle_color1, Colors.triangle_color2]
+        # Draw the off-board column to the right of the board.
+        self.drawer.draw_off_board_column()
 
         # Top half: points 13-24 (drawn left-to-right)
-        x: float
-        for i in range(12):
-            x = get_x_top(i)
-            y = BoardParameters.margin
-            points = [
-                (x, y),  # left corner of the base
-                (x + BoardParameters.triangle_width, y),  # right corner of the base
-                (x + BoardParameters.triangle_width / 2, y + BoardParameters.triangle_height),  # apex
-            ]
-            color = triangle_colors[i % 2]
-            pygame.draw.polygon(self.screen, color, points)
-            pygame.draw.polygon(self.screen, Colors.outline_color, points, 1)
+        self._render_top_triangles()
 
-        # Bottom half: points 1-12 (drawn right-to-left in each quadrant)
-        for i in range(12):
-            if i < QUARTER_BOARD_SIZE:
-                # Bottom right quadrant: points 6 to 1 (reverse order)
+        # Bottom half: points 1-12 (drawn right-to-left in each quadrant so they mirror the top)
+        self._render_bottom_triangles()
+
+        # Top half: points 13-24 (indices 12 to 23)
+        self._render_checkers_in_top_triangles(positions)
+
+        # Bottom half: points 1-12 (indices 0 to 11)
+        self._render_checkers_in_bottom_triangles(positions)
+
+        # Draw checkers on the bar
+        self._render_checkers_in_bar(bar)
+
+        # Draw the checkers that have been bear-off
+        self._render_borne_off_checkers(off)
+
+        # Start rendering the board
+        start_time = time.time()
+        while time.time() - start_time < render_duration_in_s:
+            pg.display.flip()
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    pg.quit()
+                    sys.exit()
+                if event.type == pg.KEYDOWN:
+                    return
+
+    @staticmethod
+    def _is_valid_input(positions: list, off: list, bar: list):
+        """
+        Check if the input provided to the 'render' method is valid.
+
+        :param positions: a list with the checkers in the 24 board positions
+        :param bar: a list with the amount of checkers of either players in the bar section of the board
+        :param off: a list with the amount of checkers of either players in the borne-off section of the board
+        """
+
+        if len(positions) != BoardParameters.board_position_count:
+            raise ValueError("Positions must be a list of length 24")
+        if len(bar) != BoardParameters.bar_position_count:
+            raise ValueError("Bar must be a list of length 2")
+        if len(off) != BoardParameters.off_position_count:
+            raise ValueError("Off must be a list of length 2")
+
+    def _render_top_triangles(self):
+        """
+        Draw the 12 triangles at the top of the board (points 13 to 24) with alternating colors.
+        """
+
+        for i in range(BoardParameters.triangle_count_per_side):
+            if i < BoardParameters.triangle_count_per_side // 2:
+                # Left quadrant (points 13-18)
+                x = BoardParameters.margin + i * BoardParameters.triangle_width
+            else:
+                # Right quadrant (points 19-24)
+                x = (BoardParameters.margin + ((BoardParameters.board_width - BoardParameters.bar_width) / 2) +
+                     BoardParameters.bar_width + (i - 6) * BoardParameters.triangle_width)
+            y = BoardParameters.margin
+            self.drawer.draw_triangle(Colors.triangle_colors[i % 2],
+                                      self._get_points_from_coordinates(x, y, is_bottom=False))
+
+    def _render_bottom_triangles(self):
+        """
+        Draw the 12 triangles at the bottom of the board (points 1 to 12) with alternating colors.
+        """
+
+        for i in range(BoardParameters.triangle_count_per_side):
+            if i < BoardParameters.triangle_count_per_side // 2:
+                # Bottom right quadrant: corresponds to points 6 to 1 (reverse order)
                 x = (BoardParameters.margin + ((BoardParameters.board_width - BoardParameters.bar_width) / 2) +
                      BoardParameters.bar_width + (5 - i) * BoardParameters.triangle_width)
             else:
                 # Bottom left quadrant: points 12 to 7 (reverse order)
                 x = BoardParameters.margin + (11 - i) * BoardParameters.triangle_width
             y = BoardParameters.margin + BoardParameters.board_height
-            points = [
-                (x, y),  # left corner of the base (bottom)
-                (x + BoardParameters.triangle_width, y),  # right corner
-                (x + BoardParameters.triangle_width / 2, y - BoardParameters.triangle_height),  # apex (pointing upward)
-            ]
-            color = triangle_colors[i % 2]
-            pygame.draw.polygon(self.screen, color, points)
-            pygame.draw.polygon(self.screen, Colors.outline_color, points, 1)
+            self.drawer.draw_triangle(Colors.triangle_colors[i % 2],
+                                      self._get_points_from_coordinates(x, y, is_bottom=True))
 
-        # Draw the checkers
-        piece_radius = int(BoardParameters.triangle_width * 0.4)
-        top_base_offset = piece_radius / 2
-        bottom_base_offset = piece_radius / 2
-        top_available = BoardParameters.triangle_height - top_base_offset
-        bottom_available = BoardParameters.triangle_height - bottom_base_offset
+    @staticmethod
+    def _get_points_from_coordinates(x: float, y: float, is_bottom: bool) -> list:
+        """
+        Get the 3 points defining a triangle based on the provided coordinates for its left corner.
+        The fact whether a triangle is at the bottom or top of the board is also needed, to determine the
+        position of the top vertex (lower pygame pixel coordinate for triangles at the bottom) 
+ 
+        :param x: x coordinate of the left corner of the base
+        :param y: y coordinate of the left corner of the base
+        :param is_bottom: flag whether the triangle is at the bottom of the board (True if yes)
+        :return: the 3 points defining a triangle on the pygame screen
+        """
 
-        # Top half: points 13-24 (indices 12 to 23)
-        for idx in range(12, 24):
-            count = abs(positions[idx])
-            if positions[idx] == 0:
+        return [
+            (x, y),  # left corner of the base
+            (x + BoardParameters.triangle_width, y),  # right corner of the base
+            (x + BoardParameters.triangle_width / 2, y + ((-1) ** is_bottom) * BoardParameters.triangle_height)  # apex
+        ]
+
+    @staticmethod
+    def _get_checker_color_from_position_value(position_value: int) -> tuple:
+        """
+        Helper function of the renderer to get the checker color based on the value of the position.
+        As we know that at no position can there be checkers of both players, then a positive position value implies
+        that there are only player1 checkers, while a negative, player2 checkers.
+
+        :param position_value: value at the position (one of the 24)
+        :return: the color of the checker
+        """
+
+        if position_value > 0:
+            return Colors.player1_checker_color
+        else:
+            return Colors.player2_checker_color
+
+    def _draw_stack(self, center_x: float, start_y: float, count: int, available_space: float,
+                   orientation: Orientations, color: tuple):
+        """
+        Draw the specified amount of checkers in a given space.
+        
+        :param center_x: x coordinate of the center of the checkers
+        :param start_y: y coordinate of the end of the first checker
+        :param count: number of checkers to be drawn
+        :param available_space: the space available to draw the checkers (in pygame pixels)
+        :param orientation: enumeration whether the checkers grow from the top down (TOP) or bottom up (BOTTOM)
+        :param color: color of the checkers to be drawn
+        """
+
+        max_fit = math.floor(available_space / (BoardParameters.checker_diameter + BoardParameters.spacing))
+        if 0 < max_fit < count:
+            # Draw a single checker with the count rendered on it.
+            if orientation == Orientations.TOP:
+                center_y = start_y + BoardParameters.checker_radius
+            else:  # bottom
+                center_y = start_y - BoardParameters.checker_radius
+
+            self.drawer.draw_checker(color, (int(center_x), int(center_y)))
+            self.text_handler.render_checker_text((int(center_x), int(center_y)), f"{count}")
+            
+        else:
+            for j in range(count):
+                if orientation == Orientations.TOP:
+                    center_y = (start_y + j * (BoardParameters.checker_diameter + BoardParameters.spacing) +
+                                BoardParameters.checker_radius)
+                else:
+                    center_y = (start_y - j * (BoardParameters.checker_diameter + BoardParameters.spacing) -
+                                BoardParameters.checker_radius)
+                self.drawer.draw_checker(color, (int(center_x), int(center_y)))
+
+    def _render_checkers_in_top_triangles(self, positions: list):
+        """
+        Draw the checkers in the bottom triangles (points 13 to 24).
+
+        :param positions: a list with the checkers in the 24 board positions
+        """
+
+        for idx in range(BoardParameters.triangle_count_per_side, BoardParameters.triangle_counts):
+            position_value = positions[idx]
+            count = abs(position_value)
+            if count == 0:
                 continue
-            piece_color = Colors.player1_checker_color if positions[idx] > 0 else Colors.player2_checker_color
 
+            checker_color = self._get_checker_color_from_position_value(position_value)
             i = idx - 12
             if i < QUARTER_BOARD_SIZE:
                 # Left quadrant (points 13-18)
-                center_x = BoardParameters.margin + i * BoardParameters.triangle_width + BoardParameters.triangle_width / 2
+                center_x = (BoardParameters.margin + i * BoardParameters.triangle_width +
+                            BoardParameters.triangle_width / 2)
             else:
                 # Right quadrant (points 19-24)
                 center_x = (BoardParameters.margin + ((BoardParameters.board_width - BoardParameters.bar_width) / 2) +
                             BoardParameters.bar_width + (i - 6) * BoardParameters.triangle_width +
                             BoardParameters.triangle_width / 2)
 
-            start_y = BoardParameters.margin + top_base_offset
-            self.draw_stack(center_x, start_y, int(count), piece_radius, top_available, Orientation.TOP, piece_color)
+            # For top triangles, pieces are stacked downward from near the base (the top edge).
+            start_y = BoardParameters.margin + BoardParameters.top_base_offset
+            self._draw_stack(center_x, start_y, count,
+                            BoardParameters.top_available, Orientations.TOP, checker_color)
 
-        # Bottom half: points 1-12 (indices 0 to 11)
-        for idx in range(12):
-            count = abs(positions[idx])
-            if positions[idx] == 0:
+    def _render_checkers_in_bottom_triangles(self, positions: list):
+        """
+        Draw the checkers in the bottom triangles (points 1 to 12).
+
+        :param positions: a list with the checkers in the 24 board positions
+        """
+
+        for idx in range(BoardParameters.triangle_count_per_side):
+            position_value = positions[idx]
+            count = abs(position_value)
+            if count == 0:
                 continue
-            piece_color = Colors.player1_checker_color if positions[idx] > 0 else Colors.player2_checker_color
 
-            if idx < QUARTER_BOARD_SIZE:
+            checker_color = self._get_checker_color_from_position_value(position_value)
+            if idx < 6:
                 # Bottom right quadrant: points 6 to 1 (reverse order)
                 i = 5 - idx
                 center_x = (BoardParameters.margin + ((BoardParameters.board_width - BoardParameters.bar_width) / 2) +
-                            BoardParameters.bar_width + i * BoardParameters.triangle_width +
-                            BoardParameters.triangle_width / 2)
+                            BoardParameters.bar_width + i * BoardParameters.triangle_width + BoardParameters.triangle_width / 2)
             else:
                 # Bottom left quadrant: points 12 to 7 (reverse order)
                 i = 11 - idx
                 center_x = BoardParameters.margin + i * BoardParameters.triangle_width + BoardParameters.triangle_width / 2
 
-            start_y = BoardParameters.margin + BoardParameters.board_height - bottom_base_offset
-            self.draw_stack(center_x, start_y, int(count), piece_radius, bottom_available, Orientation.BOTTOM, piece_color)
+            # For bottom triangles, pieces are stacked upward from near the base (the bottom edge).
+            start_y = BoardParameters.margin + BoardParameters.board_height - BoardParameters.bottom_base_offset
+            self._draw_stack(center_x, start_y, count, BoardParameters.bottom_available,
+                            Orientations.BOTTOM, checker_color)
 
-        # Draw the bar pieces
+    def _render_checkers_in_bar(self, bar: list):
+        """
+        Draw the checkers in the middle bar of the board. Checkers are drawn for both players,
+        with player1 at the bottom and player2 at the top.
+
+        :param bar: a list with the number of checkers in the bar for player1 and player2
+        """
+
+        # Top bar (black pieces):
+        top_bar_available = BoardParameters.board_height / 2 - BoardParameters.top_base_offset
         bar_center_x = BoardParameters.margin + BoardParameters.board_width / 2
-        top_bar_available = BoardParameters.board_height / 2 - top_base_offset
-        self.draw_stack(bar_center_x, BoardParameters.margin + top_base_offset, int(bar[1]), piece_radius,
-                        top_bar_available, Orientation.TOP, Colors.player2_checker_color)
-        bottom_bar_available = BoardParameters.board_height / 2 - bottom_base_offset
-        self.draw_stack(bar_center_x, BoardParameters.margin + BoardParameters.board_height - bottom_base_offset,
-                        int(bar[0]),
-                        piece_radius, bottom_bar_available, Orientation.BOTTOM, Colors.player1_checker_color)
 
-        # Draw the off-board pieces
+        self._draw_stack(bar_center_x, BoardParameters.margin + BoardParameters.top_base_offset, bar[1],
+                        top_bar_available, Orientations.TOP, Colors.player2_checker_color)
+
+        # Bottom bar (white pieces):
+        bottom_bar_available = BoardParameters.board_height / 2 - BoardParameters.bottom_base_offset
+        self._draw_stack(bar_center_x,
+                        BoardParameters.margin + BoardParameters.board_height - BoardParameters.bottom_base_offset,
+                        bar[0], bottom_bar_available, Orientations.BOTTOM, Colors.player1_checker_color)
+
+    def _render_borne_off_checkers(self, off: list):
+        """
+        Draw the borne-off checkers in the left section of the board. Checkers are drawn for both players,
+        with player1 at the bottom and player2 at the top.
+
+        :param off: a list with the number of borne-off checkers for player1 and player2
+        """
+
+        # For black off checkers (drawer from the top of the off column downward)
+        off_top_available = BoardParameters.board_height / 2 - BoardParameters.top_base_offset
         off_center_x = BoardParameters.margin + BoardParameters.board_width + BoardParameters.off_width / 2
-        off_top_available = BoardParameters.board_height / 2 - top_base_offset
-        self.draw_stack(off_center_x, BoardParameters.margin + top_base_offset, int(off[1]), piece_radius,
-                        off_top_available, Orientation.TOP, Colors.player2_checker_color)
-        off_bottom_available = BoardParameters.board_height / 2 - bottom_base_offset
-        self.draw_stack(off_center_x, BoardParameters.margin + BoardParameters.board_height - bottom_base_offset,
-                        int(off[0]),
-                        piece_radius, off_bottom_available, Orientation.BOTTOM, Colors.player1_checker_color)
 
-        pygame.display.flip()
+        self._draw_stack(off_center_x, BoardParameters.margin + BoardParameters.top_base_offset, off[1],
+                        off_top_available, Orientations.TOP, Colors.player2_checker_color)
 
-        self.wait(wait)
-
-    def wait(self, wait: bool) -> None:
-        """
-        Sleep until a key press or window close event.
-
-        :param wait: If True, enters wait loop for events
-
-        Variables:
-        - event: Pygame event from the event queue
-        """
-        if wait:
-            while True:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        pygame.quit()
-                        sys.exit()
-                    if event.type == pygame.KEYDOWN:
-                        return
-                self.clock.tick(30)
-
-
-if __name__ == "__main__":
-    # Test code for rendering a sample board state
-    from rlgammon.environment import backgammon
-    bg = backgammon.Backgammon()
-    bg.bar[0] = 8  # White pieces on bar
-    bg.bar[1] = 2  # Black pieces on bar
-    bg.board[0] = 11  # Pieces on first point
-    bg.off[0] = 15  # White pieces off
-    bg.off[1] = 2  # Black pieces off
-    renderer = BackgammonRenderer()
-    renderer.render(bg.board, bg.bar, bg.off)
+        # For white off checkers (drawer from the bottom of the off column upward)
+        off_bottom_available = BoardParameters.board_height / 2 - BoardParameters.bottom_base_offset
+        self._draw_stack(off_center_x,
+                        BoardParameters.margin + BoardParameters.board_height - BoardParameters.bottom_base_offset,
+                        off[0], off_bottom_available, Orientations.BOTTOM, Colors.player1_checker_color)
