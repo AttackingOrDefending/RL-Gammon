@@ -39,7 +39,7 @@ convention = "pep257"  # PEP 8 style docstrings
 [lint.pylint]
 max-args = 8
 max-locals = 15
-max-statements = 200  # Maximum function length of 200 lines
+max-statements = 100
 
 [lint.flake8-quotes]
 docstring-quotes = "double"
