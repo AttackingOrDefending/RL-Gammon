@@ -1,3 +1,5 @@
+"""Stores the parameters of the backgammon board for rendering purposes."""
+
 from dataclasses import dataclass
 
 

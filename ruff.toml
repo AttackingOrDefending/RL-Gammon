@@ -1,0 +1,55 @@
+# Enable everything
+lint.select = ["ALL"]
+
+lint.ignore = [
+    "ANN401",
+    "ARG002",
+    "FBT001",
+    "FBT002",
+    "FBT003",
+    "S311",
+    "T201"
+]
+
+# Line length to match specified requirement
+line-length = 127
+
+# Target Python 3.10
+target-version = "py310"
+
+# Common files to exclude
+exclude = [
+    ".git",
+    ".env",
+    ".venv",
+    "venv",
+    "__pycache__",
+    "build",
+    "dist"
+]
+
+# Allow fix for all rules
+lint.fixable = ["ALL"]
+lint.unfixable = []
+
+[lint.mccabe]
+max-complexity = 10
+
+[lint.pydocstyle]
+convention = "pep257"  # PEP 8 style docstrings
+
+[lint.pylint]
+max-args = 8
+max-locals = 15
+max-statements = 200  # Maximum function length of 200 lines
+
+[lint.flake8-quotes]
+docstring-quotes = "double"
+inline-quotes = "double"
+multiline-quotes = "double"
+
+[lint.isort]
+combine-as-imports = true
+force-sort-within-sections = true
+known-first-party = []
+known-third-party = []
