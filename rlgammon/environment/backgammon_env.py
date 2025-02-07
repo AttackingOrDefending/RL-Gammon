@@ -1,6 +1,6 @@
 import gymnasium as gym
 from rlgammon.environment import backgammon as bg
-from rlgammon.environment import renderer
+from rlgammon.environment import human_renderer
 import numpy as np
 import random
 
