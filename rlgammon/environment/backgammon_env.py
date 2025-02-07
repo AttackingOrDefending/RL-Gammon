@@ -6,13 +6,13 @@ from typing import Any
 
 import gymnasium as gym
 import numpy as np
-import numpy.typing as npt
 
 from rlgammon.environment import backgammon as bg, human_renderer
 from rlgammon.environment.text_renderer import text_render
+from rlgammon.rlgammon_types import Board, MoveDict, MovePart
 
 
-class BackgammonEnv(gym.Env[npt.NDArray[np.int8], tuple[int, int]]):
+class BackgammonEnv(gym.Env[Board, MovePart]):
     """
     A gym environment for backgammon.
 
@@ -36,7 +36,7 @@ class BackgammonEnv(gym.Env[npt.NDArray[np.int8], tuple[int, int]]):
         self.max_moves: int = 500
         self.moves: int = 0
 
-    def get_input(self) -> npt.NDArray[np.int8]:
+    def get_input(self) -> Board:
         """
         Return the input for the current player.
 
@@ -46,14 +46,14 @@ class BackgammonEnv(gym.Env[npt.NDArray[np.int8], tuple[int, int]]):
         - our_pieces: Array containing positions of current player's pieces
         - enemy_pieces: Array containing positions of opponent's pieces
         """
-        our_pieces: npt.NDArray[np.int8] = self.backgammon.board.copy()
+        our_pieces: Board = self.backgammon.board.copy()
         our_pieces[our_pieces < 0] = 0
-        enemy_pieces: npt.NDArray[np.int8] = -self.backgammon.board.copy()
+        enemy_pieces: Board = -self.backgammon.board.copy()
         enemy_pieces[enemy_pieces < 0] = 0
         return np.concatenate([our_pieces, enemy_pieces, self.backgammon.bar, self.backgammon.off], dtype=np.int8)
 
     def reset(self, seed: int | None = None,
-              options: dict[str, Any] | None = None) -> tuple[npt.NDArray[np.int8], dict[str, Any]]:
+              options: dict[str, Any] | None = None) -> tuple[Board, dict[str, Any]]:
         """
         Reset the environment.
 
@@ -86,7 +86,7 @@ class BackgammonEnv(gym.Env[npt.NDArray[np.int8], tuple[int, int]]):
             return rolls * 2
         return rolls
 
-    def flip(self) -> npt.NDArray[np.int8]:
+    def flip(self) -> Board:
         """
         Flip the board.
 
@@ -95,7 +95,7 @@ class BackgammonEnv(gym.Env[npt.NDArray[np.int8], tuple[int, int]]):
         self.backgammon.flip()
         return self.get_input()
 
-    def step(self, action: tuple[int, int]) -> tuple[npt.NDArray[np.int8], float, bool, bool, dict[str, Any]]:
+    def step(self, action: MovePart) -> tuple[Board, float, bool, bool, dict[str, Any]]:
         """
         Take a step in the environment.
 
@@ -141,7 +141,7 @@ class BackgammonEnv(gym.Env[npt.NDArray[np.int8], tuple[int, int]]):
             random.seed(seed)
             np.random.Generator(np.random.MT19937(seed))
 
-    def get_legal_moves(self, dice: Iterable[int]) -> dict[int, set[tuple[int, int]]]:
+    def get_legal_moves(self, dice: Iterable[int]) -> MoveDict:
         """
         Return the legal moves for the current player.
 

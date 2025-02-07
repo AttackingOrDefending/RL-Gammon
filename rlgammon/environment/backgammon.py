@@ -4,6 +4,8 @@ from collections.abc import Iterable
 
 import numpy as np
 
+from rlgammon.rlgammon_types import MoveDict, MovePart
+
 # Constant representing the bar location (when pieces are knocked out)
 BAR_LOC = 24
 
@@ -53,14 +55,14 @@ class Backgammon:
         self.bar = np.flipud(self.bar).reshape(self.bar.shape)
         self.off = np.flipud(self.off).reshape(self.off.shape)
 
-    def get_bar_moves(self, dice: Iterable[int]) -> dict[int, set[tuple[int, int]]]:
+    def get_bar_moves(self, dice: Iterable[int]) -> MoveDict:
         """Return all legal moves for the current player from the bar.
 
         :param dice: Collection of dice values available for moves
         :return: Dictionary mapping dice values to sets of legal moves from bar
                 Each move is represented as (from_position, to_position)
         """
-        possible_moves: dict[int, set[tuple[int, int]]] = {roll: set() for roll in set(dice)}
+        possible_moves: MoveDict = {roll: set() for roll in set(dice)}
 
         # Check each dice roll for possible moves from bar
         for roll in dice:
@@ -69,7 +71,7 @@ class Backgammon:
                 possible_moves[roll].add((24, int(24 - roll)))
         return possible_moves
 
-    def get_legal_moves(self, dice: Iterable[int]) -> dict[int, set[tuple[int, int]]]:
+    def get_legal_moves(self, dice: Iterable[int]) -> MoveDict:
         """Return all legal moves for the current player.
 
         :param dice: Collection of dice values available for moves
@@ -80,7 +82,7 @@ class Backgammon:
         if self.bar[0] > 0:
             return self.get_bar_moves(dice)
 
-        possible_moves: dict[int, set[tuple[int, int]]] = {roll: set() for roll in set(dice)}
+        possible_moves: MoveDict = {roll: set() for roll in set(dice)}
 
         # Check normal moves for each dice roll
         for roll in dice:
@@ -96,7 +98,7 @@ class Backgammon:
                         possible_moves[roll].add((int(loc), -1))
         return possible_moves
 
-    def make_move(self, move: tuple[int, int]) -> tuple[int, int]:
+    def make_move(self, move: MovePart) -> tuple[int, int]:
         """Make a move on the board.
 
         :param move: Tuple of (from_position, to_position)

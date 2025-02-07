@@ -3,11 +3,10 @@
 import math
 import sys
 
-import numpy as np
-import numpy.typing as npt
 import pygame
 
 from rlgammon.environment.render_data import BoardParameters, Colors
+from rlgammon.rlgammon_types import Bar, Board, Off
 
 QUARTER_BOARD_SIZE = 6  # Number of points in each quarter of the board
 
@@ -93,8 +92,7 @@ class BackgammonRenderer:
                 pygame.draw.circle(self.screen, Colors.outline_color,
                                    (int(center_x), int(center_y)), piece_radius, 1)
 
-    def render(self, positions: npt.NDArray[np.int8], bar: npt.NDArray[np.int8], off: npt.NDArray[np.int8],
-               wait: bool = True) -> None:
+    def render(self, positions: Board, bar: Bar, off: Off, wait: bool = True) -> None:
         """
         Render the backgammon board.
 
