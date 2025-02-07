@@ -19,11 +19,9 @@ def play_game():
             env.flip()
         dice = env.roll_dice()
         print(f"Color: {'White' if i%2==1 else 'Black'} Roll: {dice}")
-        while dice:
-            roll, action = agent.choose_move(env, dice)
-            if roll is None:
-                break
-            dice.remove(roll)
+        actions = agent.choose_move(env, dice)
+        print(actions)
+        for roll, action in actions:
             _, reward, done, trunc, _ = env.step(action)
             print(f"Reward: {reward}")
         if not done and not trunc:

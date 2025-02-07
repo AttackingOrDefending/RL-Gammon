@@ -86,6 +86,13 @@ class Backgammon:
     def render(self):
         return text_renderer.text_render(self)
 
+    def copy(self):
+        bg = Backgammon()
+        bg.board = self.board.copy()
+        bg.bar = self.bar.copy()
+        bg.off = self.off.copy()
+        return bg
+
 
 if __name__ == "__main__":
     bg = Backgammon()
@@ -94,4 +101,4 @@ if __name__ == "__main__":
     bg.bar[1] = 3
     bg.off[0] = 5
     bg.off[1] = 8
-    print(bg.render_backgammon_board_aligned())
+    print(bg.render())

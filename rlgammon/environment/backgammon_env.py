@@ -67,3 +67,10 @@ class BackgammonEnv(gym.Env):
         for roll in dice:
             actions += list(map(lambda move: (roll, move), actions_per_roll[roll]))
         return actions
+
+    def copy(self):
+        env = BackgammonEnv()
+        env.backgammon = self.backgammon.copy()
+        env.max_moves = self.max_moves
+        env.moves = self.moves
+        return env
