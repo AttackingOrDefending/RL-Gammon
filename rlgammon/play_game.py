@@ -1,8 +1,12 @@
+"""Plays a game of backgammon."""
+import random
+
 from rlgammon.environment import BackgammonEnv
 from rlgammon.agents.random_agent import RandomAgent
 
 
-def play_game():
+def play_game() -> None:
+    """Plays a game of backgammon."""
     env = BackgammonEnv()
     env.reset()
     agent = RandomAgent()
@@ -24,13 +28,13 @@ def play_game():
         for roll, action in actions:
             _, reward, done, trunc, _ = env.step(action)
 
-            env.render(mode="human")
+            env.render(mode="text")
 
             print(f"Reward: {reward}")
+
         if not done and not trunc:
             env.flip()
     env.render(mode="text")
-    print("Game over!")
 
 
 if __name__ == "__main__":
