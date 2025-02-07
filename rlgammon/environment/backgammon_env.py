@@ -1,5 +1,7 @@
 """A gym environment for backgammon."""
 
+from __future__ import annotations
+
 from collections.abc import Iterable
 import random
 from typing import Any
@@ -9,7 +11,7 @@ import numpy as np
 
 from rlgammon.environment import backgammon as bg, human_renderer
 from rlgammon.environment.text_renderer import text_render
-from rlgammon.rlgammon_types import Board, MoveDict, MovePart
+from rlgammon.rlgammon_types import Board, MoveList, MovePart
 
 
 class BackgammonEnv(gym.Env[Board, MovePart]):
@@ -141,20 +143,21 @@ class BackgammonEnv(gym.Env[Board, MovePart]):
             random.seed(seed)
             np.random.Generator(np.random.MT19937(seed))
 
-    def get_legal_moves(self, dice: Iterable[int]) -> MoveDict:
+    def get_legal_moves(self, dice: Iterable[int]) -> MoveList:
         """
         Return the legal moves for the current player.
-        
+
         :param dice: Iterable of dice values
         :return: Dictionary mapping starting positions to sets of possible moves
         """
         actions_per_roll = self.backgammon.get_legal_moves(dice)
         actions = []
         for roll in dice:
-            actions += list(map(lambda move: (roll, move), actions_per_roll[roll]))
+            actions += [(roll, move) for move in actions_per_roll[roll]]
         return actions
 
-    def copy(self):
+    def copy(self) -> BackgammonEnv:
+        """Return a copy of the current environment."""
         env = BackgammonEnv()
         env.backgammon = self.backgammon.copy()
         env.max_moves = self.max_moves

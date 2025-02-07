@@ -1,8 +1,7 @@
 """Plays a game of backgammon."""
-import random
 
-from rlgammon.environment import BackgammonEnv
 from rlgammon.agents.random_agent import RandomAgent
+from rlgammon.environment import BackgammonEnv
 
 
 def play_game() -> None:
@@ -25,7 +24,7 @@ def play_game() -> None:
         print(f"Color: {'White' if i%2==1 else 'Black'} Roll: {dice}")
         actions = agent.choose_move(env, dice)
         print(actions)
-        for roll, action in actions:
+        for _, action in actions:
             _, reward, done, trunc, _ = env.step(action)
 
             env.render(mode="text")

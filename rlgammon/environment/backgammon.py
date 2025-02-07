@@ -1,5 +1,7 @@
 """Handle game mechanics for backgammon."""
 
+from __future__ import annotations
+
 from collections.abc import Iterable
 
 import numpy as np
@@ -145,15 +147,13 @@ class Backgammon:
             return 1
         return 0
 
-    def render(self):
-        return text_renderer.text_render(self)
-
-    def copy(self):
-        bg = Backgammon()
-        bg.board = self.board.copy()
-        bg.bar = self.bar.copy()
-        bg.off = self.off.copy()
-        return bg
+    def copy(self) -> Backgammon:
+        """Return a copy of the current board state."""
+        bg_copy = Backgammon()
+        bg_copy.board = self.board.copy()
+        bg_copy.bar = self.bar.copy()
+        bg_copy.off = self.off.copy()
+        return bg_copy
 
 
 if __name__ == "__main__":
@@ -164,4 +164,3 @@ if __name__ == "__main__":
     bg.bar[1] = 3  # 3 black pieces on the bar
     bg.off[0] = 5  # 5 white pieces borne off
     bg.off[1] = 8  # 8 black pieces borne off
-    print(bg.render())
