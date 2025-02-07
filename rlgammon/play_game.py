@@ -9,7 +9,6 @@ def play_game() -> None:
     """Plays a game of backgammon."""
     env = BackgammonEnv()
     env.reset()
-    # None * 2
     done = False
     trunc = False
     i = 0

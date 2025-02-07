@@ -7,8 +7,7 @@ import numpy as np
 import numpy.typing as npt
 import pygame
 
-from rlgammon.environment.render_data.board_parameters import BoardParameters
-from rlgammon.environment.render_data.colors import Colors
+from rlgammon.environment.render_data import BoardParameters, Colors
 
 QUARTER_BOARD_SIZE = 6  # Number of points in each quarter of the board
 

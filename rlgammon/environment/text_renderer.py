@@ -1,7 +1,7 @@
 """Text-based rendering of the backgammon board."""
 
 from rlgammon.environment.backgammon import Backgammon
-from rlgammon.environment.render_data.text_render_parameters import TextRenderParameters
+from rlgammon.environment.render_data import TextRenderParameters
 
 
 def stack_cells(count: int, color: str, max_rows: int, orientation: str) -> list[str]:
