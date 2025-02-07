@@ -6,7 +6,7 @@ import sys
 import pygame
 
 from rlgammon.environment.render_data import BoardParameters, Colors
-from rlgammon.rlgammon_types import Bar, Board, Off
+from rlgammon.rlgammon_types import Bar, Board, Off, Orientation
 
 QUARTER_BOARD_SIZE = 6  # Number of points in each quarter of the board
 
@@ -51,7 +51,7 @@ class BackgammonRenderer:
         self.font = pygame.font.SysFont(None, 20)
 
     def draw_stack(self, center_x: float, start_y: float, count: int, piece_radius: int, available_space: float,
-                   orientation: str, color: tuple[int, int, int]) -> None:
+                   orientation: Orientation, color: tuple[int, int, int]) -> None:
         """
         Draw a vertical stack of checkers at the given x, starting from start_y.
 
@@ -75,7 +75,7 @@ class BackgammonRenderer:
         piece_diameter = piece_radius * 2
         max_fit = math.floor(available_space / (piece_diameter + spacing))
         if count > max_fit > 0:
-            center_y = start_y + piece_radius if orientation == "top" else start_y - piece_radius
+            center_y = start_y + piece_radius if orientation == Orientation.TOP else start_y - piece_radius
             pygame.draw.circle(self.screen, color, (int(center_x), int(center_y)), piece_radius)
             pygame.draw.circle(self.screen, Colors.outline_color,
                                (int(center_x), int(center_y)), piece_radius, 1)
@@ -84,7 +84,7 @@ class BackgammonRenderer:
             self.screen.blit(text, text_rect)
         else:
             for j in range(count):
-                if orientation == "top":
+                if orientation == Orientation.TOP:
                     center_y = start_y + j * (piece_diameter + spacing) + piece_radius
                 else:
                     center_y = start_y - j * (piece_diameter + spacing) - piece_radius
@@ -212,7 +212,7 @@ class BackgammonRenderer:
                             BoardParameters.triangle_width / 2)
 
             start_y = BoardParameters.margin + top_base_offset
-            self.draw_stack(center_x, start_y, int(count), piece_radius, top_available, "top", piece_color)
+            self.draw_stack(center_x, start_y, int(count), piece_radius, top_available, Orientation.TOP, piece_color)
 
         # Bottom half: points 1-12 (indices 0 to 11)
         for idx in range(12):
@@ -233,27 +233,27 @@ class BackgammonRenderer:
                 center_x = BoardParameters.margin + i * BoardParameters.triangle_width + BoardParameters.triangle_width / 2
 
             start_y = BoardParameters.margin + BoardParameters.board_height - bottom_base_offset
-            self.draw_stack(center_x, start_y, int(count), piece_radius, bottom_available, "bottom", piece_color)
+            self.draw_stack(center_x, start_y, int(count), piece_radius, bottom_available, Orientation.BOTTOM, piece_color)
 
         # Draw the bar pieces
         bar_center_x = BoardParameters.margin + BoardParameters.board_width / 2
         top_bar_available = BoardParameters.board_height / 2 - top_base_offset
         self.draw_stack(bar_center_x, BoardParameters.margin + top_base_offset, int(bar[1]), piece_radius,
-                        top_bar_available, "top", Colors.player2_checker_color)
+                        top_bar_available, Orientation.TOP, Colors.player2_checker_color)
         bottom_bar_available = BoardParameters.board_height / 2 - bottom_base_offset
         self.draw_stack(bar_center_x, BoardParameters.margin + BoardParameters.board_height - bottom_base_offset,
                         int(bar[0]),
-                        piece_radius, bottom_bar_available, "bottom", Colors.player1_checker_color)
+                        piece_radius, bottom_bar_available, Orientation.BOTTOM, Colors.player1_checker_color)
 
         # Draw the off-board pieces
         off_center_x = BoardParameters.margin + BoardParameters.board_width + BoardParameters.off_width / 2
         off_top_available = BoardParameters.board_height / 2 - top_base_offset
         self.draw_stack(off_center_x, BoardParameters.margin + top_base_offset, int(off[1]), piece_radius,
-                        off_top_available, "top", Colors.player2_checker_color)
+                        off_top_available, Orientation.TOP, Colors.player2_checker_color)
         off_bottom_available = BoardParameters.board_height / 2 - bottom_base_offset
         self.draw_stack(off_center_x, BoardParameters.margin + BoardParameters.board_height - bottom_base_offset,
                         int(off[0]),
-                        piece_radius, off_bottom_available, "bottom", Colors.player1_checker_color)
+                        piece_radius, off_bottom_available, Orientation.BOTTOM, Colors.player1_checker_color)
 
         pygame.display.flip()
 

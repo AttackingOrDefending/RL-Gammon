@@ -2,9 +2,10 @@
 
 from rlgammon.environment.backgammon import Backgammon
 from rlgammon.environment.render_data import TextRenderParameters
+from rlgammon.rlgammon_types import Color, Orientation
 
 
-def stack_cells(count: int, color: str, max_rows: int, orientation: str) -> list[str]:
+def stack_cells(count: int, color: Color, max_rows: int, orientation: Orientation) -> list[str]:
     """
     Create a list of cell strings (each of fixed width TextRenderParameters.cell_width) for one point.
 
@@ -27,15 +28,15 @@ def stack_cells(count: int, color: str, max_rows: int, orientation: str) -> list
     if count <= 0:
         return stacked_cells
     if count > max_rows:
-        s = f"{color}{count}"
+        s = f"{color.value}{count}"
         s = s.center(TextRenderParameters.cell_width)
-        if orientation == "top":
+        if orientation == Orientation.TOP:
             stacked_cells[0] = s
         else:
             stacked_cells[-1] = s
         return stacked_cells
-    piece = color.center(TextRenderParameters.cell_width)
-    if orientation == "top":
+    piece = color.value.center(TextRenderParameters.cell_width)
+    if orientation == Orientation.TOP:
         for i in range(count):
             stacked_cells[i] = piece
     else:
@@ -44,7 +45,7 @@ def stack_cells(count: int, color: str, max_rows: int, orientation: str) -> list
     return stacked_cells
 
 
-def get_cells(val: int, orientation: str) -> list[str]:
+def get_cells(val: int, orientation: Orientation) -> list[str]:
     """
     Get the cells for a point.
 
@@ -56,11 +57,11 @@ def get_cells(val: int, orientation: str) -> list[str]:
     - cells: List of strings representing the cell contents
     """
     if val > 0:
-        cells = stack_cells(val, "W", TextRenderParameters.rows, orientation)
+        cells = stack_cells(val, Color.WHITE, TextRenderParameters.rows, orientation)
     elif val < 0:
-        cells = stack_cells(abs(val), "B", TextRenderParameters.rows, orientation)
+        cells = stack_cells(abs(val), Color.BLACK, TextRenderParameters.rows, orientation)
     else:
-        cells = stack_cells(0, "", TextRenderParameters.rows, orientation)
+        cells = stack_cells(0, Color.NONE, TextRenderParameters.rows, orientation)
     return cells
 
 
@@ -113,35 +114,35 @@ def text_render(backgammon: Backgammon) -> str:
     top_left = []
     for p in range(13, 19):
         val = positions[p - 1]
-        cells = get_cells(val, "top")
+        cells = get_cells(val, Orientation.TOP)
         top_left.append(cells)
 
     # Top right quadrant (points 19 to 24)
     top_right = []
     for p in range(19, 25):
         val = positions[p - 1]
-        cells = get_cells(val, "top")
+        cells = get_cells(val, Orientation.TOP)
         top_right.append(cells)
 
     # Bottom left quadrant (points 12 to 7, descending)
     bottom_left = []
     for p in range(12, 6, -1):
         val = positions[p - 1]
-        cells = get_cells(val, "bottom")
+        cells = get_cells(val, Orientation.BOTTOM)
         bottom_left.append(cells)
 
     # Bottom right quadrant (points 6 to 1, descending)
     bottom_right = []
     for p in range(6, 0, -1):
         val = positions[p - 1]
-        cells = get_cells(val, "bottom")
+        cells = get_cells(val, Orientation.BOTTOM)
         bottom_right.append(cells)
 
-    bar_top = stack_cells(bar[1], "B", TextRenderParameters.rows, "top")
-    bar_bottom = stack_cells(bar[0], "W", TextRenderParameters.rows, "bottom")
+    bar_top = stack_cells(bar[1], Color.BLACK, TextRenderParameters.rows, Orientation.TOP)
+    bar_bottom = stack_cells(bar[0], Color.WHITE, TextRenderParameters.rows, Orientation.BOTTOM)
 
-    off_top = stack_cells(off[1], "B", TextRenderParameters.rows, "top")
-    off_bottom = stack_cells(off[0], "W", TextRenderParameters.rows, "bottom")
+    off_top = stack_cells(off[1], Color.BLACK, TextRenderParameters.rows, Orientation.TOP)
+    off_bottom = stack_cells(off[0], Color.WHITE, TextRenderParameters.rows, Orientation.BOTTOM)
 
     lines = []
 
