@@ -36,14 +36,14 @@ class Backgammon:
         self.bar = np.zeros(2, dtype=np.int8)
         self.off = np.zeros(2, dtype=np.int8)
         # Set up initial position (negative numbers for black, positive for white)
-        self.board[0] = -2    # Black has 2 pieces on point 24
-        self.board[5] = 5     # White has 5 pieces on point 19
-        self.board[7] = 3     # White has 3 pieces on point 17
-        self.board[11] = -5   # Black has 5 pieces on point 13
-        self.board[12] = 5    # White has 5 pieces on point 12
-        self.board[16] = -3   # Black has 3 pieces on point 8
-        self.board[18] = -5   # Black has 5 pieces on point 6
-        self.board[23] = 2    # White has 2 pieces on point 1
+        self.board[0] = -2  # Black has 2 pieces on point 24
+        self.board[5] = 5  # White has 5 pieces on point 19
+        self.board[7] = 3  # White has 3 pieces on point 17
+        self.board[11] = -5  # Black has 5 pieces on point 13
+        self.board[12] = 5  # White has 5 pieces on point 12
+        self.board[16] = -3  # Black has 3 pieces on point 8
+        self.board[18] = -5  # Black has 5 pieces on point 6
+        self.board[23] = 2  # White has 2 pieces on point 1
 
     def flip(self) -> None:
         """Flip the board to switch perspective between players."""
@@ -102,16 +102,16 @@ class Backgammon:
         """Make a move on the board.
 
         :param move: Tuple of (from_position, to_position)
-        :return: Tuple of (captures, beared_off) indicating number of pieces captured
+        :return: Tuple of (captures, bore_off) indicating number of pieces captured
                 and borne off in this move
         """
         captures = 0
-        beared_off = 0
+        bore_off = 0
 
         # Handle bearing off
         if move[1] == -1:
             self.board[move[0]] -= 1
-            beared_off = 1
+            bore_off = 1
             self.off[0] += 1
         else:
             # Handle regular moves and captures
@@ -127,7 +127,7 @@ class Backgammon:
                 captures = 1
             else:
                 self.board[move[1]] += 1
-        return captures, beared_off
+        return captures, bore_off
 
     def is_terminal(self) -> bool:
         """Return whether the game is over.
@@ -156,8 +156,8 @@ class Backgammon:
 if __name__ == "__main__":
     # Example board setup for testing
     bg = Backgammon()
-    bg.board[3] = 8      # 8 white pieces on point 21
-    bg.bar[0] = 9        # 9 white pieces on the bar
-    bg.bar[1] = 3        # 3 black pieces on the bar
-    bg.off[0] = 5        # 5 white pieces borne off
-    bg.off[1] = 8        # 8 black pieces borne off
+    bg.board[3] = 8  # 8 white pieces on point 21
+    bg.bar[0] = 9  # 9 white pieces on the bar
+    bg.bar[1] = 3  # 3 black pieces on the bar
+    bg.off[0] = 5  # 5 white pieces borne off
+    bg.off[1] = 8  # 8 black pieces borne off

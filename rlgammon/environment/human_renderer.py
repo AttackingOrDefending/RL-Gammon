@@ -241,21 +241,21 @@ class BackgammonRenderer:
         # Draw the bar pieces
         bar_center_x = BoardParameters.margin + BoardParameters.board_width / 2
         top_bar_available = BoardParameters.board_height / 2 - top_base_offset
-        self.draw_stack(bar_center_x, BoardParameters.margin + top_base_offset, bar[1], piece_radius,
+        self.draw_stack(bar_center_x, BoardParameters.margin + top_base_offset, int(bar[1]), piece_radius,
                         top_bar_available, "top", Colors.player2_checker_color)
         bottom_bar_available = BoardParameters.board_height / 2 - bottom_base_offset
         self.draw_stack(bar_center_x, BoardParameters.margin + BoardParameters.board_height - bottom_base_offset,
-                        bar[0],
+                        int(bar[0]),
                         piece_radius, bottom_bar_available, "bottom", Colors.player1_checker_color)
 
         # Draw the off-board pieces
         off_center_x = BoardParameters.margin + BoardParameters.board_width + BoardParameters.off_width / 2
         off_top_available = BoardParameters.board_height / 2 - top_base_offset
-        self.draw_stack(off_center_x, BoardParameters.margin + top_base_offset, off[1], piece_radius,
+        self.draw_stack(off_center_x, BoardParameters.margin + top_base_offset, int(off[1]), piece_radius,
                         off_top_available, "top", Colors.player2_checker_color)
         off_bottom_available = BoardParameters.board_height / 2 - bottom_base_offset
         self.draw_stack(off_center_x, BoardParameters.margin + BoardParameters.board_height - bottom_base_offset,
-                        off[0],
+                        int(off[0]),
                         piece_radius, off_bottom_available, "bottom", Colors.player1_checker_color)
 
         pygame.display.flip()

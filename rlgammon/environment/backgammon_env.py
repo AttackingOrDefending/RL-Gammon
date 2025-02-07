@@ -72,7 +72,8 @@ class BackgammonEnv(gym.Env[npt.NDArray[np.int8], tuple[int, int]]):
         self.moves = 0
         return self.get_input(), {}
 
-    def roll_dice(self) -> list[int]:
+    @staticmethod
+    def roll_dice() -> list[int]:
         """
         Roll the dice.
 
@@ -130,7 +131,8 @@ class BackgammonEnv(gym.Env[npt.NDArray[np.int8], tuple[int, int]]):
         else:
             print(text_render(self.backgammon))
 
-    def seed(self, seed: int | None = None) -> None:
+    @staticmethod
+    def seed(seed: int | None = None) -> None:
         """
         Set the seed for the environment.
 

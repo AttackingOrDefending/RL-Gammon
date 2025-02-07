@@ -24,7 +24,7 @@ def stack_cells(count: int, color: str, max_rows: int, orientation: str) -> list
     - s: String representation of piece count (e.g., "W12")
     - piece: Single piece representation centered in cell width
     """
-    stacked_cells = [" " * TextRenderParameters.cell_width for _ in range(max_rows)]
+    stacked_cells: list[str] = [" " * TextRenderParameters.cell_width for _ in range(max_rows)]
     if count <= 0:
         return stacked_cells
     if count > max_rows:

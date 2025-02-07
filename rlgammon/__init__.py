@@ -1,1 +1,1 @@
-"""Initialize the rlgammon package."""
+"""Initialize the rl-gammon package."""
