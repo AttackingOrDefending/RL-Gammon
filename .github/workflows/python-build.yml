@@ -31,4 +31,4 @@ jobs:
     - name: Lint with ruff
       run: |
         # Check for python syntax errors and inconsistent code style.
-        ruff check --config test_bot/ruff.toml
+        ruff check --config ruff.toml
