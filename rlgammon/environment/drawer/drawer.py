@@ -6,14 +6,14 @@ from rlgammon.environment.render_data.board_parameters import BoardParameters
 
 class Drawer:
     """
-    TODO
+    Class for drawing different elements on a pygame screen to render the backgammon board in a human-friendly way.
     """
 
     def __init__(self, screen: pg.Surface):
         """
-        TODO
+        Initialize the drawer with the given screen.
 
-        :param screen: xx
+        :param screen: the pygame screen to draw on, which should be displayed during rendering
         """
 
         self.screen = screen
@@ -30,7 +30,7 @@ class Drawer:
 
     def draw_central_bar(self, bar_x: int):
         """
-        TODO
+        Draw the central bar splitting the board into the left and right sections.
 
         :param bar_x: x coordinate (in pixels) of the top-left corner of the bar
         """
@@ -42,7 +42,7 @@ class Drawer:
 
     def draw_off_board_column(self):
         """
-        TODO
+        Draw the column where checkers are borne-off.
         """
 
         off_rect = pg.Rect(BoardParameters.margin + BoardParameters.board_width,
@@ -52,11 +52,10 @@ class Drawer:
 
     def draw_triangle(self, triangle_color: tuple, points: list):
         """
-        TODO
+        Draw a single triangle, where checkers are stacked, with the provided points.
 
-        :param triangle_color:
-        :param points:
-        :return:
+        :param triangle_color: color of the triangle
+        :param points: 3 points defining the triangle on the pygame screen
         """
 
         pg.draw.polygon(self.screen, triangle_color, points)
@@ -64,11 +63,10 @@ class Drawer:
 
     def draw_checker(self, checker_color: tuple, checker_position: tuple):
         """
-        TODO
+        Draw a single checker at the specified position.
 
-        :param checker_color:
-        :param checker_position:
-        :return:
+        :param checker_color: color of the checker
+        :param checker_position: position of the checker on the pygame screen
         """
 
         pg.draw.circle(self.screen, checker_color, checker_position, BoardParameters.checker_radius)
