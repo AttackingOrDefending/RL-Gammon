@@ -1,13 +1,13 @@
+"""Plays a game of backgammon."""
 import random
 
 from rlgammon.environment import BackgammonEnv
 
 
-def play_game():
+def play_game() -> None:
+    """Plays a game of backgammon."""
     env = BackgammonEnv()
     env.reset()
-    # print(environment.get_legal_moves([5, 6]))
-    # None * 2
     done = False
     trunc = False
     i = 0
@@ -20,26 +20,24 @@ def play_game():
             env.render(mode="text")
             env.flip()
         dice = env.roll_dice()
-        print(f"Color: {'White' if i%2==1 else 'Black'} Roll: {dice}")
         while dice:
             actions_per_roll = env.get_legal_moves(dice)
-            print(actions_per_roll)
             actions = []
             for roll in dice:
-                actions += list(map(lambda move: (roll, move), actions_per_roll[roll]))
+                actions += [(roll, move) for move in actions_per_roll[roll]]
             if not actions:
                 break
             roll, action = random.choice(actions)
             dice.remove(roll)
             _, reward, done, trunc, _ = env.step(action)
 
-            env.render(mode="human")
+            env.render(mode="text")
 
             print(f"Reward: {reward}")
+
         if not done and not trunc:
             env.flip()
     env.render(mode="text")
-    print("Game over!")
 
 
 if __name__ == "__main__":
