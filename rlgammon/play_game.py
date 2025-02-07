@@ -31,7 +31,7 @@ def play_game() -> None:
             dice.remove(roll)
             _, reward, done, trunc, _ = env.step(action)
 
-            env.render(mode="human")
+            env.render(mode="text")
 
             print(f"Reward: {reward}")
 

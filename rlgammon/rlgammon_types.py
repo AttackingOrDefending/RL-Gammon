@@ -9,6 +9,8 @@ MovePart = tuple[int, int]
 MoveDict = dict[int, set[MovePart]]
 Move = list[MovePart]
 
+Color = tuple[int, int, int]
+
 Board = NDArray[np.int8]
 Bar = NDArray[np.int8]
 Off = NDArray[np.int8]
@@ -21,8 +23,8 @@ class Orientation(Enum):
     BOTTOM = "bottom"
 
 
-class Color(Enum):
-    """Color of the checkers."""
+class CheckerColor(Enum):
+    """CheckerColor of the checkers."""
 
     WHITE = "W"
     BLACK = "B"

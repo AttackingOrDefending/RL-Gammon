@@ -2,10 +2,10 @@
 
 from rlgammon.environment.backgammon import Backgammon
 from rlgammon.environment.render_data import TextRenderParameters
-from rlgammon.rlgammon_types import Color, Orientation
+from rlgammon.rlgammon_types import CheckerColor, Orientation
 
 
-def stack_cells(count: int, color: Color, max_rows: int, orientation: Orientation) -> list[str]:
+def stack_cells(count: int, color: CheckerColor, max_rows: int, orientation: Orientation) -> list[str]:
     """
     Create a list of cell strings (each of fixed width TextRenderParameters.cell_width) for one point.
 
@@ -57,11 +57,11 @@ def get_cells(val: int, orientation: Orientation) -> list[str]:
     - cells: List of strings representing the cell contents
     """
     if val > 0:
-        cells = stack_cells(val, Color.WHITE, TextRenderParameters.rows, orientation)
+        cells = stack_cells(val, CheckerColor.WHITE, TextRenderParameters.rows, orientation)
     elif val < 0:
-        cells = stack_cells(abs(val), Color.BLACK, TextRenderParameters.rows, orientation)
+        cells = stack_cells(abs(val), CheckerColor.BLACK, TextRenderParameters.rows, orientation)
     else:
-        cells = stack_cells(0, Color.NONE, TextRenderParameters.rows, orientation)
+        cells = stack_cells(0, CheckerColor.NONE, TextRenderParameters.rows, orientation)
     return cells
 
 
@@ -138,11 +138,11 @@ def text_render(backgammon: Backgammon) -> str:
         cells = get_cells(val, Orientation.BOTTOM)
         bottom_right.append(cells)
 
-    bar_top = stack_cells(bar[1], Color.BLACK, TextRenderParameters.rows, Orientation.TOP)
-    bar_bottom = stack_cells(bar[0], Color.WHITE, TextRenderParameters.rows, Orientation.BOTTOM)
+    bar_top = stack_cells(bar[1], CheckerColor.BLACK, TextRenderParameters.rows, Orientation.TOP)
+    bar_bottom = stack_cells(bar[0], CheckerColor.WHITE, TextRenderParameters.rows, Orientation.BOTTOM)
 
-    off_top = stack_cells(off[1], Color.BLACK, TextRenderParameters.rows, Orientation.TOP)
-    off_bottom = stack_cells(off[0], Color.WHITE, TextRenderParameters.rows, Orientation.BOTTOM)
+    off_top = stack_cells(off[1], CheckerColor.BLACK, TextRenderParameters.rows, Orientation.TOP)
+    off_bottom = stack_cells(off[0], CheckerColor.WHITE, TextRenderParameters.rows, Orientation.BOTTOM)
 
     lines = []
 
