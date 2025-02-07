@@ -1,7 +1,6 @@
 """Text-based rendering of the backgammon board."""
 
-from typing import Any
-
+from rlgammon.environment.backgammon import Backgammon
 from rlgammon.environment.render_data.text_render_parameters import TextRenderParameters
 
 
@@ -65,7 +64,7 @@ def get_cells(val: int, orientation: str) -> list[str]:
     return cells
 
 
-def text_render(backgammon: Any) -> str:
+def text_render(backgammon: Backgammon) -> str:
     """
     Render the backgammon board as text.
 

@@ -4,8 +4,6 @@ from collections.abc import Iterable
 
 import numpy as np
 
-from rlgammon.environment import text_renderer
-
 # Constant representing the bar location (when pieces are knocked out)
 BAR_LOC = 24
 
@@ -144,13 +142,6 @@ class Backgammon:
         if np.all(self.board <= 0):
             return 1
         return 0
-
-    def render(self) -> str:
-        """Render the board as text.
-
-        :return: String representation of the current board state
-        """
-        return text_renderer.text_render(self)
 
 
 if __name__ == "__main__":

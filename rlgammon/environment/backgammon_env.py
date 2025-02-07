@@ -65,11 +65,10 @@ class BackgammonEnv(gym.Env[npt.NDArray[np.int8], tuple[int, int]]):
         - seed: Optional random seed for game initialization
         - moves: Reset to 0 for new game
         """
-        if seed is not None:
-            random.seed(seed)
-            np.random.Generator(np.random.MT19937(seed))
+        self.seed(seed)
         self.backgammon.reset()
         self.moves = 0
+        self.max_moves = options.get("max_moves", 500) if options is not None else 500
         return self.get_input(), {}
 
     @staticmethod
