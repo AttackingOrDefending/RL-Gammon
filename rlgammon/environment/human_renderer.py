@@ -85,7 +85,7 @@ class BackgammonRenderer:
                     return
 
     @staticmethod
-    def _is_valid_input(positions: Board, off: Bar, bar: Off) -> None:
+    def _is_valid_input(positions: Board, off: Off, bar: Bar) -> None:
         """
         Check if the input provided to the 'render' method is valid.
 
@@ -164,7 +164,7 @@ class BackgammonRenderer:
         return Colors.player2_checker_color
 
     def _draw_stack(self, center_x: float, start_y: float, count: int, available_space: float,
-                    orientation: Orientation, color: tuple[int, int, int]) -> None:
+                    orientation: Orientation, color: Color) -> None:
         """
         Draw the specified amount of checkers in a given space.
 
