@@ -23,6 +23,9 @@ def play_game():
         print(actions)
         for roll, action in actions:
             _, reward, done, trunc, _ = env.step(action)
+
+            env.render(mode="human")
+
             print(f"Reward: {reward}")
         if not done and not trunc:
             env.flip()
