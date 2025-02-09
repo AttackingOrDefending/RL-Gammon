@@ -3,11 +3,16 @@
 from collections.abc import Iterable
 
 import numpy as np
+from mypy.checker import FineGrainedDeferredNode
 
 from rlgammon.rlgammon_types import MoveDict, MovePart
 
 # Constant representing the bar location (when pieces are knocked out)
 BAR_LOC = 24
+
+TOTAL_PIECES = 15
+QUARTER_BOARD_SIZE = 6
+
 
 class Backgammon:
     """Handle game mechanics for backgammon.
@@ -47,13 +52,11 @@ class Backgammon:
 
     def flip(self) -> None:
         """Flip the board to switch perspective between players."""
-        # Negate all values to switch colors
-        self.board = -self.board
-        # Reverse the board array
-        self.board = np.flipud(self.board).reshape(self.board.shape)
+        # Negate all values to switch colors and reverse the board array
+        self.board = -self.board[::-1]  # type: ignore[assignment]
         # Reverse bar and off arrays
-        self.bar = np.flipud(self.bar).reshape(self.bar.shape)
-        self.off = np.flipud(self.off).reshape(self.off.shape)
+        self.bar = self.bar[::-1]  # type: ignore[assignment]
+        self.off = self.off[::-1]  # type: ignore[assignment]
 
     def get_bar_moves(self, dice: Iterable[int]) -> MoveDict:
         """Return all legal moves for the current player from the bar.
@@ -82,18 +85,20 @@ class Backgammon:
         if self.bar[0] > 0:
             return self.get_bar_moves(dice)
 
-        possible_moves: MoveDict = {roll: set() for roll in set(dice)}
+        unique_dice = set(dice)
+        possible_moves: MoveDict = {roll: set() for roll in unique_dice}
+        our_checkers = np.flatnonzero(self.board > 0)
 
         # Check normal moves for each dice roll
-        for roll in dice:
-            for loc in np.argwhere(self.board > 0).reshape(-1):
+        for roll in unique_dice:
+            for loc in our_checkers:
                 if loc - roll >= 0 and self.board[loc - roll] >= -1:
                     possible_moves[roll].add((int(loc), int(loc) - roll))
 
         # Check bearing off moves if all pieces are in home board
-        if np.all(self.board[6:] <= 0):
-            for roll in dice:
-                for loc in np.argwhere(self.board > 0).reshape(-1):
+        if our_checkers.size == 0 or our_checkers[-1] < QUARTER_BOARD_SIZE:
+            for roll in unique_dice:
+                for loc in our_checkers:
                     if loc - roll < 0:
                         possible_moves[roll].add((int(loc), -1))
         return possible_moves
@@ -134,14 +139,14 @@ class Backgammon:
 
         :return: True if game is finished, False otherwise
         """
-        return bool(np.all(self.board <= 0) or np.all(self.board >= 0))
+        return bool(self.off[0] == TOTAL_PIECES or self.off[1] == TOTAL_PIECES)
 
     def get_winner(self) -> int:
         """Return the winner of the game.
 
-        :return: 1 if black wins, 0 if white wins
+        :return: 1 if white wins, 0 if black wins
         """
-        if np.all(self.board <= 0):
+        if self.off[0] == TOTAL_PIECES:
             return 1
         return 0
 

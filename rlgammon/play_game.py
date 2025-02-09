@@ -29,7 +29,7 @@ def play_game() -> None:
                 break
             roll, action = random.choice(actions)
             dice.remove(roll)
-            _, reward, done, trunc, _ = env.step(action)
+            reward, done, trunc, _ = env.step(action)
 
             env.render(mode="text")
 
