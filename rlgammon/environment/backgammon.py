@@ -3,7 +3,6 @@
 from collections.abc import Iterable
 
 import numpy as np
-from mypy.checker import FineGrainedDeferredNode
 
 from rlgammon.rlgammon_types import MoveDict, MovePart
 
