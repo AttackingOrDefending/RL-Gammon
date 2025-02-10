@@ -26,7 +26,7 @@ def play_game() -> None:
         actions = agent.choose_move(env, dice)
         print(actions)
         for _, action in actions:
-            _, reward, done, trunc, _ = env.step(action)
+            reward, done, trunc, _ = env.step(action)
 
             env.render(mode="text")
             print(f"Reward: {reward}")
