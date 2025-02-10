@@ -6,15 +6,14 @@ from collections.abc import Iterable
 import random
 from typing import Any
 
-import gymnasium as gym
 import numpy as np
 
 from rlgammon.environment import backgammon as bg, human_renderer
 from rlgammon.environment.text_renderer import text_render
-from rlgammon.rlgammon_types import Board, MoveList, MovePart
+from rlgammon.rlgammon_types import Board, Input, MoveList, MovePart
 
 
-class BackgammonEnv(gym.Env[Board, MovePart]):
+class BackgammonEnv:
     """
     A gym environment for backgammon.
 
@@ -38,7 +37,7 @@ class BackgammonEnv(gym.Env[Board, MovePart]):
         self.max_moves: int = 500
         self.moves: int = 0
 
-    def get_input(self) -> Board:
+    def get_input(self) -> Input:
         """
         Return the input for the current player.
 
@@ -48,11 +47,19 @@ class BackgammonEnv(gym.Env[Board, MovePart]):
         - our_pieces: Array containing positions of current player's pieces
         - enemy_pieces: Array containing positions of opponent's pieces
         """
-        our_pieces: Board = self.backgammon.board.copy()
-        our_pieces[our_pieces < 0] = 0
-        enemy_pieces: Board = -self.backgammon.board.copy()
-        enemy_pieces[enemy_pieces < 0] = 0
-        return np.concatenate([our_pieces, enemy_pieces, self.backgammon.bar, self.backgammon.off], dtype=np.int8)
+        board = self.backgammon.board  # shape (24,)
+        # Pre-allocate the result array:
+        # our_pieces (24) + enemy_pieces (24) + bar (2) + off (2) = 52 elements.
+        res = np.empty(52, dtype=np.int8)
+
+        # Use np.maximum to replace elementwise comparison and assignment (vectorized).
+        np.maximum(board, 0, out=res[:24])  # our_pieces: all negative values become 0
+        np.maximum(-board, 0, out=res[24:48])  # enemy_pieces: all negative values (of -board) become 0
+
+        # Directly set bar and off.
+        res[48:50] = self.backgammon.bar
+        res[50:52] = self.backgammon.off
+        return res
 
     def reset(self, seed: int | None = None,
               options: dict[str, Any] | None = None) -> tuple[Board, dict[str, Any]]:
@@ -97,7 +104,7 @@ class BackgammonEnv(gym.Env[Board, MovePart]):
         self.backgammon.flip()
         return self.get_input()
 
-    def step(self, action: MovePart) -> tuple[Board, float, bool, bool, dict[str, Any]]:
+    def step(self, action: MovePart) -> tuple[float, bool, bool, dict[str, Any]]:
         """
         Take a step in the environment.
 
@@ -115,7 +122,7 @@ class BackgammonEnv(gym.Env[Board, MovePart]):
         reward = 0.
         if done:
             reward = 1. if self.backgammon.get_winner() == 1 else -1.
-        return self.get_input(), reward, done, self.moves >= self.max_moves and not done, {}
+        return reward, done, self.moves >= self.max_moves and not done, {}
 
     def render(self, mode: str = "human") -> None:
         """

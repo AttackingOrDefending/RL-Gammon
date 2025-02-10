@@ -21,14 +21,14 @@ def play_game() -> None:
             env.render(mode="text")
             env.flip()
         dice = env.roll_dice()
+
         print(f"Color: {'White' if i%2==1 else 'Black'} Roll: {dice}")
         actions = agent.choose_move(env, dice)
         print(actions)
         for _, action in actions:
-            _, reward, done, trunc, _ = env.step(action)
+            reward, done, trunc, _ = env.step(action)
 
             env.render(mode="text")
-
             print(f"Reward: {reward}")
 
         if not done and not trunc:
