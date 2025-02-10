@@ -8,6 +8,7 @@ from numpy.typing import NDArray
 MovePart = tuple[int, int]
 MoveDict = dict[int, set[MovePart]]
 Move = list[MovePart]
+MoveList = list[tuple[int, MovePart]]
 
 Color = tuple[int, int, int]
 
