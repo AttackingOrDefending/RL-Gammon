@@ -10,7 +10,7 @@ import numpy as np
 
 from rlgammon.environment import backgammon as bg, human_renderer
 from rlgammon.environment.text_renderer import text_render
-from rlgammon.rlgammon_types import Board, Input, MoveDict, MovePart
+from rlgammon.rlgammon_types import Board, Input, MoveList, MovePart
 
 
 class BackgammonEnv:
