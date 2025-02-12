@@ -1,3 +1,6 @@
+import pickle
+import time
+
 import numpy as np
 
 from rlgammon.buffers.buffer_types import BufferBatch
@@ -27,7 +30,7 @@ class UniformBuffer(BaseBuffer):
         self.reward_buffer = np.zeros(shape=self.capacity, dtype=np.int8)
         self.done_buffer = np.zeros(shape=self.capacity, dtype=np.bool)
 
-    def update(self, state: Input, next_state: Input, action: MovePart, reward: int, done: bool) -> None:
+    def record(self, state: Input, next_state: Input, action: MovePart, reward: int, done: bool) -> None:
         """
         TODO
 
@@ -77,3 +80,30 @@ class UniformBuffer(BaseBuffer):
         self.action_buffer.fill(0)
         self.reward_buffer.fill(0)
         self.done_buffer.fill(0)
+
+    def load(self, path: str) -> None:
+        """
+        TODO
+
+        :param path:
+        """
+
+        with open(path, "rb") as f:
+            buffer = pickle.load(f)
+
+        self.update_counter = buffer.update_counter
+        self.state_buffer = buffer.state_buffer
+        self.new_state_buffer = buffer.new_state_buffer
+        self.action_buffer = buffer.action_buffer
+        self.reward_buffer = buffer.reward_buffer
+        self.done_buffer = buffer.done_buffer
+
+    def save(self) -> None:
+        """
+        TODO
+        """
+
+        buffer_name = f"uniform-buffer-{str(time.time())}.pkl"
+        buffer_file_path = "rlgammon/buffers/saved_buffers/"
+        with open(buffer_file_path + buffer_name, "wb") as f:
+            f.write(pickle.dumps(self))
