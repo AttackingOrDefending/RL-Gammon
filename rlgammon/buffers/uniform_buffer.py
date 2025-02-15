@@ -11,14 +11,14 @@ from rlgammon.rlgammon_types import MovePart, Input
 
 class UniformBuffer(BaseBuffer):
     """
-    TODO
+    Class implementing a buffer with uniform sampling.
     """
 
     def __init__(self, capacity: int) -> None:
         """
-        TODO
+        Constructor for the UniformBuffer, initializing the counter, and all the numpy arrays for storing data.
 
-        :param capacity:
+        :param capacity: the number of samples that can maximally be stored in the buffer
         """
 
         self.capacity = capacity
@@ -32,14 +32,13 @@ class UniformBuffer(BaseBuffer):
 
     def record(self, state: Input, next_state: Input, action: MovePart, reward: int, done: bool) -> None:
         """
-        TODO
+        Store the environment observation into the buffer.
 
-        :param state:
-        :param next_state:
-        :param action:
-        :param reward:
-        :param done:
-        :return:
+        :param state: environment state at the recorded step
+        :param next_state: the environment state after performing the action at the recorded step
+        :param action: the action performed at the recorded step
+        :param reward: the reward obtained at the recorded step
+        :param done: boolean indicating if the episode ended at the recorded step
         """
 
         current_index = self.update_counter % self.capacity
@@ -49,12 +48,15 @@ class UniformBuffer(BaseBuffer):
         self.reward_buffer[current_index] = reward
         self.done_buffer[current_index] = done
 
+        self.update_counter += 1
+
     def get_batch(self, batch_size: int) -> BufferBatch:
         """
-        TODO
+        Get a batch of data from the buffer making a map with random indexes for the numpy arrays.
 
-        :param batch_size:
-        :return:
+        :param batch_size: the number of samples to return
+        :return: a dict with the following keys: "state", "next_state", "action", "reward", "done",
+        each of which having as their value a numpy array with batch size amount of elements
         """
 
         index_map = np.random.choice(np.arange(min(self.update_counter, self.capacity)), size=batch_size)
@@ -72,7 +74,7 @@ class UniformBuffer(BaseBuffer):
 
     def clear(self) -> None:
         """
-        TODO
+        Clear the contents of the buffer by filling all numpy arrays with zeros and resetting the update counter.
         """
 
         self.state_buffer.fill(0)
@@ -81,11 +83,13 @@ class UniformBuffer(BaseBuffer):
         self.reward_buffer.fill(0)
         self.done_buffer.fill(0)
 
+        self.update_counter = 0
+
     def load(self, path: str) -> None:
         """
-        TODO
+        Load the buffer from the given path.
 
-        :param path:
+        :param path: filepath to the file where the buffer is stored
         """
 
         with open(path, "rb") as f:
@@ -100,7 +104,7 @@ class UniformBuffer(BaseBuffer):
 
     def save(self) -> None:
         """
-        TODO
+        Save the buffer to a file, with the current time as differentiating name.
         """
 
         buffer_name = f"uniform-buffer-{str(time.time())}.pkl"

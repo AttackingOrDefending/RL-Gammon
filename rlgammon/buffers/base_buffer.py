@@ -5,17 +5,18 @@ from rlgammon.buffers.buffer_types import BufferBatch
 
 
 class BaseBuffer:
+    """Base class for all buffers used for training"""
+
     @abstractmethod
     def record(self, state: Input, next_state: Input, action: MovePart, reward: int, done: bool) -> None:
         """
-        TODO
+        Store the environment observation into the buffer.
 
-        :param state:
-        :param next_state:
-        :param action:
-        :param reward:
-        :param done:
-        :return:
+        :param state: environment state at the recorded step
+        :param next_state: the environment state after performing the action at the recorded step
+        :param action: the action performed at the recorded step
+        :param reward: the reward obtained at the recorded step
+        :param done: boolean indicating if the episode ended at the recorded step
         """
 
         raise NotImplementedError
@@ -24,10 +25,11 @@ class BaseBuffer:
     @abstractmethod
     def get_batch(self, batch_size: int) -> BufferBatch:
         """
-        TODO
+        Get a batch of data from the buffer.
 
-        :param batch_size:
-        :return:
+        :param batch_size: the number of samples to return
+        :return: a dict with the following keys: "state", "next_state", "action", "reward", "done",
+        each of which having as their value a numpy array with batch size amount of elements
         """
 
         raise NotImplementedError
@@ -35,7 +37,7 @@ class BaseBuffer:
     @abstractmethod
     def clear(self) -> None:
         """
-        TODO
+        Clear the contents of the buffer
         """
 
         raise  NotImplementedError
@@ -43,9 +45,9 @@ class BaseBuffer:
     @abstractmethod
     def load(self, path: str) -> None:
         """
-        TODO
+        Load the buffer from the given path
 
-        :param path:
+        :param path: filepath to the file where the buffer is stored
         """
 
         raise NotImplementedError
@@ -53,7 +55,7 @@ class BaseBuffer:
     @abstractmethod
     def save(self) -> None:
         """
-        TODO
+        Save the buffer to a file
         """
 
         raise NotImplementedError
