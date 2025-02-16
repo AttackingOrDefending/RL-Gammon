@@ -1,13 +1,12 @@
 import pickle
-from pathlib import Path
 import time
+from pathlib import Path
 
 import numpy as np
 
 from rlgammon.buffers.base_buffer import BaseBuffer
 from rlgammon.buffers.buffer_types import BufferBatch
 from rlgammon.rlgammon_types import Input, MovePart
-
 
 
 class UniformBuffer(BaseBuffer):
@@ -62,11 +61,13 @@ class UniformBuffer(BaseBuffer):
         batch_reward = self.reward_buffer[index_map]
         batch_done = self.done_buffer[index_map]
 
-        return {"state": batch_state,
-                "next_state": batch_next_state,
-                "action": batch_action,
-                "reward": batch_reward,
-                "done": batch_done}
+        return {
+            "state": batch_state,
+            "next_state": batch_next_state,
+            "action": batch_action,
+            "reward": batch_reward,
+            "done": batch_done,
+        }
 
     def clear(self) -> None:
         """Clear the contents of the buffer by filling all numpy arrays with zeros and resetting the update counter."""
