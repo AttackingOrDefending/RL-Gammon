@@ -1,3 +1,5 @@
+"""A buffer with uniform sampling."""
+
 from pathlib import Path
 import pickle
 import time

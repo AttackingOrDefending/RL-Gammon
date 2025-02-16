@@ -1,3 +1,5 @@
+"""Base class for all buffers used in RL-training."""
+
 from abc import abstractmethod
 
 from rlgammon.buffers.buffer_types import BufferBatch
