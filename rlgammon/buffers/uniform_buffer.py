@@ -1,6 +1,5 @@
 import pickle
 import time
-from typing import BinaryIO
 
 import numpy as np
 
