@@ -1,5 +1,6 @@
 import pickle
 import time
+from typing import BinaryIO
 
 import numpy as np
 
@@ -14,7 +15,7 @@ class UniformBuffer(BaseBuffer):
     Class implementing a buffer with uniform sampling.
     """
 
-    def __init__(self, capacity: int) -> None:
+    def __init__(self, observation_shape: tuple[int, ...], action_shape: int, capacity: int = 10_000) -> None:
         """
         Constructor for the UniformBuffer, initializing the counter, and all the numpy arrays for storing data.
 
@@ -24,9 +25,9 @@ class UniformBuffer(BaseBuffer):
         self.capacity = capacity
         self.update_counter = 0
 
-        self.state_buffer = np.zeros(shape=(self.capacity,), dtype=np.int8)
-        self.new_state_buffer = np.zeros(shape=(self.capacity,), dtype=np.int8)
-        self.action_buffer = np.zeros(shape=(self.capacity,), dtype=np.int8)
+        self.state_buffer = np.zeros(shape=(self.capacity, *observation_shape), dtype=np.int8)
+        self.new_state_buffer = np.zeros(shape=(self.capacity, *observation_shape), dtype=np.int8)
+        self.action_buffer = np.zeros(shape=(self.capacity, action_shape), dtype=np.int8)
         self.reward_buffer = np.zeros(shape=self.capacity, dtype=np.int8)
         self.done_buffer = np.zeros(shape=self.capacity, dtype=np.bool)
 
@@ -85,14 +86,14 @@ class UniformBuffer(BaseBuffer):
 
         self.update_counter = 0
 
-    def load(self, path: str) -> None:
+    def load(self, buffer_name: str) -> None:
         """
-        Load the buffer from the given path.
+        Load the buffer with the given name.
 
-        :param path: filepath to the file where the buffer is stored
+        :param buffer_name: name of the saved buffer to load
         """
 
-        with open(path, "rb") as f:
+        with open("../rlgammon/buffers/saved_buffers/" + buffer_name, "rb") as f:
             buffer = pickle.load(f)
 
         self.update_counter = buffer.update_counter
@@ -108,6 +109,6 @@ class UniformBuffer(BaseBuffer):
         """
 
         buffer_name = f"uniform-buffer-{str(time.time())}.pkl"
-        buffer_file_path = "rlgammon/buffers/saved_buffers/"
+        buffer_file_path = "../rlgammon/buffers/saved_buffers/"
         with open(buffer_file_path + buffer_name, "wb") as f:
-            f.write(pickle.dumps(self))
+            pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
