@@ -1,7 +1,7 @@
 from abc import abstractmethod
 
 from rlgammon.buffers.buffer_types import BufferBatch
-from rlgammon.rlgammon_types import MovePart, Input
+from rlgammon.rlgammon_types import Input, MovePart
 
 
 class BaseBuffer:
@@ -48,7 +48,5 @@ class BaseBuffer:
 
     @abstractmethod
     def save(self) -> None:
-        """
-        Save the buffer to a file.
-        """
+        """Save the buffer to a file."""
         raise NotImplementedError

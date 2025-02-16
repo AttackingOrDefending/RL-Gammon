@@ -6,7 +6,7 @@ import numpy as np
 
 from rlgammon.buffers.base_buffer import BaseBuffer
 from rlgammon.buffers.buffer_types import BufferBatch
-from rlgammon.rlgammon_types import MovePart, Input
+from rlgammon.rlgammon_types import Input, MovePart
 
 
 
