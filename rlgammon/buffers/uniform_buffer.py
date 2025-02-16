@@ -4,24 +4,21 @@ from pathlib import Path
 
 import numpy as np
 
-from rlgammon.buffers.buffer_types import BufferBatch
 from rlgammon.buffers.base_buffer import BaseBuffer
+from rlgammon.buffers.buffer_types import BufferBatch
 from rlgammon.rlgammon_types import MovePart, Input
 
 
 
 class UniformBuffer(BaseBuffer):
-    """
-    Class implementing a buffer with uniform sampling.
-    """
+    """Class implementing a buffer with uniform sampling."""
 
     def __init__(self, observation_shape: tuple[int, ...], action_shape: int, capacity: int = 10_000) -> None:
         """
-        Constructor for the UniformBuffer, initializing the counter, and all the numpy arrays for storing data.
+        Constructor for the UniformBuffer, that initializes the counter, and all the numpy arrays for storing data.
 
         :param capacity: the number of samples that can maximally be stored in the buffer
         """
-
         self.capacity = capacity
         self.update_counter = 0
 
@@ -41,7 +38,6 @@ class UniformBuffer(BaseBuffer):
         :param reward: the reward obtained at the recorded step
         :param done: boolean indicating if the episode ended at the recorded step
         """
-
         current_index = self.update_counter % self.capacity
         self.state_buffer[current_index] = state
         self.new_state_buffer[current_index] = next_state
@@ -59,7 +55,6 @@ class UniformBuffer(BaseBuffer):
         :return: a dict with the following keys: "state", "next_state", "action", "reward", "done",
         each of which having as their value a numpy array with batch size amount of elements
         """
-
         index_map = np.random.choice(np.arange(min(self.update_counter, self.capacity)), size=batch_size)
         batch_state = self.state_buffer[index_map]
         batch_next_state = self.new_state_buffer[index_map]
@@ -74,10 +69,7 @@ class UniformBuffer(BaseBuffer):
                 "done": batch_done}
 
     def clear(self) -> None:
-        """
-        Clear the contents of the buffer by filling all numpy arrays with zeros and resetting the update counter.
-        """
-
+        """Clear the contents of the buffer by filling all numpy arrays with zeros and resetting the update counter."""
         self.state_buffer.fill(0)
         self.new_state_buffer.fill(0)
         self.action_buffer.fill(0)
@@ -92,8 +84,10 @@ class UniformBuffer(BaseBuffer):
 
         :param buffer_name: name of the saved buffer to load
         """
+        buffer_file_path = "../rlgammon/buffers/saved_buffers/"
+        path = Path(buffer_file_path + buffer_name)
 
-        with open("../rlgammon/buffers/saved_buffers/" + buffer_name, "rb") as f:
+        with path.open("rb") as f:
             buffer = pickle.load(f)
 
         self.update_counter = buffer.update_counter
@@ -105,8 +99,7 @@ class UniformBuffer(BaseBuffer):
 
     def save(self) -> None:
         """Save the buffer to a file, with the current time as differentiating name."""
-
-        buffer_name = f"uniform-buffer-{str(time.time())}.pkl"
+        buffer_name = f"uniform-buffer-{time.time()}.pkl"
         buffer_file_path = "../rlgammon/buffers/saved_buffers/"
         path = Path(buffer_file_path + buffer_name)
         with path.open("wb") as f:
