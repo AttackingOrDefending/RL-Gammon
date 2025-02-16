@@ -1,5 +1,6 @@
 import pickle
 import time
+from pathlib import Path
 
 import numpy as np
 
@@ -103,11 +104,10 @@ class UniformBuffer(BaseBuffer):
         self.done_buffer = buffer.done_buffer
 
     def save(self) -> None:
-        """
-        Save the buffer to a file, with the current time as differentiating name.
-        """
+        """Save the buffer to a file, with the current time as differentiating name."""
 
         buffer_name = f"uniform-buffer-{str(time.time())}.pkl"
         buffer_file_path = "../rlgammon/buffers/saved_buffers/"
-        with open(buffer_file_path + buffer_name, "wb") as f:
+        path = Path(buffer_file_path + buffer_name)
+        with path.open("wb") as f:
             pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
