@@ -1,4 +1,4 @@
-"""Implementation of epsilon greedy exploration"""
+"""Implementation of epsilon greedy exploration."""
 
 import random
 
@@ -10,7 +10,7 @@ class EpsilonGreedyExploration(BaseExploration):
 
     def __init__(self, start_epsilon: float, end_epsilon: float, step_decay: float, step_per_update: int) -> None:
         """
-        Initialize
+        Initialize the epsilon-greedy exploration algorithm by setting up the start-up values.
 
         :param start_epsilon: the starting value of epsilon - i.e. the max chance of random action
         :param end_epsilon: the final value of epsilon - i.e. the min chance of random action

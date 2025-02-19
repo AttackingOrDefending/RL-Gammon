@@ -1,10 +1,10 @@
-"""Base class for all exploration algorithms"""
+"""Base class for all exploration algorithms."""
 
 from abc import abstractmethod
 
 
 class BaseExploration:
-    """Base class for all exploration algorithms"""
+    """Base class for all exploration algorithms."""
 
     @abstractmethod
     def explore(self, action: int, valid_actions: list[int]) -> int:
@@ -19,5 +19,5 @@ class BaseExploration:
 
     @abstractmethod
     def update(self) -> None:
-        """Update the exploration algorithm"""
+        """Update the exploration algorithm."""
         raise NotImplementedError
