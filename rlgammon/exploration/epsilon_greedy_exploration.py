@@ -39,7 +39,7 @@ class EpsilonGreedyExploration(BaseExploration):
 
     def update(self) -> None:
         """
-        Update the step counter, and if it has reached the threshold. Then update the epsilon,
+        Update the step counter, and if it has reached the threshold, then update the epsilon,
         by multiplying it by the decay rate.
         """
         self.current_steps += 1
