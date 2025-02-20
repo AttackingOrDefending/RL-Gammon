@@ -12,6 +12,8 @@ from rlgammon.environment import backgammon as bg, human_renderer
 from rlgammon.environment.text_renderer import text_render
 from rlgammon.rlgammon_types import Board, Input, MoveList, MovePart
 
+NO_MOVE_NUMBER = -2
+
 
 class BackgammonEnv:
     """
@@ -172,7 +174,7 @@ class BackgammonEnv:
         """
         actions = self.get_legal_moves(dice)
         if not actions:
-            return [(self, [(-2, (-2, -2))])]
+            return [(self, [(NO_MOVE_NUMBER, (NO_MOVE_NUMBER, NO_MOVE_NUMBER))])]
         moves = []
         for roll, action in actions:
             board_copy = self.copy()
@@ -180,7 +182,7 @@ class BackgammonEnv:
             next_dice = dice.copy()
             next_dice.remove(roll)
             next_moves = board_copy.get_all_complete_moves(next_dice)
-            if next_moves[0][1][0][0] != -2:
+            if next_moves[0][1][0][0] != NO_MOVE_NUMBER:
                 moves += [(position, [(roll, action), *move]) for position, move in next_moves]
             else:
                 moves += [(position, [(roll, action)]) for position, _ in next_moves]

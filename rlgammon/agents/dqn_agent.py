@@ -9,7 +9,7 @@ from torch import nn
 
 from rlgammon.agents.base_agent import BaseAgent
 from rlgammon.buffers import UniformBuffer
-from rlgammon.environment import BackgammonEnv
+from rlgammon.environment import NO_MOVE_NUMBER, BackgammonEnv
 from rlgammon.rlgammon_types import MovePart
 
 
@@ -55,7 +55,7 @@ class DQNAgent(BaseAgent):
 
         scores_per_move = []
 
-        if actions[0][1][0][0] == -2:
+        if actions[0][1][0][0] == -NO_MOVE_NUMBER:
             return []
         for board_after_move, moves in actions:
             value = self.evaluate_position(board_after_move)

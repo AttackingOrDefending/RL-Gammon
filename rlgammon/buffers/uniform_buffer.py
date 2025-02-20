@@ -44,7 +44,7 @@ class UniformBuffer(BaseBuffer):
         self.state_buffer[current_index] = state
         self.new_state_buffer[current_index] = next_state
         numpy_action = np.ones(self.max_action_shape, dtype=np.int8) * -2  # -1 is used for bear off
-        for i, (roll, move) in enumerate(action):
+        for i, (_, move) in enumerate(action):
             numpy_action[i * 2] = move[0]
             numpy_action[i * 2 + 1] = move[1]
         self.action_buffer[current_index] = numpy_action
