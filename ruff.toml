@@ -12,7 +12,8 @@ lint.ignore = [
     "S301",
     "NPY002",
     "D401",
-    "B019"
+    "B019",
+    "D205"
 ]
 
 # Line length to match specified requirement
