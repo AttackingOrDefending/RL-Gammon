@@ -2,6 +2,7 @@
 """A DQN agent for backgammon."""
 
 from functools import cache
+import os
 
 import torch
 from torch import nn
@@ -31,13 +32,18 @@ class DQN(nn.Module):
 
 class DQNAgent(BaseAgent):
     """A DQN agent for backgammon."""
+    TAU = 0.01
 
-    def __init__(self, filename: str = "") -> None:
+    def __init__(self, main_filename: str = "value.pt", target_filename: str = "target_value.pt") -> None:
         """Initialize the DQN agent."""
         super().__init__()
         self.value_network = DQN()
-        if filename:
-            self.value_network.load_state_dict(torch.load(filename))
+        self.target_network = DQN()
+        self.target_network.load_state_dict(self.value_network.state_dict())
+        if main_filename and os.path.exists(main_filename):
+            self.value_network.load_state_dict(torch.load(main_filename))
+        if target_filename and os.path.exists(target_filename):
+            self.target_network.load_state_dict(torch.load(target_filename))
 
     def choose_move(self, board: BackgammonEnv, dice: list[int]) -> list[tuple[int, MovePart]]:
         """Choose a move according to the DQN value network."""
@@ -72,6 +78,9 @@ class DQNAgent(BaseAgent):
         self.value_network.zero_grad()
         loss.backward()
         self.value_network.optimizer.step()
+
+        for target_param, param in zip(self.target_network.parameters(), self.value_network.parameters()):
+            target_param.data.copy_(self.TAU * param.data + (1 - self.TAU) * target_param.data)
 
     def clear_cache(self) -> None:
         """Clear the cache of the evaluate_position method."""
