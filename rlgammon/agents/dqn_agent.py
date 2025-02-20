@@ -58,7 +58,7 @@ class DQNAgent(BaseAgent):
         if actions[0][1][0][0] == -NO_MOVE_NUMBER:
             return []
         for board_after_move, moves in actions:
-            value = self.evaluate_position(board_after_move)
+            value = -self.evaluate_position(board_after_move)  # Minimize opponent's value
             scores_per_move.append((value, moves))
 
         return max(scores_per_move, key=lambda x: x[0])[1]

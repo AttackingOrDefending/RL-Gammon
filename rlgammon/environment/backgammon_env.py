@@ -192,7 +192,10 @@ class BackgammonEnv:
         for position, move in moves:
             if position not in unique_moves:
                 unique_moves[position] = (position, move)
-        return list(unique_moves.values())
+        moves = list(unique_moves.values())
+        for board, move in moves:
+            board.flip()
+        return moves
 
     def copy(self) -> BackgammonEnv:
         """Return a copy of the current environment."""
