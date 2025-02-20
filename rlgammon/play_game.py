@@ -1,8 +1,7 @@
 """Plays a game of backgammon."""
 
-from rlgammon.agents.random_agent import RandomAgent
-from rlgammon.environment import BackgammonEnv
 from rlgammon.agents.dqn_agent import DQNAgent
+from rlgammon.environment import BackgammonEnv
 
 
 def play_game() -> None:

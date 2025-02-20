@@ -2,7 +2,7 @@
 """A DQN agent for backgammon."""
 
 from functools import cache
-import os
+import pathlib
 
 import torch
 from torch import nn
@@ -32,6 +32,7 @@ class DQN(nn.Module):
 
 class DQNAgent(BaseAgent):
     """A DQN agent for backgammon."""
+
     TAU = 0.01
 
     def __init__(self, main_filename: str = "value.pt", target_filename: str = "target_value.pt") -> None:
@@ -40,9 +41,9 @@ class DQNAgent(BaseAgent):
         self.value_network = DQN()
         self.target_network = DQN()
         self.target_network.load_state_dict(self.value_network.state_dict())
-        if main_filename and os.path.exists(main_filename):
+        if main_filename and pathlib.Path(main_filename).exists():
             self.value_network.load_state_dict(torch.load(main_filename))
-        if target_filename and os.path.exists(target_filename):
+        if target_filename and pathlib.Path(target_filename).exists():
             self.target_network.load_state_dict(torch.load(target_filename))
         self.optimizer = torch.optim.RMSprop(self.value_network.parameters())
 
@@ -80,7 +81,7 @@ class DQNAgent(BaseAgent):
         loss.backward()
         self.optimizer.step()
 
-        for target_param, param in zip(self.target_network.parameters(), self.value_network.parameters()):
+        for target_param, param in zip(self.target_network.parameters(), self.value_network.parameters(), strict=False):
             target_param.data.copy_(self.TAU * param.data + (1 - self.TAU) * target_param.data)
 
     def clear_cache(self) -> None:
