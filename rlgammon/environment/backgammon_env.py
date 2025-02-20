@@ -172,7 +172,7 @@ class BackgammonEnv:
         """
         actions = self.get_legal_moves(dice)
         if not actions:
-            return [(self, [(-1, (-1, -1))])]
+            return [(self, [(-2, (-2, -2))])]
         moves = []
         for roll, action in actions:
             board_copy = self.copy()
@@ -180,7 +180,7 @@ class BackgammonEnv:
             next_dice = dice.copy()
             next_dice.remove(roll)
             next_moves = board_copy.get_all_complete_moves(next_dice)
-            if next_moves[0][1][0][0] != -1:
+            if next_moves[0][1][0][0] != -2:
                 moves += [(position, [(roll, action), *move]) for position, move in next_moves]
             else:
                 moves += [(position, [(roll, action)]) for position, _ in next_moves]

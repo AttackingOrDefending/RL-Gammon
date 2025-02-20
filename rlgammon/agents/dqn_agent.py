@@ -55,7 +55,7 @@ class DQNAgent(BaseAgent):
 
         scores_per_move = []
 
-        if actions[0][1][0][0] == -1:
+        if actions[0][1][0][0] == -2:
             return []
         for board_after_move, moves in actions:
             value = self.evaluate_position(board_after_move)
