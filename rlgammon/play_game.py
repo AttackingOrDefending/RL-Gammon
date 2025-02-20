@@ -2,13 +2,14 @@
 
 from rlgammon.agents.random_agent import RandomAgent
 from rlgammon.environment import BackgammonEnv
+from rlgammon.agents.dqn_agent import DQNAgent
 
 
 def play_game() -> None:
     """Plays a game of backgammon."""
     env = BackgammonEnv()
     env.reset()
-    agent = RandomAgent()
+    agent = DQNAgent()
     done = False
     trunc = False
     i = 0

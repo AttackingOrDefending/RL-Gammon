@@ -19,9 +19,9 @@ class DQN(nn.Module):
     def __init__(self) -> None:
         """Initialize the DQN value network."""
         super().__init__()
-        self.fc1 = nn.Linear(52, 128)
-        self.fc2 = nn.Linear(128, 128)
-        self.fc3 = nn.Linear(128, 1)
+        self.fc1 = nn.Linear(52, 128, dtype=torch.float16)
+        self.fc2 = nn.Linear(128, 128, dtype=torch.float16)
+        self.fc3 = nn.Linear(128, 1, dtype=torch.float16)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass through the DQN value network."""
@@ -44,6 +44,7 @@ class DQNAgent(BaseAgent):
             self.value_network.load_state_dict(torch.load(main_filename))
         if target_filename and os.path.exists(target_filename):
             self.target_network.load_state_dict(torch.load(target_filename))
+        self.optimizer = torch.optim.RMSprop(self.value_network.parameters())
 
     def choose_move(self, board: BackgammonEnv, dice: list[int]) -> list[tuple[int, MovePart]]:
         """Choose a move according to the DQN value network."""
@@ -62,22 +63,22 @@ class DQNAgent(BaseAgent):
         return max(scores_per_move, key=lambda x: x[0])[1]
 
     def train(self, replay_buffer: UniformBuffer) -> None:
-        """Train the DQN value network using the replay buffer."""
+        """Train the DQN value network using the replay buffer. We don't use actions as we are building a value network."""
         batch = replay_buffer.get_batch(32)
-        states = torch.tensor(batch["state"], dtype=torch.int8)
-        next_states = torch.tensor(batch["next_state"], dtype=torch.int8)
-        actions = torch.tensor(batch["action"], dtype=torch.int8)
-        rewards = torch.tensor(batch["reward"], dtype=torch.int8)
+        states = torch.tensor(batch["state"], dtype=torch.float16)
+        next_states = torch.tensor(batch["next_state"], dtype=torch.float16)
+        rewards = torch.tensor(batch["reward"], dtype=torch.float16)
         dones = torch.tensor(batch["done"], dtype=torch.bool)
 
-        values = self.value_network(states).gather(1, actions)
-        next_values = self.value_network(next_states).max(1)[0].detach()
-        target_values = rewards + 0.99 * next_values * ~dones
-        loss = nn.functional.mse_loss(values, target_values.unsqueeze(1))
+        current_q_values = self.value_network(states).squeeze()
+        next_q_values = self.target_network(next_states).squeeze()
 
-        self.value_network.zero_grad()
+        target_q_values = rewards + 0.99 * next_q_values * (1 - dones)
+        loss = nn.functional.mse_loss(current_q_values, target_q_values)
+
+        self.optimizer.zero_grad()
         loss.backward()
-        self.value_network.optimizer.step()
+        self.optimizer.step()
 
         for target_param, param in zip(self.target_network.parameters(), self.value_network.parameters()):
             target_param.data.copy_(self.TAU * param.data + (1 - self.TAU) * target_param.data)
@@ -89,5 +90,5 @@ class DQNAgent(BaseAgent):
     @cache
     def evaluate_position(self, board: BackgammonEnv) -> float:
         """Evaluate a position using the DQN value network."""
-        state = torch.tensor(board.get_input(), dtype=torch.int8)
+        state = torch.tensor(board.get_input(), dtype=torch.float16)
         return float(self.value_network(state))
