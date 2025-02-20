@@ -24,7 +24,6 @@ def play_game() -> None:
 
         print(f"Color: {'White' if i%2==1 else 'Black'} Roll: {dice}")
         actions = agent.choose_move(env, dice)
-        print(actions)
         for _, action in actions:
             reward, done, trunc, _ = env.step(action)
 

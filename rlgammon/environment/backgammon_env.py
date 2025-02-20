@@ -163,6 +163,36 @@ class BackgammonEnv:
             actions += [(roll, move) for move in actions_per_roll[roll]]
         return actions
 
+    def get_all_complete_moves(self, dice: list[int]) -> list[tuple[BackgammonEnv, list[tuple[int, MovePart]]]]:
+        """
+        Return all possible complete moves for the current player. Filters all unique positions using the hash.
+
+        :param dice: Iterable of dice values
+        :return: List of all possible complete moves
+        """
+        actions = self.get_legal_moves(dice)
+        if not actions:
+            return [(self, [(-1, (-1, -1))])]
+        moves = []
+        for roll, action in actions:
+            board_copy = self.copy()
+            board_copy.step(action)
+            next_dice = dice.copy()
+            next_dice.remove(roll)
+            next_moves = board_copy.get_all_complete_moves(next_dice)
+            if next_moves[0][1][0][0] != -1:
+                moves += [(position, [(roll, action)] + move) for position, move in next_moves]
+            else:
+                moves += [(position, [(roll, action)]) for position, _ in next_moves]
+
+        # Get unique positions using the hash.
+        unique_moves = {}
+        for position, move in moves:
+            if position not in unique_moves:
+                unique_moves[position] = (position, move)
+        moves = list(unique_moves.values())
+        return moves
+
     def copy(self) -> BackgammonEnv:
         """Return a copy of the current environment."""
         env = BackgammonEnv()
@@ -170,3 +200,9 @@ class BackgammonEnv:
         env.max_moves = self.max_moves
         env.moves = self.moves
         return env
+
+    def __hash__(self):
+        return hash(tuple(self.get_input().tolist()))
+
+    def __eq__(self, other):
+        return np.array_equal(self.get_input(), other.get_input())
