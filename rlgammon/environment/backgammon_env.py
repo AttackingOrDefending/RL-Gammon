@@ -193,7 +193,7 @@ class BackgammonEnv:
             if position not in unique_moves:
                 unique_moves[position] = (position, move)
         moves = list(unique_moves.values())
-        for board, move in moves:
+        for board, _ in moves:
             board.flip()
         return moves
 
