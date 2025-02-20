@@ -1,39 +1,40 @@
+# mypy: disable-error-code="no-any-return, no-untyped-call, union-attr, operator"
 """A DQN agent for backgammon."""
 
 from functools import cache
 
+import torch
+from torch import nn
+
 from rlgammon.agents.base_agent import BaseAgent
+from rlgammon.buffers import UniformBuffer
 from rlgammon.environment import BackgammonEnv
 from rlgammon.rlgammon_types import MovePart
-from rlgammon.buffers import UniformBuffer
-
-from torch import nn
-import torch
 
 
 class DQN(nn.Module):
     """A simple DQN value network for backgammon."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the DQN value network."""
-        super(DQN, self).__init__()
+        super().__init__()
         self.fc1 = nn.Linear(52, 128)
         self.fc2 = nn.Linear(128, 128)
         self.fc3 = nn.Linear(128, 1)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass through the DQN value network."""
         x = nn.functional.relu(self.fc1(x))
         x = nn.functional.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
+        return self.fc3(x)
 
 
 class DQNAgent(BaseAgent):
     """A DQN agent for backgammon."""
-    def __init__(self, filename: str = None):
+
+    def __init__(self, filename: str = "") -> None:
         """Initialize the DQN agent."""
-        super(DQNAgent, self).__init__()
+        super().__init__()
         self.value_network = DQN()
         if filename:
             self.value_network.load_state_dict(torch.load(filename))
@@ -52,10 +53,9 @@ class DQNAgent(BaseAgent):
             value = self.evaluate_position(board_after_move)
             scores_per_move.append((value, moves))
 
-        best_moves = max(scores_per_move, key=lambda x: x[0])[1]
-        return best_moves
+        return max(scores_per_move, key=lambda x: x[0])[1]
 
-    def train(self, replay_buffer: UniformBuffer):
+    def train(self, replay_buffer: UniformBuffer) -> None:
         """Train the DQN value network using the replay buffer."""
         batch = replay_buffer.get_batch(32)
         states = torch.tensor(batch["state"], dtype=torch.int8)
@@ -73,7 +73,7 @@ class DQNAgent(BaseAgent):
         loss.backward()
         self.value_network.optimizer.step()
 
-    def clear_cache(self):
+    def clear_cache(self) -> None:
         """Clear the cache of the evaluate_position method."""
         self.evaluate_position.cache_clear()
 
@@ -81,4 +81,4 @@ class DQNAgent(BaseAgent):
     def evaluate_position(self, board: BackgammonEnv) -> float:
         """Evaluate a position using the DQN value network."""
         state = torch.tensor(board.get_input(), dtype=torch.int8)
-        return self.value_network(state)
+        return float(self.value_network(state))

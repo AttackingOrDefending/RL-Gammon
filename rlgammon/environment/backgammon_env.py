@@ -181,7 +181,7 @@ class BackgammonEnv:
             next_dice.remove(roll)
             next_moves = board_copy.get_all_complete_moves(next_dice)
             if next_moves[0][1][0][0] != -1:
-                moves += [(position, [(roll, action)] + move) for position, move in next_moves]
+                moves += [(position, [(roll, action), *move]) for position, move in next_moves]
             else:
                 moves += [(position, [(roll, action)]) for position, _ in next_moves]
 
@@ -190,8 +190,7 @@ class BackgammonEnv:
         for position, move in moves:
             if position not in unique_moves:
                 unique_moves[position] = (position, move)
-        moves = list(unique_moves.values())
-        return moves
+        return list(unique_moves.values())
 
     def copy(self) -> BackgammonEnv:
         """Return a copy of the current environment."""
@@ -201,8 +200,10 @@ class BackgammonEnv:
         env.moves = self.moves
         return env
 
-    def __hash__(self):
-        return hash(tuple(self.get_input().tolist()))
+    def __hash__(self) -> int:
+        """Return the hash of the input array."""
+        return hash(tuple(self.get_input().tolist()))  # type: ignore[arg-type]
 
-    def __eq__(self, other):
+    def __eq__(self, other: BackgammonEnv) -> bool:  # type: ignore[override]
+        """Return if the input arrays are equal."""
         return np.array_equal(self.get_input(), other.get_input())
