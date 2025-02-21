@@ -1,4 +1,4 @@
-# mypy: disable-error-code="no-any-return, no-untyped-call, union-attr, operator"
+# mypy: disable-error-code="no-any-return, no-untyped-call, union-attr, operator, assignment"
 """A DQN agent for backgammon."""
 
 from functools import cache
@@ -10,8 +10,8 @@ from torch import nn
 from rlgammon.agents.base_agent import BaseAgent
 from rlgammon.buffers import BaseBuffer
 from rlgammon.environment import NO_MOVE_NUMBER, BackgammonEnv
-from rlgammon.rlgammon_types import MovePart
 from rlgammon.exploration import BaseExploration
+from rlgammon.rlgammon_types import MovePart
 
 
 class DQN(nn.Module):
@@ -98,10 +98,10 @@ class DQNAgent(BaseAgent):
         torch.nn.utils.clip_grad_norm_(self.value_network.parameters(), self.max_grad_norm)
         self.optimizer.step()
 
-        for target_param, param in zip(self.target_network.parameters(), self.value_network.parameters(), strict=False):
+        for target_param, param in zip(self.target_network.parameters(), self.value_network.parameters(), strict=True):
             target_param.data.copy_(self.tau * param.data + (1 - self.tau) * target_param.data)
         # Copy batch norm layer stats as well as they are not part of the parameters.
-        for target_param, param in zip(self.target_network.named_buffers(), self.value_network.named_buffers()):
+        for target_param, param in zip(self.target_network.named_buffers(), self.value_network.named_buffers(), strict=True):
             if "running_mean" in target_param[0]:
                 target_param[1].copy_(param[1])
             if "running_var" in target_param[0]:
@@ -110,7 +110,8 @@ class DQNAgent(BaseAgent):
         # Clear the cache of the evaluate_position method as we have updated the model.
         self.clear_cache()
 
-    def save(self, main_filename: str = None, target_filename: str = None, optimizer_filename: str = None) -> None:
+    def save(self, main_filename: str | None = None, target_filename: str | None = None,
+             optimizer_filename: str | None = None) -> None:
         """Save the DQN agent."""
         if main_filename is None:
             main_filename = self.main_filename

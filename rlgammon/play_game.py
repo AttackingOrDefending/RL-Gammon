@@ -2,24 +2,32 @@
 
 from rlgammon.agents.dqn_agent import DQNAgent
 from rlgammon.environment import BackgammonEnv
+from rlgammon.exploration import EpsilonGreedyExploration
+
+
+def print_env(env: BackgammonEnv, i: int) -> None:
+    """Prints the environment."""
+    if i % 2 == 1:
+        env.render(mode="text")
+    else:
+        # The flips are done to print the board from the perspective of the white player.
+        env.flip()
+        env.render(mode="text")
+        env.flip()
 
 
 def play_game() -> None:
     """Plays a game of backgammon."""
     env = BackgammonEnv()
     env.reset()
-    agent = DQNAgent()
+    exploration = EpsilonGreedyExploration(0.5, 0.05, 0.99, 100)
+    agent = DQNAgent(exploration)
     done = False
     trunc = False
     i = 0
     while not done and not trunc:
         i += 1
-        if i % 2 == 1:
-            env.render(mode="text")
-        else:
-            env.flip()
-            env.render(mode="text")
-            env.flip()
+        print_env(env, i)
         dice = env.roll_dice()
 
         print(f"Color: {'White' if i%2==1 else 'Black'} Roll: {dice}")
@@ -27,12 +35,12 @@ def play_game() -> None:
         for _, action in actions:
             reward, done, trunc, _ = env.step(action)
 
-            env.render(mode="text")
             print(f"Reward: {reward}")
 
         if not done and not trunc:
             env.flip()
-    env.render(mode="text")
+        exploration.update()
+    print_env(env, i)
 
 
 if __name__ == "__main__":

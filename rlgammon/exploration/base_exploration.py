@@ -1,6 +1,7 @@
 """Base class for all exploration algorithms."""
 
 from abc import abstractmethod
+
 from rlgammon.rlgammon_types import MovePart
 
 
@@ -8,7 +9,8 @@ class BaseExploration:
     """Base class for all exploration algorithms."""
 
     @abstractmethod
-    def explore(self, action: list[tuple[int, MovePart]], valid_actions: list[list[tuple[int, MovePart]]]) -> list[tuple[int, MovePart]]:
+    def explore(self, action: list[tuple[int, MovePart]], valid_actions: list[list[tuple[int, MovePart]]],
+                ) -> list[tuple[int, MovePart]]:
         """
         Method to conduct exploration.
 
