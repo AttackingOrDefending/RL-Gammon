@@ -10,7 +10,6 @@ from torch import nn
 from rlgammon.agents.base_agent import BaseAgent
 from rlgammon.buffers import BaseBuffer
 from rlgammon.environment import NO_MOVE_NUMBER, BackgammonEnv
-from rlgammon.exploration import BaseExploration
 from rlgammon.rlgammon_types import MovePart
 
 
@@ -34,12 +33,11 @@ class DQN(nn.Module):
 class DQNAgent(BaseAgent):
     """A DQN agent for backgammon."""
 
-    def __init__(self, exploration: BaseExploration, main_filename: str = "value.pt",
+    def __init__(self, main_filename: str = "value.pt",
                  target_filename: str = "target_value.pt", optimizer_filename: str = "optimizer.pt", lr: float = 0.001,
                  tau: float = 0.01, batch_size: int = 64, gamma: float = 0.99, max_grad_norm: float = 10) -> None:
         """Initialize the DQN agent."""
         super().__init__()
-        self.exploration = exploration
         self.main_filename = main_filename
         self.target_filename = target_filename
         self.optimizer_filename = optimizer_filename
@@ -73,9 +71,7 @@ class DQNAgent(BaseAgent):
             value = -self.evaluate_position(board_after_move)  # Minimize opponent's value
             scores_per_move.append((value, moves))
 
-        best_move = max(scores_per_move, key=lambda x: x[0])[1]
-
-        return self.exploration.explore(best_move, [move for _, move in actions])
+        return max(scores_per_move, key=lambda x: x[0])[1]
 
     def train(self, replay_buffer: BaseBuffer) -> None:
         """Train the DQN value network using the replay buffer. We don't use actions as we are building a value network."""
