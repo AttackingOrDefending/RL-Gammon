@@ -187,12 +187,6 @@ class BackgammonEnv:
             else:
                 moves += [(position, [(roll, action)]) for position, _ in next_moves]
 
-        # Get unique positions using the hash.
-        unique_moves = {}
-        for position, move in moves:
-            if position not in unique_moves:
-                unique_moves[position] = (position, move)
-        moves = list(unique_moves.values())
         for board, _ in moves:
             board.flip()
         return moves
@@ -204,11 +198,3 @@ class BackgammonEnv:
         env.max_moves = self.max_moves
         env.moves = self.moves
         return env
-
-    def __hash__(self) -> int:
-        """Return the hash of the input array."""
-        return hash(tuple(self.get_input().tolist()))  # type: ignore[arg-type]
-
-    def __eq__(self, other: BackgammonEnv) -> bool:  # type: ignore[override]
-        """Return if the input arrays are equal."""
-        return np.array_equal(self.get_input(), other.get_input())
