@@ -53,6 +53,16 @@ class UniformBuffer(BaseBuffer):
 
         self.update_counter += 1
 
+    def has_element_count(self, element_count: int) -> bool:
+        """
+        TODO
+
+        :param element_count:
+        :return:
+        """
+
+        return self.update_counter > element_count
+
     def get_batch(self, batch_size: int) -> BufferBatch:
         """
         Get a batch of data from the buffer making a map with random indexes for the numpy arrays.

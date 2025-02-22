@@ -22,6 +22,14 @@ class BaseBuffer:
         """
         raise NotImplementedError
 
+    @abstractmethod
+    def has_element_count(self, element_count: int) -> bool:
+        """
+        TODO
+
+        :param element_count:
+        :return:
+        """
 
     @abstractmethod
     def get_batch(self, batch_size: int) -> BufferBatch:

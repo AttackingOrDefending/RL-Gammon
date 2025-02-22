@@ -1,8 +1,13 @@
 from typing import Any
 
+from rlgammon.buffers.buffer_types import PossibleBuffers
+from rlgammon.exploration.exploration_types import PossibleExploration
 
 REQUIRED_PARAMETERS: list[tuple[str, type]] = [
-    ("episodes", int)
+    ("episodes", int),
+    ("batch_size", int),
+    ("buffer", PossibleBuffers),
+    ("exploration", PossibleExploration),
 ]
 
 

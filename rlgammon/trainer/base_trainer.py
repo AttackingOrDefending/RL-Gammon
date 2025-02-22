@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Any
 
-from rlgammon.agents.base_agent import BaseAgent
+from rlgammon.agents.trainable_agent import TrainableAgent
 
 
 class BaseTrainer:
@@ -11,7 +11,7 @@ class BaseTrainer:
         self.parameters: dict[str, Any] = {}
 
     @abstractmethod
-    def train(self, agent: BaseAgent) -> None:
+    def train(self, agent: TrainableAgent) -> None:
         """TODO"""
         raise NotImplementedError
 
