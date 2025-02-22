@@ -3,14 +3,14 @@
 from abc import abstractmethod
 
 from rlgammon.buffers.buffer_types import BufferBatch
-from rlgammon.rlgammon_types import Input, MovePart
+from rlgammon.rlgammon_types import Input, MoveList
 
 
 class BaseBuffer:
     """Base class for all buffers used for training."""
 
     @abstractmethod
-    def record(self, state: Input, next_state: Input, action: MovePart, reward: int, done: bool) -> None:
+    def record(self, state: Input, next_state: Input, action: MoveList, reward: int, done: bool) -> None:
         """
         Store the environment observation into the buffer.
 

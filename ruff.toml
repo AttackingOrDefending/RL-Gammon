@@ -2,17 +2,20 @@
 lint.select = ["ALL"]
 
 lint.ignore = [
+    "B019",
+    "D205",
+    "D401",
     "FBT001",
     "FBT002",
     "FBT003",
+    "NPY002",
+    "PLR0913",
+    "S301",
     "S311",
+    "SLF001",
     "T201",
     "TC001",
     "TC003",
-    "S301",
-    "NPY002",
-    "D401",
-    "D205"
 ]
 
 # Line length to match specified requirement

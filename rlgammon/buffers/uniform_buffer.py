@@ -8,13 +8,13 @@ import numpy as np
 
 from rlgammon.buffers.base_buffer import BaseBuffer
 from rlgammon.buffers.buffer_types import BufferBatch
-from rlgammon.rlgammon_types import Input, MovePart
+from rlgammon.rlgammon_types import Input, MoveList
 
 
 class UniformBuffer(BaseBuffer):
     """Class implementing a buffer with uniform sampling."""
 
-    def __init__(self, observation_shape: tuple[int, ...], action_shape: int, capacity: int = 10_000) -> None:
+    def __init__(self, observation_shape: tuple[int, ...], max_action_shape: int, capacity: int = 10_000) -> None:
         """
         Constructor for the UniformBuffer, that initializes the counter, and all the numpy arrays for storing data.
 
@@ -22,14 +22,15 @@ class UniformBuffer(BaseBuffer):
         """
         self.capacity = capacity
         self.update_counter = 0
+        self.max_action_shape = max_action_shape
 
         self.state_buffer = np.zeros(shape=(self.capacity, *observation_shape), dtype=np.int8)
         self.new_state_buffer = np.zeros(shape=(self.capacity, *observation_shape), dtype=np.int8)
-        self.action_buffer = np.zeros(shape=(self.capacity, action_shape), dtype=np.int8)
+        self.action_buffer = np.zeros(shape=(self.capacity, max_action_shape), dtype=np.int8)
         self.reward_buffer = np.zeros(shape=self.capacity, dtype=np.int8)
         self.done_buffer = np.zeros(shape=self.capacity, dtype=np.bool)
 
-    def record(self, state: Input, next_state: Input, action: MovePart, reward: int, done: bool) -> None:
+    def record(self, state: Input, next_state: Input, action: MoveList, reward: int, done: bool) -> None:
         """
         Store the environment observation into the buffer.
 
@@ -42,7 +43,11 @@ class UniformBuffer(BaseBuffer):
         current_index = self.update_counter % self.capacity
         self.state_buffer[current_index] = state
         self.new_state_buffer[current_index] = next_state
-        self.action_buffer[current_index] = action
+        numpy_action = np.ones(self.max_action_shape, dtype=np.int8) * -2  # -1 is used for bear off
+        for i, (_, move) in enumerate(action):
+            numpy_action[i * 2] = move[0]
+            numpy_action[i * 2 + 1] = move[1]
+        self.action_buffer[current_index] = numpy_action
         self.reward_buffer[current_index] = reward
         self.done_buffer[current_index] = done
 
