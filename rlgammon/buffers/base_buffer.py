@@ -10,7 +10,7 @@ class BaseBuffer:
     """Base class for all buffers used for training."""
 
     @abstractmethod
-    def record(self, state: Input, next_state: Input, action: MoveList, reward: int, done: bool) -> None:
+    def record(self, state: Input, next_state: Input, action: MoveList, reward: float, done: bool) -> None:
         """
         Store the environment observation into the buffer.
 

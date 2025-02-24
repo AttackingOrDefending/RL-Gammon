@@ -8,6 +8,7 @@ from rlgammon.environment import BackgammonEnv
 from rlgammon.exploration.base_exploration import BaseExploration
 from rlgammon.exploration.epsilon_greedy_exploration import EpsilonGreedyExploration
 from rlgammon.exploration.exploration_types import PossibleExploration
+from rlgammon.rlgammon_types import Input, MoveList
 from rlgammon.trainer.base_trainer import BaseTrainer
 from rlgammon.trainer.trainer_errors.trainer_errors import NoParametersError, WrongExplorationTypeError, \
     WrongBufferTypeError
@@ -59,6 +60,22 @@ class StepTrainer(BaseTrainer):
 
         return explorer
 
+    def finalize_data(self, episode_buffer: list[tuple[Input, Input, MoveList, float, bool, int]],
+                      losing_player: int, buffer: BaseBuffer) -> None:
+        """
+        TODO
+
+        :param episode_buffer:
+        :param losing_player:
+        :param buffer:
+        """
+
+        for i, (state, next_state, action, reward, done, player) in enumerate(reversed(episode_buffer)):
+            if player == losing_player:
+                reward *= -1
+            reward *= self.parameters["decay"] ** i
+            buffer.record(state, next_state, action, reward, done)
+
     def train(self, agent: TrainableAgent) -> None:
         if not self.is_ready_for_training():
             raise NoParametersError
@@ -70,10 +87,11 @@ class StepTrainer(BaseTrainer):
             env.reset()
             done = False
             trunc = False
+            episode_buffer = []
             while not done and not trunc:
                 dice = env.roll_dice()
                 if explorer.should_explore():
-                    actions = explorer.explore(env.get_all_complete_moves(dice))
+                    actions = explorer.explore(env.get_all_complete_moves(dice)) # TODO CHECK MOVE STRUCTURE
                 else:
                     actions = agent.choose_move(env, dice)
 
@@ -82,9 +100,8 @@ class StepTrainer(BaseTrainer):
                 for _, action in actions:
                     reward, done, trunc, _ = env.step(action)
 
-                    next_state = env.get_input()
-                    buffer.record(state, next_state, action, reward, done)
-                    state = next_state
+                next_state = env.get_input()
+                episode_buffer.append((state, next_state, actions, reward, done, 1)) # TODO ADD CURRENT PLAYER
 
                 # Only train agent when at least a batch of data in the buffer
                 if buffer.has_element_count(self.parameters["batch_size"]):

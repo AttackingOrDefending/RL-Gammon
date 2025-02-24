@@ -2,6 +2,7 @@
 
 from abc import abstractmethod
 
+from rlgammon.environment import BackgammonEnv
 from rlgammon.rlgammon_types import MovePart
 
 
@@ -18,7 +19,7 @@ class BaseExploration:
         raise NotImplementedError()
 
     @abstractmethod
-    def explore(self, valid_actions: list[list[tuple[int, MovePart]]],) -> list[tuple[int, MovePart]]:
+    def explore(self, valid_actions: list[tuple[BackgammonEnv, list[tuple[int, MovePart]]]]) -> list[tuple[int, MovePart]]:
         """
         Method to conduct exploration.
 

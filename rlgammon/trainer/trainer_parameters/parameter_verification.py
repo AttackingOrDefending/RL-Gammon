@@ -8,6 +8,7 @@ REQUIRED_PARAMETERS: list[tuple[str, type]] = [
     ("batch_size", int),
     ("buffer", PossibleBuffers),
     ("exploration", PossibleExploration),
+    ("decay", float)
 ]
 
 

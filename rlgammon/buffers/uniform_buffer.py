@@ -30,7 +30,7 @@ class UniformBuffer(BaseBuffer):
         self.reward_buffer = np.zeros(shape=self.capacity, dtype=np.int8)
         self.done_buffer = np.zeros(shape=self.capacity, dtype=np.bool)
 
-    def record(self, state: Input, next_state: Input, action: MoveList, reward: int, done: bool) -> None:
+    def record(self, state: Input, next_state: Input, action: MoveList, reward: float, done: bool) -> None:
         """
         Store the environment observation into the buffer.
 

@@ -2,6 +2,8 @@ from abc import abstractmethod
 from typing import Any
 
 from rlgammon.agents.trainable_agent import TrainableAgent
+from rlgammon.buffers import BaseBuffer
+from rlgammon.rlgammon_types import Input, MoveList
 
 
 class BaseTrainer:
@@ -9,6 +11,18 @@ class BaseTrainer:
     def __init__(self) -> None:
         """TODO"""
         self.parameters: dict[str, Any] = {}
+
+    @abstractmethod
+    def finalize_data(self, episode_buffer: list[tuple[Input, Input, MoveList, float, bool, int]],
+                      losing_player: int, buffer: BaseBuffer) -> None:
+        """
+        TODO
+
+        :param episode_buffer:
+        :param losing_player:
+        :param buffer:
+        """
+        raise NotImplementedError()
 
     @abstractmethod
     def train(self, agent: TrainableAgent) -> None:
