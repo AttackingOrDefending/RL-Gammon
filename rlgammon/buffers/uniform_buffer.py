@@ -55,10 +55,11 @@ class UniformBuffer(BaseBuffer):
 
     def has_element_count(self, element_count: int) -> bool:
         """
-        TODO
+        Method to check if the buffer contains at least the specified amount of elements.
+        By comparing the update counter with the argument
 
-        :param element_count:
-        :return:
+        :param element_count: element count to check
+        :return: boolean, indicating if the buffer has at least the specified element count
         """
 
         return self.update_counter > element_count

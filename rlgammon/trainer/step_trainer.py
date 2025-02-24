@@ -8,15 +8,11 @@ from rlgammon.environment import BackgammonEnv
 from rlgammon.exploration.base_exploration import BaseExploration
 from rlgammon.exploration.epsilon_greedy_exploration import EpsilonGreedyExploration
 from rlgammon.exploration.exploration_types import PossibleExploration
-from rlgammon.rlgammon_types import Input, MoveList
 from rlgammon.trainer.base_trainer import BaseTrainer
 from rlgammon.trainer.trainer_errors.trainer_errors import NoParametersError, WrongExplorationTypeError, \
     WrongBufferTypeError
 
 from rlgammon.trainer.trainer_parameters.parameter_verification import are_parameters_valid
-
-
-# TODO Add Agent to training loop
 
 
 class StepTrainer(BaseTrainer):
@@ -30,58 +26,18 @@ class StepTrainer(BaseTrainer):
         else:
             raise ValueError("Invalid parameters")
 
-    def create_buffer(self) -> BaseBuffer:
-        """
-        TODO
-
-        :return:
-        """
-
-        if self.parameters["buffer"] == PossibleBuffers.UNIFORM:
-            # TODO FIX !!!
-            buffer = UniformBuffer((100, 100), 10)
-        else:
-            raise WrongBufferTypeError()
-
-        return buffer
-
-    def create_explorer(self) -> BaseExploration:
-        """
-        TODO
-
-        :return:
-        """
-
-        if self.parameters["exploration"] == PossibleExploration.EPSILON_GREEDY:
-            explorer = EpsilonGreedyExploration(self.parameters["start_epsilon"], self.parameters["end_epsilon"],
-                                                self.parameters["update_decay"], self.parameters["steps_per_update"])
-        else:
-            raise WrongExplorationTypeError()
-
-        return explorer
-
-    def finalize_data(self, episode_buffer: list[tuple[Input, Input, MoveList, float, bool, int]],
-                      losing_player: int, buffer: BaseBuffer) -> None:
-        """
-        TODO
-
-        :param episode_buffer:
-        :param losing_player:
-        :param buffer:
-        """
-
-        for i, (state, next_state, action, reward, done, player) in enumerate(reversed(episode_buffer)):
-            if player == losing_player:
-                reward *= -1
-            reward *= self.parameters["decay"] ** i
-            buffer.record(state, next_state, action, reward, done)
-
     def train(self, agent: TrainableAgent) -> None:
+        """
+        Train the provided agent with the parameters provided at the Trainer constructor.
+
+        :param agent: agent to be trained
+        """
+
         if not self.is_ready_for_training():
             raise NoParametersError
 
-        buffer = self.create_buffer()
-        explorer = self.create_explorer()
+        buffer = self.create_buffer_from_parameters()
+        explorer = self.create_explorer_from_parameters()
         env = BackgammonEnv()
         for episode in range(self.parameters["episodes"]):
             env.reset()
@@ -91,7 +47,7 @@ class StepTrainer(BaseTrainer):
             while not done and not trunc:
                 dice = env.roll_dice()
                 if explorer.should_explore():
-                    actions = explorer.explore(env.get_all_complete_moves(dice)) # TODO CHECK MOVE STRUCTURE
+                    actions = explorer.explore(env.get_all_complete_moves(dice))
                 else:
                     actions = agent.choose_move(env, dice)
 
@@ -101,7 +57,7 @@ class StepTrainer(BaseTrainer):
                     reward, done, trunc, _ = env.step(action)
 
                 next_state = env.get_input()
-                episode_buffer.append((state, next_state, actions, reward, done, 1)) # TODO ADD CURRENT PLAYER
+                episode_buffer.append((state, next_state, actions, reward, done, env.current_player))
 
                 # Only train agent when at least a batch of data in the buffer
                 if buffer.has_element_count(self.parameters["batch_size"]):

@@ -1,28 +1,71 @@
+"""Base trainer class for all trainers used for training rl-algorithms."""
+
 from abc import abstractmethod
 from typing import Any
 
 from rlgammon.agents.trainable_agent import TrainableAgent
-from rlgammon.buffers import BaseBuffer
+from rlgammon.buffers import BaseBuffer, UniformBuffer
+from rlgammon.buffers.buffer_types import PossibleBuffers
+from rlgammon.exploration import BaseExploration, EpsilonGreedyExploration
+from rlgammon.exploration.exploration_types import PossibleExploration
 from rlgammon.rlgammon_types import Input, MoveList
+from rlgammon.trainer.trainer_errors.trainer_errors import WrongExplorationTypeError, WrongBufferTypeError
 
 
 class BaseTrainer:
-    """TODO"""
+    """Base trainer class for all trainers used for training rl-algorithms."""
+
     def __init__(self) -> None:
-        """TODO"""
+        """Constructor for the BaseTrainer containing the parameters for the trainer."""
         self.parameters: dict[str, Any] = {}
 
-    @abstractmethod
     def finalize_data(self, episode_buffer: list[tuple[Input, Input, MoveList, float, bool, int]],
                       losing_player: int, buffer: BaseBuffer) -> None:
         """
-        TODO
+        Finalize the data by updating the rewards for each time step
+        to take into account the loss of value of rewards closer to the start of the game, and
+        to set the reward negative for the losing player.
 
-        :param episode_buffer:
-        :param losing_player:
-        :param buffer:
+        :param episode_buffer: the data from the completed episode
+        :param losing_player: the player who lost the game
+        :param buffer: buffer to which to add the data
         """
-        raise NotImplementedError()
+
+        for i, (state, next_state, action, reward, done, player) in enumerate(reversed(episode_buffer)):
+            if player == losing_player:
+                reward *= -1
+            reward *= self.parameters["decay"] ** i
+            buffer.record(state, next_state, action, reward, done)
+
+    def create_buffer_from_parameters(self) -> BaseBuffer:
+        """
+        Create a new buffer of the type provided in the parameters
+
+        :return: buffer of the type provided in the parameters
+        """
+
+        if self.parameters["buffer"] == PossibleBuffers.UNIFORM:
+            # TODO FIX !!!
+            buffer = UniformBuffer((100, 100), 10)
+        else:
+            raise WrongBufferTypeError()
+
+        return buffer
+
+    def create_explorer_from_parameters(self) -> BaseExploration:
+        """
+        Create a new exploration algorithm of the type provided in the parameters
+
+        :return: exploration algorithm of the type provided in the parameters
+        """
+
+        if self.parameters["exploration"] == PossibleExploration.EPSILON_GREEDY:
+            explorer = EpsilonGreedyExploration(self.parameters["start_epsilon"], self.parameters["end_epsilon"],
+                                                self.parameters["update_decay"], self.parameters["steps_per_update"])
+        else:
+            raise WrongExplorationTypeError()
+
+        return explorer
 
     @abstractmethod
     def train(self, agent: TrainableAgent) -> None:

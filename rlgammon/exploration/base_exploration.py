@@ -12,11 +12,11 @@ class BaseExploration:
     @abstractmethod
     def should_explore(self) -> bool:
         """
-        TODO
+        Method to determine whether to explore this time step.
 
-        :return:
+        :return: boolean, indicating whether to explore this time step
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     @abstractmethod
     def explore(self, valid_actions: list[tuple[BackgammonEnv, list[tuple[int, MovePart]]]]) -> list[tuple[int, MovePart]]:

@@ -29,6 +29,12 @@ class EpsilonGreedyExploration(BaseExploration):
         self.current_epsilon = self.start_epsilon
 
     def should_explore(self) -> bool:
+        """Checks whether a random value is greater than the current epsilon value
+        to determine whether to explore this time step.
+        If greater, than epsilon, then explore.
+
+        :return: boolean, indicating whether to explore this time step
+        """
         return random.random() > self.current_epsilon
 
     def explore(self, valid_actions: list[tuple[BackgammonEnv, list[tuple[int, MovePart]]]]) -> list[tuple[int, MovePart]]:

@@ -9,6 +9,6 @@ BufferBatch = dict[str, NDArray[Any]]
 
 
 class PossibleBuffers(Enum):
-    """TODO"""
+    """Enumeration of possible buffer types."""
 
     UNIFORM = "U"

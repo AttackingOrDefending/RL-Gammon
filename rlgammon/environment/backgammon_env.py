@@ -35,12 +35,14 @@ class BackgammonEnv:
         - backgammon: New Backgammon game instance.
         - max_moves: Set to 500 moves.
         - moves: Initialize move counter to 0.
+        - current_player: the current player's orientation of board
         - _cache: Dictionary used for caching computed move combinations.
         """
         super().__init__()
         self.backgammon: bg.Backgammon = bg.Backgammon()
         self.max_moves: int = 500
         self.moves: int = 0
+        self.current_player = 1
         self._cache: dict[
             tuple[int, tuple[int, ...]] | tuple[int, int, int],
             list[tuple[BackgammonEnv, list[tuple[int, MovePart]]]],
@@ -105,6 +107,7 @@ class BackgammonEnv:
         :return: New board state after flipping.
         """
         self.backgammon.flip()
+        self.current_player *= -1
         return self.get_input()
 
     def step(self, action: MovePart) -> tuple[float, bool, bool, dict[str, Any]]:
