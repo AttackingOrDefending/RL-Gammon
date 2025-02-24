@@ -15,7 +15,7 @@ Color = tuple[int, int, int]
 Board = NDArray[np.int8]
 Bar = NDArray[np.int8]
 Off = NDArray[np.int8]
-Input = NDArray[np.int8]
+Input = NDArray[np.int8] | NDArray[np.float16]
 
 
 class Orientation(Enum):

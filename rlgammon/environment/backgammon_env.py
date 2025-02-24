@@ -10,7 +10,8 @@ import numpy as np
 
 from rlgammon.environment import backgammon as bg, human_renderer
 from rlgammon.environment.text_renderer import text_render
-from rlgammon.rlgammon_types import Board, Input, MoveList, MovePart
+from rlgammon.environment.utils.normalize_input import cell_stats, normalize_input
+from rlgammon.rlgammon_types import Input, MoveList, MovePart
 
 NO_MOVE_NUMBER = -2
 
@@ -45,10 +46,11 @@ class BackgammonEnv:
             list[tuple[BackgammonEnv, list[tuple[int, MovePart]]]],
         ] = {}
 
-    def get_input(self) -> Input:
+    def get_input(self, get_normalized: bool = False) -> Input:
         """
         Return the input for the current player.
 
+        :param get_normalized: Whether to normalize the input.
         :return: Array containing board state, bar, and off information.
         """
         board = self.backgammon.board  # shape (24,)
@@ -63,10 +65,12 @@ class BackgammonEnv:
         # Directly set bar and off.
         res[48:50] = self.backgammon.bar
         res[50:52] = self.backgammon.off
+        if get_normalized:
+            return normalize_input(res, cell_stats)
         return res
 
     def reset(self, seed: int | None = None,
-              options: dict[str, Any] | None = None) -> tuple[Board, dict[str, Any]]:
+              options: dict[str, Any] | None = None) -> tuple[Input, dict[str, Any]]:
         """
         Reset the environment.
 
@@ -94,7 +98,7 @@ class BackgammonEnv:
             return rolls * 2
         return rolls
 
-    def flip(self) -> Board:
+    def flip(self) -> Input:
         """
         Flip the board.
 
