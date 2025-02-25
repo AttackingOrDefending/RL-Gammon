@@ -1,6 +1,6 @@
 """Plays a game of backgammon."""
 
-from rlgammon.agents.dqn_agent import DQNAgent
+from rlgammon.agents.random_agent import RandomAgent
 from rlgammon.environment import BackgammonEnv
 from rlgammon.exploration import EpsilonGreedyExploration
 
@@ -21,16 +21,10 @@ def play_game() -> None:
     env = BackgammonEnv()
     env.reset()
     exploration = EpsilonGreedyExploration(0.5, 0.05, 0.99, 100)
-    agent = DQNAgent()
+    agent = RandomAgent()
     done = False
     trunc = False
     i = 0
-    import cProfile
-    import io
-    import pstats
-    from pstats import SortKey
-    pr = cProfile.Profile()
-    pr.enable()
     while not done and not trunc:
         i += 1
         print_env(env, i)
@@ -48,12 +42,6 @@ def play_game() -> None:
             env.flip()
         exploration.update()
     print_env(env, i)
-    pr.disable()
-    s = io.StringIO()
-    sortby = SortKey.CUMULATIVE
-    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-    ps.print_stats()
-    print(s.getvalue())
 
 
 if __name__ == "__main__":
