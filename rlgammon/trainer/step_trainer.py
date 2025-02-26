@@ -1,17 +1,10 @@
 import json
 
 from rlgammon.agents.trainable_agent import TrainableAgent
-from rlgammon.buffers.base_buffer import BaseBuffer
-from rlgammon.buffers.buffer_types import PossibleBuffers
-from rlgammon.buffers.uniform_buffer import UniformBuffer
 from rlgammon.environment import BackgammonEnv
-from rlgammon.exploration.base_exploration import BaseExploration
-from rlgammon.exploration.epsilon_greedy_exploration import EpsilonGreedyExploration
-from rlgammon.exploration.exploration_types import PossibleExploration
-from rlgammon.rlgammon_types import Input, MoveList, MovePart
+from rlgammon.rlgammon_types import Input, MoveList
 from rlgammon.trainer.base_trainer import BaseTrainer
-from rlgammon.trainer.trainer_errors.trainer_errors import NoParametersError, WrongExplorationTypeError, \
-    WrongBufferTypeError
+from rlgammon.trainer.trainer_errors.trainer_errors import NoParametersError
 
 from rlgammon.trainer.trainer_parameters.parameter_verification import are_parameters_valid
 
@@ -22,9 +15,11 @@ class StepTrainer(BaseTrainer):
 
     def load_parameters(self, json_parameters_name: str) -> None:
         """
-        TODO
+        Load parameters to be used for training, and verify their validity.
 
-        :param json_parameters_name:
+
+        :param json_parameters_name: name of the json parameters file
+        :raises: ValueError: the parameters are invalid, i.e. don't contain some data, or have invalid types
         """
 
         with open("trainer/trainer_parameters/parameters/" + json_parameters_name) as json_parameters:
@@ -52,7 +47,7 @@ class StepTrainer(BaseTrainer):
             env.reset()
             done = False
             trunc = False
-            episode_buffer: list[tuple[Input, Input, MoveList, float, bool, int]] = []
+            episode_buffer: list[tuple[Input, Input, MoveList, bool, int]] = []
             while not done and not trunc:
                 state = env.get_input()
 
@@ -68,11 +63,12 @@ class StepTrainer(BaseTrainer):
                     reward, done, trunc, _ = env.step(action)
 
                 next_state = env.get_input()
-                episode_buffer.append((state, next_state, actions, reward, done, env.current_player))
+                episode_buffer.append((state, next_state, actions, done, env.current_player))
+                env.flip()
 
                 # Only train agent when at least a batch of data in the buffer
                 if buffer.has_element_count(self.parameters["batch_size"]):
                     agent.train(buffer)
 
             # Update the collected data based on the final result of the game
-            self.finalize_data(episode_buffer, env.current_player, buffer)
+            self.finalize_data(episode_buffer, env.current_player, reward, buffer)

@@ -14,12 +14,12 @@ class PossibleBuffers(Enum):
     UNIFORM = "U"
 
     @staticmethod
-    def get_enum_from_string(string_to_convert: str):
+    def get_enum_from_string(string_to_convert: str) -> 'PossibleBuffers':
         """
-        TODO
+        Convert string, found e.g. in JSON parameters to a PossibleBuffers enum.
 
-        :return:
+        :return: the corresponding enum, if none found, return null
         """
         if string_to_convert == PossibleBuffers.UNIFORM.value:
             return PossibleBuffers.UNIFORM
-        return None
+        return None  # type: ignore

@@ -20,8 +20,8 @@ class BaseTrainer:
         """Constructor for the BaseTrainer containing the parameters for the trainer."""
         self.parameters: dict[str, Any] = {}
 
-    def finalize_data(self, episode_buffer: list[tuple[Input, Input, MoveList, float, bool, int]],
-                      losing_player: int, buffer: BaseBuffer) -> None:
+    def finalize_data(self, episode_buffer: list[tuple[Input, Input, MoveList, bool, int]],
+                      losing_player: int, final_reward: float, buffer: BaseBuffer) -> None:
         """
         Finalize the data by updating the rewards for each time step
         to take into account the loss of value of rewards closer to the start of the game, and
@@ -29,16 +29,14 @@ class BaseTrainer:
 
         :param episode_buffer: the data from the completed episode
         :param losing_player: the player who lost the game
+        :param final_reward: the reward given at the end of the game
         :param buffer: buffer to which to add the data
         """
 
-        for i, (state, next_state, action, reward, done, player) in enumerate(reversed(episode_buffer)):
+        for i, (state, next_state, action, done, player) in enumerate(reversed(episode_buffer)):
+            reward = final_reward * self.parameters["decay"] ** i
             if player == losing_player:
                 reward *= -1
-            reward *= self.parameters["decay"] ** i
-
-            print(reward, player)
-
             buffer.record(state, next_state, action, reward, done)
 
     def create_buffer_from_parameters(self, env: BackgammonEnv) -> BaseBuffer:
@@ -70,19 +68,26 @@ class BaseTrainer:
 
         return explorer
 
-    @abstractmethod
-    def load_parameters(self, json_parameters_name: str) -> None:
-        """TODO"""
-        raise NotImplementedError
-
-    @abstractmethod
-    def train(self, agent: TrainableAgent) -> None:
-        """TODO"""
-        raise NotImplementedError
-
     def is_ready_for_training(self) -> bool:
         """Checks if the parameters have been loaded, which indicates whether trainer is ready."""
         if self.parameters == {}:
             return False
         return True
 
+    @abstractmethod
+    def load_parameters(self, json_parameters_name: str) -> None:
+        """
+        Load parameters to be used for training.
+
+        :param json_parameters_name: name of the json parameters file
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def train(self, agent: TrainableAgent) -> None:
+        """
+        Train the provided agent.
+
+        :param agent: agent to be trained
+        """
+        raise NotImplementedError

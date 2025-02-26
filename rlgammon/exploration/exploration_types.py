@@ -9,12 +9,12 @@ class PossibleExploration(Enum):
     EPSILON_GREEDY = "EG"
 
     @staticmethod
-    def get_enum_from_string(string_to_convert: str):
+    def get_enum_from_string(string_to_convert: str) -> 'PossibleExploration':
         """
-        TODO
+        Convert string, found e.g. in JSON parameters to a PossibleExploration enum.
 
-        :return:
+        :return: the corresponding enum, if none found, return null
         """
         if string_to_convert == PossibleExploration.EPSILON_GREEDY.value:
             return PossibleExploration.EPSILON_GREEDY
-        return None
+        return None  # type: ignore

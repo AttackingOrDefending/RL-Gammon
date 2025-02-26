@@ -1,3 +1,5 @@
+"""Verify parameters passed to the trainer."""
+
 from typing import Any
 
 from rlgammon.buffers.buffer_types import PossibleBuffers
@@ -19,10 +21,11 @@ REQUIRED_PARAMETERS: list[tuple[str, type]] = [
 
 def are_parameters_valid(parameters: dict[str, Any]) -> bool:
     """
-    TODO
+    Check if the loaded parameters are valid. To be valid,
+    they must contain all data points from the 'REQUIRED_PARAMETERS' list, with the correct data types.
 
     :param parameters:
-    :return:
+    :return: boolean indicating whether parameters are valid, true for valid, else false
     """
 
     for parameter in REQUIRED_PARAMETERS:
