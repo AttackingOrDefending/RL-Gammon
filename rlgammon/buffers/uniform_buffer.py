@@ -14,7 +14,7 @@ from rlgammon.rlgammon_types import Input, MoveList
 class UniformBuffer(BaseBuffer):
     """Class implementing a buffer with uniform sampling."""
 
-    def __init__(self, observation_shape: tuple[int, ...], max_action_shape: int, capacity: int = 10_000) -> None:
+    def __init__(self, observation_shape: tuple[int, ...], max_action_shape: int, capacity: int) -> None:
         """
         Constructor for the UniformBuffer, that initializes the counter, and all the numpy arrays for storing data.
 

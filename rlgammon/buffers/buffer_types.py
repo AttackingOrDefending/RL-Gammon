@@ -12,3 +12,14 @@ class PossibleBuffers(Enum):
     """Enumeration of possible buffer types."""
 
     UNIFORM = "U"
+
+    @staticmethod
+    def get_enum_from_string(string_to_convert: str):
+        """
+        TODO
+
+        :return:
+        """
+        if string_to_convert == PossibleBuffers.UNIFORM.value:
+            return PossibleBuffers.UNIFORM
+        return None

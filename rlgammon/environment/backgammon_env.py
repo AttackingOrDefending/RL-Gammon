@@ -43,6 +43,8 @@ class BackgammonEnv:
         self.max_moves: int = 500
         self.moves: int = 0
         self.current_player = 1
+        self.observation_shape = self.get_input().shape
+        self.action_shape = 8
         self._cache: dict[
             tuple[int, tuple[int, ...]] | tuple[int, int, int],
             list[tuple[BackgammonEnv, list[tuple[int, MovePart]]]],

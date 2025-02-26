@@ -6,6 +6,7 @@ from typing import Any
 from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.buffers import BaseBuffer, UniformBuffer
 from rlgammon.buffers.buffer_types import PossibleBuffers
+from rlgammon.environment import BackgammonEnv
 from rlgammon.exploration import BaseExploration, EpsilonGreedyExploration
 from rlgammon.exploration.exploration_types import PossibleExploration
 from rlgammon.rlgammon_types import Input, MoveList
@@ -35,9 +36,12 @@ class BaseTrainer:
             if player == losing_player:
                 reward *= -1
             reward *= self.parameters["decay"] ** i
+
+            print(reward, player)
+
             buffer.record(state, next_state, action, reward, done)
 
-    def create_buffer_from_parameters(self) -> BaseBuffer:
+    def create_buffer_from_parameters(self, env: BackgammonEnv) -> BaseBuffer:
         """
         Create a new buffer of the type provided in the parameters
 
@@ -45,8 +49,7 @@ class BaseTrainer:
         """
 
         if self.parameters["buffer"] == PossibleBuffers.UNIFORM:
-            # TODO FIX !!!
-            buffer = UniformBuffer((100, 100), 10)
+            buffer = UniformBuffer(env.observation_shape, env.action_shape, self.parameters["buffer_capacity"])
         else:
             raise WrongBufferTypeError()
 
@@ -68,6 +71,11 @@ class BaseTrainer:
         return explorer
 
     @abstractmethod
+    def load_parameters(self, json_parameters_name: str) -> None:
+        """TODO"""
+        raise NotImplementedError
+
+    @abstractmethod
     def train(self, agent: TrainableAgent) -> None:
         """TODO"""
         raise NotImplementedError
@@ -77,3 +85,4 @@ class BaseTrainer:
         if self.parameters == {}:
             return False
         return True
+
