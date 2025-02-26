@@ -8,6 +8,7 @@ import torch
 from torch import nn
 
 from rlgammon.agents.base_agent import BaseAgent
+from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.buffers import BaseBuffer
 from rlgammon.environment import NO_MOVE_NUMBER, BackgammonEnv
 from rlgammon.rlgammon_types import MovePart
@@ -34,7 +35,7 @@ class DQN(nn.Module):
         return self.fc3(x)
 
 
-class DoubleDQNAgent(BaseAgent):
+class DoubleDQNAgent(TrainableAgent):
     """A DQN agent for backgammon."""
 
     def __init__(self, main_filename: str = "value.pt",
