@@ -57,7 +57,7 @@ class DoubleDQNAgent(BaseAgent):
             self.value_network.load_state_dict(torch.load(main_filename))
         if target_filename and pathlib.Path(target_filename).exists():
             self.target_network.load_state_dict(torch.load(target_filename))
-        self.optimizer = torch.optim.RMSprop(self.value_network.parameters(), lr=self.lr, momentum=0.9, eps=0.0001,
+        self.optimizer = torch.optim.RMSprop(self.value_network.parameters(), lr=self.lr, momentum=0.9, eps=0.001,
                                              centered=True)
         if optimizer_filename and pathlib.Path(optimizer_filename).exists():
             self.optimizer.load_state_dict(torch.load(optimizer_filename))
@@ -92,7 +92,7 @@ class DoubleDQNAgent(BaseAgent):
             next_q_values = -self.target_network(next_states).squeeze()
             target_q_values = rewards + self.gamma * next_q_values * (1 - dones)
 
-        loss = nn.functional.binary_cross_entropy_with_logits(current_q_values, target_q_values)
+        loss = nn.functional.mse_loss(current_q_values, target_q_values)
 
         self.optimizer.zero_grad()
         loss.backward()
