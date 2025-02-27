@@ -10,7 +10,7 @@ class BaseBuffer:
     """Base class for all buffers used for training."""
 
     @abstractmethod
-    def record(self, state: Input, next_state: Input, action: MoveList, reward: int, done: bool) -> None:
+    def record(self, state: Input, next_state: Input, action: MoveList, reward: float, done: bool) -> None:
         """
         Store the environment observation into the buffer.
 
@@ -22,6 +22,14 @@ class BaseBuffer:
         """
         raise NotImplementedError
 
+    @abstractmethod
+    def has_element_count(self, element_count: int) -> bool:
+        """
+        Method to check if the buffer contains at least the specified amount of elements.
+
+        :param element_count: element count to check
+        :return: boolean, indicating if the buffer has at least the specified element count
+        """
 
     @abstractmethod
     def get_batch(self, batch_size: int) -> BufferBatch:

@@ -2,6 +2,7 @@
 
 from abc import abstractmethod
 
+from rlgammon.environment import BackgammonEnv
 from rlgammon.rlgammon_types import MovePart
 
 
@@ -9,12 +10,19 @@ class BaseExploration:
     """Base class for all exploration algorithms."""
 
     @abstractmethod
-    def explore(self, action: list[tuple[int, MovePart]], valid_actions: list[list[tuple[int, MovePart]]],
-                ) -> list[tuple[int, MovePart]]:
+    def should_explore(self) -> bool:
+        """
+        Method to determine whether to explore this time step.
+
+        :return: boolean, indicating whether to explore this time step
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def explore(self, valid_actions: list[tuple[BackgammonEnv, list[tuple[int, MovePart]]]]) -> list[tuple[int, MovePart]]:
         """
         Method to conduct exploration.
 
-        :param action: current action chosen by the agent
         :param valid_actions: all valid actions from the current state
         :return: the final action to execute
         """

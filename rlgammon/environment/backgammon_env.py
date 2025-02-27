@@ -35,12 +35,16 @@ class BackgammonEnv:
         - backgammon: New Backgammon game instance.
         - max_moves: Set to 500 moves.
         - moves: Initialize move counter to 0.
+        - current_player: the current player's orientation of board
         - _cache: Dictionary used for caching computed move combinations.
         """
         super().__init__()
         self.backgammon: bg.Backgammon = bg.Backgammon()
         self.max_moves: int = 500
         self.moves: int = 0
+        self.current_player = 1
+        self.observation_shape = self.get_input().shape
+        self.action_shape = 8
         self._cache: dict[
             tuple[int, tuple[int, ...]] | tuple[int, int, int],
             list[tuple[BackgammonEnv, list[tuple[int, MovePart]]]],
@@ -105,6 +109,7 @@ class BackgammonEnv:
         :return: New board state after flipping.
         """
         self.backgammon.flip()
+        self.current_player *= -1
         return self.get_input()
 
     def step(self, action: MovePart) -> tuple[float, bool, bool, dict[str, Any]]:
@@ -215,7 +220,7 @@ class BackgammonEnv:
 
     def __hash__(self) -> int:
         """Return the hash of the input array."""
-        return hash(tuple(self.get_input().tolist()))  # type: ignore[arg-type]
+        return hash(tuple(self.get_input().tolist()))
 
     def __eq__(self, other: BackgammonEnv) -> bool:  # type: ignore[override]
         """Return whether the input arrays are equal."""

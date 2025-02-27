@@ -14,7 +14,7 @@ from rlgammon.rlgammon_types import Input, MoveList
 class UniformBuffer(BaseBuffer):
     """Class implementing a buffer with uniform sampling."""
 
-    def __init__(self, observation_shape: tuple[int, ...], max_action_shape: int, capacity: int = 10_000) -> None:
+    def __init__(self, observation_shape: tuple[int, ...], max_action_shape: int, capacity: int) -> None:
         """
         Constructor for the UniformBuffer, that initializes the counter, and all the numpy arrays for storing data.
 
@@ -30,7 +30,7 @@ class UniformBuffer(BaseBuffer):
         self.reward_buffer = np.zeros(shape=self.capacity, dtype=np.int8)
         self.done_buffer = np.zeros(shape=self.capacity, dtype=np.bool)
 
-    def record(self, state: Input, next_state: Input, action: MoveList, reward: int, done: bool) -> None:
+    def record(self, state: Input, next_state: Input, action: MoveList, reward: float, done: bool) -> None:
         """
         Store the environment observation into the buffer.
 
@@ -52,6 +52,16 @@ class UniformBuffer(BaseBuffer):
         self.done_buffer[current_index] = done
 
         self.update_counter += 1
+
+    def has_element_count(self, element_count: int) -> bool:
+        """
+        Method to check if the buffer contains at least the specified amount of elements.
+        By comparing the update counter with the argument.
+
+        :param element_count: element count to check
+        :return: boolean, indicating if the buffer has at least the specified element count
+        """
+        return self.update_counter > element_count
 
     def get_batch(self, batch_size: int) -> BufferBatch:
         """
@@ -108,7 +118,8 @@ class UniformBuffer(BaseBuffer):
     def save(self) -> None:
         """Save the buffer to a file, with the current time as differentiating name."""
         buffer_name = f"uniform-buffer-{time.time()}.pkl"
-        buffer_file_path = "../rlgammon/buffers/saved_buffers/"
-        path = Path(buffer_file_path + buffer_name)
+        buffer_file_path = Path(__file__).parent
+        buffer_file_path = buffer_file_path.joinpath("saved_buffers/")
+        path = buffer_file_path.joinpath(buffer_name)
         with path.open("wb") as f:
             pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
