@@ -5,15 +5,15 @@ import numpy as np
 from rlgammon.rlgammon_types import Input
 
 
-def group_stats(array_list: list[Input], start: int, end: int) -> tuple[np.floating, np.floating]:
+def group_stats(array_list: list[Input], start: int, end: int) -> tuple[np.float32, np.float32]:
     """
     Computes the mean and standard deviation for a specific group of cells across all arrays.
 
     Used to find the mean and std of each cell to normalize the input.
     """
     group_values = np.concatenate([arr[start:end + 1] for arr in array_list])
-    mean = np.mean(group_values)
-    std = np.std(group_values)
+    mean = np.mean(group_values, dtype=np.float32)
+    std = np.std(group_values, dtype=np.float32)
     print(f"Group cells {start} to {end}: Mean = {mean:.3f}, Std = {std:.3f}")
     return mean, std
 

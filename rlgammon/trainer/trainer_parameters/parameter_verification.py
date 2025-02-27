@@ -15,7 +15,7 @@ REQUIRED_PARAMETERS: list[tuple[str, type]] = [
     ("start_epsilon", float),
     ("end_epsilon", float),
     ("update_decay", float),
-    ("steps_per_update", int)
+    ("steps_per_update", int),
 ]
 
 
@@ -27,7 +27,6 @@ def are_parameters_valid(parameters: dict[str, Any]) -> bool:
     :param parameters:
     :return: boolean indicating whether parameters are valid, true for valid, else false
     """
-
     for parameter in REQUIRED_PARAMETERS:
         parameter_key = parameter[0]
         parameter_type = parameter[1]

@@ -1,7 +1,7 @@
 """Type aliases for buffers."""
 
-from typing import Any
 from enum import Enum
+from typing import Any
 
 from numpy.typing import NDArray
 
@@ -14,7 +14,7 @@ class PossibleBuffers(Enum):
     UNIFORM = "U"
 
     @staticmethod
-    def get_enum_from_string(string_to_convert: str) -> 'PossibleBuffers':
+    def get_enum_from_string(string_to_convert: str) -> "PossibleBuffers":
         """
         Convert string, found e.g. in JSON parameters to a PossibleBuffers enum.
 
@@ -22,4 +22,4 @@ class PossibleBuffers(Enum):
         """
         if string_to_convert == PossibleBuffers.UNIFORM.value:
             return PossibleBuffers.UNIFORM
-        return None  # type: ignore
+        return None  # type: ignore[return-value]

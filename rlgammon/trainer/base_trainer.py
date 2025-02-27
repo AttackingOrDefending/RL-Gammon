@@ -10,7 +10,7 @@ from rlgammon.environment import BackgammonEnv
 from rlgammon.exploration import BaseExploration, EpsilonGreedyExploration
 from rlgammon.exploration.exploration_types import PossibleExploration
 from rlgammon.rlgammon_types import Input, MoveList
-from rlgammon.trainer.trainer_errors.trainer_errors import WrongExplorationTypeError, WrongBufferTypeError
+from rlgammon.trainer.trainer_errors.trainer_errors import WrongBufferTypeError, WrongExplorationTypeError
 
 
 class BaseTrainer:
@@ -32,7 +32,6 @@ class BaseTrainer:
         :param final_reward: the reward given at the end of the game
         :param buffer: buffer to which to add the data
         """
-
         for i, (state, next_state, action, done, player) in enumerate(reversed(episode_buffer)):
             reward = final_reward * self.parameters["decay"] ** i
             if player == losing_player:
@@ -41,38 +40,34 @@ class BaseTrainer:
 
     def create_buffer_from_parameters(self, env: BackgammonEnv) -> BaseBuffer:
         """
-        Create a new buffer of the type provided in the parameters
+        Create a new buffer of the type provided in the parameters.
 
         :return: buffer of the type provided in the parameters
         """
-
         if self.parameters["buffer"] == PossibleBuffers.UNIFORM:
             buffer = UniformBuffer(env.observation_shape, env.action_shape, self.parameters["buffer_capacity"])
         else:
-            raise WrongBufferTypeError()
+            raise WrongBufferTypeError
 
         return buffer
 
     def create_explorer_from_parameters(self) -> BaseExploration:
         """
-        Create a new exploration algorithm of the type provided in the parameters
+        Create a new exploration algorithm of the type provided in the parameters.
 
         :return: exploration algorithm of the type provided in the parameters
         """
-
         if self.parameters["exploration"] == PossibleExploration.EPSILON_GREEDY:
             explorer = EpsilonGreedyExploration(self.parameters["start_epsilon"], self.parameters["end_epsilon"],
                                                 self.parameters["update_decay"], self.parameters["steps_per_update"])
         else:
-            raise WrongExplorationTypeError()
+            raise WrongExplorationTypeError
 
         return explorer
 
     def is_ready_for_training(self) -> bool:
         """Checks if the parameters have been loaded, which indicates whether trainer is ready."""
-        if self.parameters == {}:
-            return False
-        return True
+        return self.parameters == {}
 
     @abstractmethod
     def load_parameters(self, json_parameters_name: str) -> None:

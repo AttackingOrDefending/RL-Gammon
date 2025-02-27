@@ -54,10 +54,10 @@ class Backgammon:
     def flip(self) -> None:
         """Flip the board to switch perspective between players."""
         # Negate all values to switch colors and reverse the board array
-        self.board = -self.board[::-1]  # type: ignore[assignment]
+        self.board = -self.board[::-1]
         # Reverse bar and off arrays
-        self.bar = self.bar[::-1]  # type: ignore[assignment]
-        self.off = self.off[::-1]  # type: ignore[assignment]
+        self.bar = self.bar[::-1]
+        self.off = self.off[::-1]
 
     def get_bar_moves(self, dice: Iterable[int]) -> MoveDict:
         """Return all legal moves for the current player from the bar.
