@@ -67,7 +67,7 @@ class BaseTrainer:
 
     def is_ready_for_training(self) -> bool:
         """Checks if the parameters have been loaded, which indicates whether trainer is ready."""
-        return self.parameters == {}
+        return bool(self.parameters)
 
     @abstractmethod
     def load_parameters(self, json_parameters_name: str) -> None:

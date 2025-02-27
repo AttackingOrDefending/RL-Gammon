@@ -118,7 +118,8 @@ class UniformBuffer(BaseBuffer):
     def save(self) -> None:
         """Save the buffer to a file, with the current time as differentiating name."""
         buffer_name = f"uniform-buffer-{time.time()}.pkl"
-        buffer_file_path = "../rlgammon/buffers/saved_buffers/"
-        path = Path(buffer_file_path + buffer_name)
+        buffer_file_path = Path(__file__).parent
+        buffer_file_path = buffer_file_path.joinpath("saved_buffers/")
+        path = buffer_file_path.joinpath(buffer_name)
         with path.open("wb") as f:
             pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)

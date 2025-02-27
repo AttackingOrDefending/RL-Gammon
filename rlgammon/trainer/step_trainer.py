@@ -26,8 +26,9 @@ class StepTrainer(BaseTrainer):
         :param json_parameters_name: name of the json parameters file
         :raises: ValueError: the parameters are invalid, i.e. don't contain some data, or have invalid types
         """
-        parameter_file_path = "trainer/trainer_parameters/parameters/"
-        path = Path(parameter_file_path + json_parameters_name)
+        parameter_file_path = Path(__file__).parent
+        parameter_file_path = parameter_file_path.joinpath("trainer_parameters/parameters/")
+        path = parameter_file_path.joinpath(json_parameters_name)
         with path.open() as json_parameters:
             parameters = json.load(json_parameters)
 
