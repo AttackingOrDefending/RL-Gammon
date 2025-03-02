@@ -1,1 +1,1 @@
-"""TODO."""
+"""Initialize the logger package."""

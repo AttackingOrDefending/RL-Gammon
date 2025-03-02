@@ -1,10 +1,10 @@
-"""TODO."""
+"""Define different types related to the logger."""
 
 from typing import TypedDict
 
 
 class LoggerData(TypedDict):
-    """TODO."""
+    """Define type defining what data the logger holds."""
 
     episodes: list[int]
     steps: list[int]
