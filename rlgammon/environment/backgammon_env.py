@@ -220,7 +220,7 @@ class BackgammonEnv:
 
     def __hash__(self) -> int:
         """Return the hash of the input array."""
-        return hash(tuple(self.get_input().tolist()))
+        return hash(tuple(self.get_input().tolist()))  # type: ignore[arg-type]
 
     def __eq__(self, other: BackgammonEnv) -> bool:  # type: ignore[override]
         """Return whether the input arrays are equal."""
