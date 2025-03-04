@@ -50,11 +50,13 @@ class StepTrainer(BaseTrainer):
         env = BackgammonEnv()
         buffer = self.create_buffer_from_parameters(env)
         explorer = self.create_explorer_from_parameters()
+        testing = self.create_testing_from_parameters()
         for _episode in range(self.parameters["episodes"]):
             env.reset()
             done = False
             trunc = False
             episode_buffer: list[tuple[Input, Input, MoveList, bool, int]] = []
+            reward = 0.0
             while not done and not trunc:
                 state = env.get_input()
 
@@ -71,7 +73,8 @@ class StepTrainer(BaseTrainer):
 
                 next_state = env.get_input()
                 episode_buffer.append((state, next_state, actions, done, env.current_player))
-                env.flip()
+                if not done and not trunc:
+                    env.flip()
 
                 # Only train agent when at least a batch of data in the buffer
                 if buffer.has_element_count(self.parameters["batch_size"]):

@@ -38,6 +38,10 @@ class BaseTrainer:
                 reward *= -1
             buffer.record(state, next_state, action, reward, done)
 
+    def create_testing_from_parameters(self) -> BaseTesting:
+        """TODO."""
+
+
     def create_buffer_from_parameters(self, env: BackgammonEnv) -> BaseBuffer:
         """
         Create a new buffer of the type provided in the parameters.

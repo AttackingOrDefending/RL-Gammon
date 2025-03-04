@@ -50,6 +50,17 @@ class BackgammonEnv:
             list[tuple[BackgammonEnv, list[tuple[int, MovePart]]]],
         ] = {}
 
+    def has_lost(self, player: int) -> bool:
+        """
+        Basic way to check if a player has lost, by comparing the provided player
+        to the player who should have played after the last move (i.e. the losing player).
+        Have to be careful to only use it after done was returned to true and reward = 1.
+
+        :param player: the player to check
+        :return: true, if the player has lost, false otherwise.
+        """
+        return player == self.current_player
+
     def get_input(self, get_normalized: bool = False) -> Input:
         """
         Return the input for the current player.

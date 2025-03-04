@@ -4,9 +4,13 @@ from typing import Any
 
 from rlgammon.buffers.buffer_types import PossibleBuffers
 from rlgammon.exploration.exploration_types import PossibleExploration
+from rlgammon.trainer.testing.testing_types import PossibleTesting
 
 REQUIRED_PARAMETERS: list[tuple[str, type]] = [
     ("episodes", int),
+    ("tester_type", PossibleTesting),
+    ("episodes_in_test", int),
+    ("episodes_per_test", int),
     ("batch_size", int),
     ("buffer", PossibleBuffers),
     ("buffer_capacity", int),
@@ -27,6 +31,9 @@ def are_parameters_valid(parameters: dict[str, Any]) -> bool:
     :param parameters:
     :return: boolean indicating whether parameters are valid, true for valid, else false
     """
+    if len(parameters) != len(REQUIRED_PARAMETERS):
+        return False
+
     for parameter in REQUIRED_PARAMETERS:
         parameter_key = parameter[0]
         parameter_type = parameter[1]
@@ -39,6 +46,9 @@ def are_parameters_valid(parameters: dict[str, Any]) -> bool:
                 parameters[parameter_key] = value
             elif parameter_type == PossibleExploration:
                 value = PossibleExploration.get_enum_from_string(value)
+                parameters[parameter_key] = value
+            elif parameter_type == PossibleTesting:
+                value = PossibleTesting.get_enum_from_string(value)
                 parameters[parameter_key] = value
 
             if type(value) is not parameter_type:
