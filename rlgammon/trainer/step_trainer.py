@@ -51,7 +51,10 @@ class StepTrainer(BaseTrainer):
         buffer = self.create_buffer_from_parameters(env)
         explorer = self.create_explorer_from_parameters()
         testing = self.create_testing_from_parameters()
-        for _episode in range(self.parameters["episodes"]):
+        logger = self.create_logger_from_parameters()
+
+        total_steps = 0
+        for episode in range(self.parameters["episodes"]):
             env.reset()
             done = False
             trunc = False
@@ -80,5 +83,12 @@ class StepTrainer(BaseTrainer):
                 if buffer.has_element_count(self.parameters["batch_size"]):
                     agent.train(buffer)
 
+                total_steps += 1
+
             # Update the collected data based on the final result of the game
             self.finalize_data(episode_buffer, env.current_player, reward, buffer)
+
+            if episode % self.parameters["episodes_per_test"] == 0:
+                results = testing.test(agent)
+                logger.update_log(episode, total_steps, results["win_rate"])
+                logger.print_log()

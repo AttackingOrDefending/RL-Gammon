@@ -91,6 +91,22 @@ class Logger:
             msg = "Invalid logging choice"
             raise ValueError(msg)
 
+    def load(self, logger_name: str) -> None:
+        """
+        Load the logger with the given name.
+
+        :param logger_name: name of the saved buffer to load
+        """
+        logger_file_path = "../rlgammon/trainer/logger/saved_loggers/"
+        path = Path(logger_file_path + logger_name)
+
+        with path.open("rb") as f:
+            logger = pickle.load(f)
+
+        self.logger = logger.logger
+        self.num_items, self.load_episode, self.load_step = logger.num_items, logger.load_episode, logger.load_step
+        self.info = logger.info
+
     def save(self) -> None:
         """Save the logger to a file, with the current time as differentiating name."""
         logger_name = f"logger-{time.time()}.pkl"

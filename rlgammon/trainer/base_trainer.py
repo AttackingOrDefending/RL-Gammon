@@ -10,7 +10,15 @@ from rlgammon.environment import BackgammonEnv
 from rlgammon.exploration import BaseExploration, EpsilonGreedyExploration
 from rlgammon.exploration.exploration_types import PossibleExploration
 from rlgammon.rlgammon_types import Input, MoveList
-from rlgammon.trainer.trainer_errors.trainer_errors import WrongBufferTypeError, WrongExplorationTypeError
+from rlgammon.trainer.logger.logger import Logger
+from rlgammon.trainer.testing.base_testing import BaseTesting
+from rlgammon.trainer.testing.random_testing import RandomTesting
+from rlgammon.trainer.testing.testing_types import PossibleTesting
+from rlgammon.trainer.trainer_errors.trainer_errors import (
+    WrongBufferTypeError,
+    WrongExplorationTypeError,
+    WrongTestingTypeError,
+)
 
 
 class BaseTrainer:
@@ -38,9 +46,29 @@ class BaseTrainer:
                 reward *= -1
             buffer.record(state, next_state, action, reward, done)
 
-    def create_testing_from_parameters(self) -> BaseTesting:
-        """TODO."""
+    def create_logger_from_parameters(self) -> Logger:
+        """
+        Create a new logger, either an empty one just initialized
+        or one loaded with the logger name provided in the parameters.
 
+        :return: new logger
+        """
+        logger = Logger()
+        if self.parameters["load_logger"]:
+            logger.load(self.parameters["logger_name"])
+        return logger
+
+    def create_testing_from_parameters(self) -> BaseTesting:
+        """
+        Create a new testing object of the type provided in the parameters.
+
+        :return: testing object of the type provided in the parameters
+        """
+        if self.parameters["testing_type"] == PossibleTesting.RANDOM:
+            testing = RandomTesting(self.parameters["episodes_in_test"])
+        else:
+            raise WrongTestingTypeError
+        return testing
 
     def create_buffer_from_parameters(self, env: BackgammonEnv) -> BaseBuffer:
         """

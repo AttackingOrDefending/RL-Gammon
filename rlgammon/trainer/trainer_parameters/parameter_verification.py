@@ -8,7 +8,7 @@ from rlgammon.trainer.testing.testing_types import PossibleTesting
 
 REQUIRED_PARAMETERS: list[tuple[str, type]] = [
     ("episodes", int),
-    ("tester_type", PossibleTesting),
+    ("testing_type", PossibleTesting),
     ("episodes_in_test", int),
     ("episodes_per_test", int),
     ("batch_size", int),
@@ -20,6 +20,8 @@ REQUIRED_PARAMETERS: list[tuple[str, type]] = [
     ("end_epsilon", float),
     ("update_decay", float),
     ("steps_per_update", int),
+    ("load_logger", bool),
+    ("logger_name", str),
 ]
 
 

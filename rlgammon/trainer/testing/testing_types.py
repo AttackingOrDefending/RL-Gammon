@@ -1,10 +1,10 @@
-"""TODO."""
+"""Define different types related to testing objects."""
 
 from enum import Enum
 
 
 class PossibleTesting(Enum):
-    """TODO."""
+    """Enumeration of possible testing types."""
 
     RANDOM = "RND"
 
