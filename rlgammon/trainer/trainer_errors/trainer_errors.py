@@ -30,3 +30,14 @@ class WrongExplorationTypeError(Exception):
         """Construct the error with a default message."""
         super().__init__("The exploration type you are trying to use is not available right now! "
                          "Please check 'PossibleExploration' for available exploration types!")
+
+class WrongTestingTypeError(Exception):
+    """
+    Class implementing the error occurring
+    when the wrong testing type has been provided in the parameters.
+    """
+
+    def __init__(self) -> None:
+        """Construct the error with a default message."""
+        super().__init__("The testing type you are trying to use is not available right now! "
+                         "Please check 'PossibleTesting' for available testing types!")
