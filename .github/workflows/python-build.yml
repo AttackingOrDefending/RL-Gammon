@@ -32,3 +32,7 @@ jobs:
       run: |
         # Check for python syntax errors and inconsistent code style.
         ruff check --config ruff.toml
+    - name: Run tests
+      run: |
+        # Run the tests with pytest.
+        pytest

@@ -99,8 +99,10 @@ class Backgammon:
         # Check bearing off moves if all pieces are in home board
         if our_checkers.size == 0 or our_checkers[-1] < QUARTER_BOARD_SIZE:
             for roll in unique_dice:
-                for loc in our_checkers:
-                    if loc - roll < 0:
+                bore_off = False
+                for loc in our_checkers[::-1]:
+                    if loc - roll < 0 and not bore_off:
+                        bore_off = True
                         possible_moves[roll].add((int(loc), -1))
         return possible_moves
 
