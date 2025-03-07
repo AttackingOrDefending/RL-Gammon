@@ -150,6 +150,10 @@ class Backgammon:
         :return: 1 if white wins, 0 if black wins
         """
         if self.off[0] == TOTAL_PIECES:
+            if self.off[1] == 0 and self.bar[1] > 0:
+                return 3
+            elif self.off[1] == 0:
+                return 2
             return 1
         return 0
 
