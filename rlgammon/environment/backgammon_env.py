@@ -210,6 +210,16 @@ class BackgammonEnv:
             else:
                 moves += [(position, [(roll, action)]) for position, _ in next_moves]
 
+        max_moves = max(len(move) for _, move in moves)
+        # Filter out moves that are not the longest.
+        moves = [move for move in moves if len(move[1]) == max_moves]
+        # If not all rolls can be used, use the one with the largest roll.
+        if dice[0] != dice[1] and max_moves == 1:
+            max_roll = max(dice)
+            moves_max_roll = [move for move in moves if move[1][0][0] == max_roll]
+            if moves_max_roll:
+                moves = moves_max_roll
+
         for board, _ in moves:
             board.flip()
 
