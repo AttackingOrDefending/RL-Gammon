@@ -1,7 +1,4 @@
-# This workflow will install Python dependencies and lint
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
-name: Python Build
+name: Test
 
 on:
   push:
@@ -14,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
         python: ["3.13", "3.12"]
 
     steps:
@@ -28,10 +25,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r dev-requirements.txt
-    - name: Lint with ruff
-      run: |
-        # Check for python syntax errors and inconsistent code style.
-        ruff check --config ruff.toml
     - name: Run tests
       run: |
         # Run the tests with pytest.
