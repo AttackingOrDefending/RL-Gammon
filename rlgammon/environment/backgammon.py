@@ -104,7 +104,7 @@ class Backgammon:
             for roll in unique_dice:
                 bore_off = False
                 for loc in our_checkers[::-1]:
-                    if not bore_off and (loc - roll == -1 or loc - roll < 0 and roll not in found_moves_for):
+                    if not bore_off and (loc - roll == -1 or (loc - roll < 0 and roll not in found_moves_for)):
                         bore_off = True
                         possible_moves[roll].add((int(loc), -1))
         return possible_moves
