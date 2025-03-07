@@ -90,10 +90,13 @@ class Backgammon:
         possible_moves: MoveDict = {roll: set() for roll in unique_dice}
         our_checkers = np.flatnonzero(self.board > 0)
 
+        found_moves_for = set()
+
         # Check normal moves for each dice roll
         for roll in unique_dice:
             for loc in our_checkers:
                 if loc - roll >= 0 and self.board[loc - roll] >= -1:
+                    found_moves_for.add(roll)
                     possible_moves[roll].add((int(loc), int(loc) - roll))
 
         # Check bearing off moves if all pieces are in home board
@@ -101,7 +104,7 @@ class Backgammon:
             for roll in unique_dice:
                 bore_off = False
                 for loc in our_checkers[::-1]:
-                    if loc - roll < 0 and not bore_off:
+                    if not bore_off and (loc - roll == -1 or loc - roll < 0 and roll not in found_moves_for):
                         bore_off = True
                         possible_moves[roll].add((int(loc), -1))
         return possible_moves
