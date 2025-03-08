@@ -1,0 +1,17 @@
+{
+  "episodes": 100,
+  "testing_type": "RND",
+  "episodes_in_test": 10,
+  "episodes_per_test": 25,
+  "batch_size": 64,
+  "buffer": "wrong buffer type",
+  "buffer_capacity": 50000,
+  "exploration": "EG",
+  "decay": 0.99,
+  "start_epsilon": 0.95,
+  "end_epsilon": 0.05,
+  "update_decay": 0.99,
+  "steps_per_update": 10,
+  "load_logger": false,
+  "logger_name": ""
+}

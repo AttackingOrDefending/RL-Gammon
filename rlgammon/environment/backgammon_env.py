@@ -214,7 +214,8 @@ class BackgammonEnv:
         # Filter out moves that are not the longest.
         moves = [move for move in moves if len(move[1]) == max_moves]
         # If not all rolls can be used, use the one with the largest roll.
-        if dice[0] != dice[1] and max_moves == 1:
+
+        if len(dice) > 1 and dice[0] != dice[1] and max_moves == 1:
             max_roll = max(dice)
             moves_max_roll = [move for move in moves if move[1][0][0] == max_roll]
             if moves_max_roll:

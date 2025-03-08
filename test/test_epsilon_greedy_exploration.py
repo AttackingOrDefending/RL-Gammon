@@ -1,10 +1,10 @@
-"""TODO."""
+"""Test epsilon-greedy exploration."""
 
 from rlgammon.exploration.epsilon_greedy_exploration import EpsilonGreedyExploration
 
 
 def test_epsilon_greedy_exploration_update() -> None:
-    """TODO."""
+    """Test the update of the current epsilon."""
     exploration = EpsilonGreedyExploration(1, 0.05, 0.99, 5)
     # Update 1
     exploration.update()
