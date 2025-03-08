@@ -90,17 +90,22 @@ class Backgammon:
         possible_moves: MoveDict = {roll: set() for roll in unique_dice}
         our_checkers = np.flatnonzero(self.board > 0)
 
+        found_moves_for = set()
+
         # Check normal moves for each dice roll
         for roll in unique_dice:
             for loc in our_checkers:
                 if loc - roll >= 0 and self.board[loc - roll] >= -1:
+                    found_moves_for.add(roll)
                     possible_moves[roll].add((int(loc), int(loc) - roll))
 
         # Check bearing off moves if all pieces are in home board
         if our_checkers.size == 0 or our_checkers[-1] < QUARTER_BOARD_SIZE:
             for roll in unique_dice:
-                for loc in our_checkers:
-                    if loc - roll < 0:
+                bore_off = False
+                for loc in our_checkers[::-1]:
+                    if not bore_off and (loc - roll == -1 or (loc - roll < 0 and roll not in found_moves_for)):
+                        bore_off = True
                         possible_moves[roll].add((int(loc), -1))
         return possible_moves
 
@@ -148,6 +153,10 @@ class Backgammon:
         :return: 1 if white wins, 0 if black wins
         """
         if self.off[0] == TOTAL_PIECES:
+            if self.off[1] == 0 and self.bar[1] > 0:
+                return 3
+            if self.off[1] == 0:
+                return 2
             return 1
         return 0
 
