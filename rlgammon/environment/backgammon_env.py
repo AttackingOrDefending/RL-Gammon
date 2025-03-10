@@ -135,7 +135,7 @@ class BackgammonEnv:
         done = self.backgammon.is_terminal()
         reward = 0.0
         if done:
-            reward = 1.0 if self.backgammon.get_winner() == 1 else -1.0
+            reward = self.backgammon.get_winner()
         return reward, done, self.moves >= self.max_moves and not done, {}
 
     def render(self, mode: str = "human") -> None:

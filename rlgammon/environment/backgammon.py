@@ -153,7 +153,7 @@ class Backgammon:
         :return: 1 if white wins, 0 if black wins
         """
         if self.off[0] == TOTAL_PIECES:
-            if self.off[1] == 0 and self.bar[1] > 0:
+            if self.off[1] == 0 and (self.bar[1] > 0 or np.any(self.board[-QUARTER_BOARD_SIZE:] < 0)):
                 return 3
             if self.off[1] == 0:
                 return 2
