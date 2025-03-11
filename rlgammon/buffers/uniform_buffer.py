@@ -27,7 +27,7 @@ class UniformBuffer(BaseBuffer):
         self.state_buffer = np.zeros(shape=(self.capacity, *observation_shape), dtype=np.int8)
         self.new_state_buffer = np.zeros(shape=(self.capacity, *observation_shape), dtype=np.int8)
         self.action_buffer = np.zeros(shape=(self.capacity, max_action_shape), dtype=np.int8)
-        self.reward_buffer = np.zeros(shape=self.capacity, dtype=np.int8)
+        self.reward_buffer = np.zeros(shape=self.capacity, dtype=np.float32)
         self.done_buffer = np.zeros(shape=self.capacity, dtype=np.bool)
 
     def record(self, state: Input, next_state: Input, action: MoveList, reward: float, done: bool) -> None:

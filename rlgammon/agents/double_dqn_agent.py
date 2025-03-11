@@ -19,11 +19,11 @@ class DQN(nn.Module):
     def __init__(self) -> None:
         """Initialize the DQN value network."""
         super().__init__()
-        self.fc1 = nn.Linear(52, 128, dtype=torch.float16)
+        self.fc1 = nn.Linear(52, 128, dtype=torch.float32)
         nn.init.xavier_uniform_(self.fc1.weight)
-        self.fc2 = nn.Linear(128, 128, dtype=torch.float16)
+        self.fc2 = nn.Linear(128, 128, dtype=torch.float32)
         nn.init.xavier_uniform_(self.fc2.weight)
-        self.fc3 = nn.Linear(128, 1, dtype=torch.float16)
+        self.fc3 = nn.Linear(128, 1, dtype=torch.float32)
         nn.init.xavier_uniform_(self.fc3.weight)
         self.fc3.weight.data /= 1000
 
@@ -81,16 +81,16 @@ class DoubleDQNAgent(TrainableAgent):
     def train(self, replay_buffer: BaseBuffer) -> None:
         """Train the DQN value network using the replay buffer. We don't use actions as we are building a value network."""
         batch = replay_buffer.get_batch(self.batch_size)
-        states = torch.tensor(batch["state"], dtype=torch.float16)
-        next_states = torch.tensor(batch["next_state"], dtype=torch.float16)
-        rewards = torch.tensor(batch["reward"], dtype=torch.float16)
+        states = torch.tensor(batch["state"], dtype=torch.float32)
+        next_states = torch.tensor(batch["next_state"], dtype=torch.float32)
+        rewards = torch.tensor(batch["reward"], dtype=torch.float32)
         dones = torch.tensor(batch["done"], dtype=torch.bool)
 
         current_q_values = self.value_network(states).squeeze()
 
         with torch.no_grad():
             next_q_values = -self.target_network(next_states).squeeze()
-            target_q_values = rewards + self.gamma * next_q_values * (1 - dones)
+            target_q_values = rewards + self.gamma * next_q_values * ~dones
 
         loss = nn.functional.mse_loss(current_q_values, target_q_values)
 
@@ -131,5 +131,5 @@ class DoubleDQNAgent(TrainableAgent):
     @cache
     def evaluate_position(self, board: BackgammonEnv) -> float:
         """Evaluate a position using the DQN value network."""
-        state = torch.tensor(board.get_input(), dtype=torch.float16)
+        state = torch.tensor(board.get_input(), dtype=torch.float32)
         return float(self.value_network(state))

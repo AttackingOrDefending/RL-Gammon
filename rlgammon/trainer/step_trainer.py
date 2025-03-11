@@ -30,8 +30,6 @@ class StepTrainer(BaseTrainer):
         parameter_file_path = parameter_file_path.joinpath("trainer_parameters/parameters/")
         path = parameter_file_path.joinpath(json_parameters_name)
 
-        print(path)
-
         with path.open() as json_parameters:
             parameters = json.load(json_parameters)
 
