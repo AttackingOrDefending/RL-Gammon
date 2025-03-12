@@ -3,6 +3,7 @@
 
 from functools import cache
 import pathlib
+from uuid import UUID
 
 import torch
 from torch import nn
@@ -37,8 +38,8 @@ class DQN(nn.Module):
 class DoubleDQNAgent(TrainableAgent):
     """A DQN agent for backgammon."""
 
-    def __init__(self, main_filename: str = "value.pt",
-                 target_filename: str = "target_value.pt", optimizer_filename: str = "optimizer.pt", lr: float = 0.0001,
+    def __init__(self, main_filename: str = "ddqn-value",
+                 target_filename: str = "ddqn-target_value", optimizer_filename: str = "ddqn-optimizer", lr: float = 0.0001,
                  tau: float = 0.01, batch_size: int = 64, gamma: float = 0.99, max_grad_norm: float = 5) -> None:
         """Initialize the DQN agent."""
         super().__init__()
@@ -111,18 +112,34 @@ class DoubleDQNAgent(TrainableAgent):
         # Clear the cache of the evaluate_position method as we have updated the model.
         self.clear_cache()
 
-    def save(self, main_filename: str | None = None, target_filename: str | None = None,
-             optimizer_filename: str | None = None) -> None:
-        """Save the DQN agent."""
+    def save(self, training_session_id: UUID, session_save_count: int, main_filename: str | None = None,
+             target_filename: str | None = None, optimizer_filename: str | None = None) -> None:
+        """
+        Save the DQN agent.
+
+        :param training_session_id: uuid of the training session
+        :param session_save_count: number of saved sessions
+        :param main_filename: filename where the main network is to be saved
+        :param target_filename: filename where the target network is to be saved
+        :param optimizer_filename: filename where the optimizer is to be saved
+        """
         if main_filename is None:
             main_filename = self.main_filename
         if target_filename is None:
             target_filename = self.target_filename
         if optimizer_filename is None:
             optimizer_filename = self.optimizer_filename
-        torch.save(self.value_network.state_dict(), main_filename)
-        torch.save(self.target_network.state_dict(), target_filename)
-        torch.save(self.optimizer.state_dict(), optimizer_filename)
+
+        agent_main_filename = f"{main_filename}-{training_session_id}-({session_save_count}).pt"
+        agent_target_filename = f"{target_filename}-{training_session_id}-({session_save_count}).pt"
+        agent_optimizer_filename = f"{optimizer_filename}-{training_session_id}-({session_save_count}).pt"
+
+        agent_file_path = pathlib.Path(__file__).parent
+        agent_file_path = agent_file_path.joinpath("saved_agents/")
+
+        torch.save(self.value_network.state_dict(), agent_file_path.joinpath(agent_main_filename))
+        torch.save(self.target_network.state_dict(), agent_file_path.joinpath(agent_target_filename))
+        torch.save(self.optimizer.state_dict(), agent_file_path.joinpath(agent_optimizer_filename))
 
     def clear_cache(self) -> None:
         """Clear the cache of the evaluate_position method."""

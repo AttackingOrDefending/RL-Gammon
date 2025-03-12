@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+import uuid
 
 from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.environment import BackgammonEnv
@@ -53,6 +54,7 @@ class StepTrainer(BaseTrainer):
         explorer = self.create_explorer_from_parameters()
         testing = self.create_testing_from_parameters()
         logger = self.create_logger_from_parameters()
+        session_id = uuid.uuid4()
 
         total_steps = 0
         for episode in range(self.parameters["episodes"]):
@@ -89,7 +91,12 @@ class StepTrainer(BaseTrainer):
             # Update the collected data based on the final result of the game
             self.finalize_data(episode_buffer, env.current_player, reward, buffer)
 
-            if episode % self.parameters["episodes_per_test"] == 0:
+            if episode > 0 and episode % self.parameters["episodes_per_test"] == 0:
                 results = testing.test(agent)
                 logger.update_log(episode, total_steps, results["win_rate"])
                 logger.print_log()
+
+            if episode > 0 and episode % self.parameters["save_every"] == 0:
+                logger.save(session_id, episode // self.parameters["save_every"])
+                agent.save(session_id, episode // self.parameters["save_every"])
+

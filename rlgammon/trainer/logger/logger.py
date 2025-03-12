@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 import pickle
-import time
+from uuid import UUID
 
 import matplotlib.pyplot as plt
 
@@ -107,9 +107,14 @@ class Logger:
         self.num_items, self.load_episode, self.load_step = logger.num_items, logger.load_episode, logger.load_step
         self.info = logger.info
 
-    def save(self) -> None:
-        """Save the logger to a file, with the current time as differentiating name."""
-        logger_name = f"logger-{time.time()}.pkl"
+    def save(self, training_session_id: UUID, session_save_count: int) -> None:
+        """
+        Save the logger to a file, with the current time as differentiating name.
+
+        :param training_session_id: uuid of the training session
+        :param session_save_count: number of saved sessions
+        """
+        logger_name = f"logger-{training_session_id}-({session_save_count}).pkl"
         logger_file_path = Path(__file__).parent
         logger_file_path = logger_file_path.joinpath("saved_loggers/")
         path = logger_file_path.joinpath(logger_name)
