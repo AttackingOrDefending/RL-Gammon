@@ -8,6 +8,7 @@ from rlgammon.trainer.testing.testing_types import PossibleTesting
 
 REQUIRED_PARAMETERS: list[tuple[str, type]] = [
     ("episodes", int),
+    ("save_every", int),
     ("testing_type", PossibleTesting),
     ("episodes_in_test", int),
     ("episodes_per_test", int),

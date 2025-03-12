@@ -1,6 +1,7 @@
 """Base class for all buffers used in RL-training."""
 
 from abc import abstractmethod
+from uuid import UUID
 
 from rlgammon.buffers.buffer_types import BufferBatch
 from rlgammon.rlgammon_types import Input, MoveList
@@ -57,6 +58,11 @@ class BaseBuffer:
         raise NotImplementedError
 
     @abstractmethod
-    def save(self) -> None:
-        """Save the buffer to a file."""
+    def save(self, training_session_id: UUID, session_save_count: int) -> None:
+        """
+        Save the buffer to a file.
+
+        :param training_session_id: uuid of the training session
+        :param session_save_count: number of saved sessions
+        """
         raise NotImplementedError
