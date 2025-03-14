@@ -14,8 +14,6 @@ from rlgammon.environment.text_renderer import text_render
 from rlgammon.environment.utils.normalize_input import cell_stats, normalize_input
 from rlgammon.rlgammon_types import Input, MoveList, MovePart
 
-NO_MOVE_NUMBER = -2
-
 
 class BackgammonEnv:
     """
@@ -60,7 +58,7 @@ class BackgammonEnv:
         :param player: the player to check
         :return: true, if the player has lost, false otherwise.
         """
-        return player == self.current_player
+        return self.moves % 2 != player % 2
 
     def get_input(self, get_normalized: bool = False) -> Input:
         """
@@ -201,6 +199,8 @@ class BackgammonEnv:
         :param dice: List of dice values.
         :return: List of all possible complete moves.
         """
+        if not dice:
+            return []
         # Use a canonical key for caching.
         key = (hash(self), dice[0], len(dice)) if len(dice) > 0 and len(set(dice)) == 1 else (hash(self), tuple(dice))
 
@@ -219,11 +219,11 @@ class BackgammonEnv:
             board_copy.step(action)
             next_dice = dice.copy()
             next_dice.remove(roll)
-            next_moves = board_copy.get_all_complete_moves(next_dice)
-            if next_moves and next_moves[0][1][0][0] != NO_MOVE_NUMBER:
+            next_moves = board_copy.get_all_complete_moves(next_dice) if next_dice else []
+            if next_moves:
                 moves += [(position, [(roll, action), *move]) for position, move in next_moves]
             else:
-                moves += [(position, [(roll, action)]) for position, _ in next_moves]
+                moves += [(board_copy, [(roll, action)])]
 
         max_moves = max(len(move) for _, move in moves) if moves else 0
         # Filter out moves that are not the longest.
