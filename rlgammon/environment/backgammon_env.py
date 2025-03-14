@@ -148,7 +148,7 @@ class BackgammonEnv:
             render = human_renderer.BackgammonRenderer()
             render.render(self.backgammon.board, self.backgammon.bar, self.backgammon.off)
         else:
-            print(text_render(self.backgammon))
+            print(self)
 
     @staticmethod
     def seed(seed: int | None = None) -> None:
@@ -248,5 +248,6 @@ class BackgammonEnv:
         """Return whether the input arrays are equal."""
         return np.array_equal(self.get_input(), other.get_input())
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """Represent the environment with text."""
         return text_render(self.backgammon)
