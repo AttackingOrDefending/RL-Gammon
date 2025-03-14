@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 import random
+import sys
 from typing import Any
 
 import numpy as np
@@ -131,7 +132,21 @@ class BackgammonEnv:
         :return: Tuple containing (reward, done, truncated, info).
         """
         self.moves += 1
+        white_pieces = (np.sum(self.backgammon.board[self.backgammon.board > 0]) + self.backgammon.off[0]
+                        + self.backgammon.bar[0])
+        black_pieces = (np.sum(-self.backgammon.board[self.backgammon.board < 0]) + self.backgammon.off[1]
+                        + self.backgammon.bar[1])
         self.backgammon.make_move(action)
+        white_pieces_new = (np.sum(-self.backgammon.board[self.backgammon.board < 0]) + self.backgammon.off[1]
+                            + self.backgammon.bar[1])
+        black_pieces_new = (np.sum(self.backgammon.board[self.backgammon.board > 0]) + self.backgammon.off[0]
+                            + self.backgammon.bar[0])
+        if black_pieces != black_pieces_new or white_pieces != white_pieces_new:
+            self.render("text")
+            print(action)
+            print("Black pieces:", black_pieces, "Black pieces new:", black_pieces_new)
+            print("White pieces:", white_pieces, "White pieces new:", white_pieces_new)
+            sys.exit()
         done = self.backgammon.is_terminal()
         reward = 0.0
         if done:
@@ -194,7 +209,7 @@ class BackgammonEnv:
 
         actions = self.get_legal_moves(dice)
         if not actions:
-            result = [(self, [(NO_MOVE_NUMBER, (NO_MOVE_NUMBER, NO_MOVE_NUMBER))])]
+            result: list[tuple[BackgammonEnv, list[tuple[int, MovePart]]]] = []
             self._cache[key] = result
             return result
 
@@ -210,7 +225,7 @@ class BackgammonEnv:
             else:
                 moves += [(position, [(roll, action)]) for position, _ in next_moves]
 
-        max_moves = max(len(move) for _, move in moves)
+        max_moves = max(len(move) for _, move in moves) if moves else 0
         # Filter out moves that are not the longest.
         moves = [move for move in moves if len(move[1]) == max_moves]
         # If not all rolls can be used, use the one with the largest roll.
