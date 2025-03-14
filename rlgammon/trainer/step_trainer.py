@@ -77,10 +77,10 @@ class StepTrainer(BaseTrainer):
                 for _, action in actions:
                     reward, done, trunc, _ = env.step(action)
 
+                player = env.current_player
+                env.flip()
                 next_state = env.get_input()
-                episode_buffer.append((state, next_state, actions, done, env.current_player))
-                if not done and not trunc:
-                    env.flip()
+                episode_buffer.append((state, next_state, actions, done, player))
 
                 # Only train agent when at least a batch of data in the buffer
                 if buffer.has_element_count(self.parameters["batch_size"]):

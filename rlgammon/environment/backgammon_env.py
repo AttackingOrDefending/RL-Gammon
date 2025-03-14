@@ -247,3 +247,6 @@ class BackgammonEnv:
     def __eq__(self, other: BackgammonEnv) -> bool:  # type: ignore[override]
         """Return whether the input arrays are equal."""
         return np.array_equal(self.get_input(), other.get_input())
+
+    def __repr__(self):
+        return text_render(self.backgammon)
