@@ -134,6 +134,7 @@ class DoubleDQNAgent(TrainableAgent):
         agent_file_path = pathlib.Path(__file__).parent
         agent_file_path = agent_file_path.joinpath("saved_agents/")
 
+        agent_file_path.mkdir(parents=True, exist_ok=True)
         torch.save(self.value_network.state_dict(), agent_file_path.joinpath(agent_main_filename))
         torch.save(self.target_network.state_dict(), agent_file_path.joinpath(agent_target_filename))
         torch.save(self.optimizer.state_dict(), agent_file_path.joinpath(agent_optimizer_filename))

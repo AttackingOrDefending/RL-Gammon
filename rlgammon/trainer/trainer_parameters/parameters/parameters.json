@@ -1,5 +1,5 @@
 {
-  "episodes": 1001,
+  "episodes": 200,
   "save_every": 25,
   "testing_type": "RND",
   "episodes_in_test": 10,

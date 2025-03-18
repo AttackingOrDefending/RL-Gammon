@@ -15,24 +15,27 @@ logging.basicConfig(level=logging.INFO)
 class Logger:
     """Create a logger for storing data about the training process."""
 
-    def __init__(self) -> None:
+    def __init__(self, training_session_id: UUID) -> None:
         """Construct a logger by composing it with the python logging library, and initializing an empty data list."""
         self.logger = logging.getLogger("rl-training-logger")
+        self.training_session_id = training_session_id
         self.num_items, self.load_episode, self.load_step = 0, 0, 0
-        self.info: LoggerData = {"episodes": [0], "steps": [0], "win_rate": [0.0]}
+        self.info: LoggerData = {"episodes": [0], "steps": [0], "win_rate": [0.0], "training_time": [0.0]}
 
-    def update_log(self, episode: int, steps: int, win_rate: float) -> None:
+    def update_log(self, episode: int, steps: int, win_rate: float, training_time: float) -> None:
         """
         Add data to the log .
 
         :param episode: current episode of the training process
         :param steps: current steps of the training process
         :param win_rate: current win rate achieved during tests
+        :param training_time: current training time since the start of the session
         """
         self.num_items += 1
         self.info["episodes"].append(episode)
         self.info["steps"].append(steps)
         self.info["win_rate"].append(win_rate)
+        self.info["training_time"].append(training_time)
 
     def print_log(self) -> None:
         """Print the most recent logger data to the termial using the python logging library."""
@@ -51,7 +54,7 @@ class Logger:
         Utility function to convert fractional win rate to percent of one data point.
 
         :param win_rate: fractional win rate to be converted
-        :return: the provided win rate represented as a string precentage
+        :return: the provided win rate represented as a string percentage
         """
         return str(round(win_rate * 100, 2)) + "%"
 
@@ -118,7 +121,7 @@ class Logger:
         logger_file_path = Path(__file__).parent
         logger_file_path = logger_file_path.joinpath("saved_loggers/")
         path = logger_file_path.joinpath(logger_name)
-        path.mkdir(parents=True, exist_ok=True)
+        logger_file_path.mkdir(parents=True, exist_ok=True)
         with path.open("wb") as f:
             pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
 

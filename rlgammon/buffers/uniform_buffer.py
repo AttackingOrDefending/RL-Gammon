@@ -120,6 +120,6 @@ class UniformBuffer(BaseBuffer):
         buffer_file_path = Path(__file__).parent
         buffer_file_path = buffer_file_path.joinpath("saved_buffers/")
         path = buffer_file_path.joinpath(buffer_name)
-        path.mkdir(parents=True, exist_ok=True)
+        buffer_file_path.mkdir(parents=True, exist_ok=True)
         with path.open("wb") as f:
             pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)

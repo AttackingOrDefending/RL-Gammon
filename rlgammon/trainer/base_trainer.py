@@ -2,6 +2,7 @@
 
 from abc import abstractmethod
 from typing import Any
+from uuid import UUID
 
 from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.buffers import BaseBuffer, UniformBuffer
@@ -47,14 +48,14 @@ class BaseTrainer:
                 reward *= -1
             buffer.record(state, next_state, action, reward, done)
 
-    def create_logger_from_parameters(self) -> Logger:
+    def create_logger_from_parameters(self, training_session_id: UUID) -> Logger:
         """
         Create a new logger, either an empty one just initialized
         or one loaded with the logger name provided in the parameters.
 
         :return: new logger
         """
-        logger = Logger()
+        logger = Logger(training_session_id)
         if self.parameters["load_logger"]:
             logger.load(self.parameters["logger_name"])
         return logger
