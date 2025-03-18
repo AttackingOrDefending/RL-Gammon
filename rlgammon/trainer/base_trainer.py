@@ -9,6 +9,7 @@ from rlgammon.buffers.buffer_types import PossibleBuffers
 from rlgammon.environment import BackgammonEnv
 from rlgammon.exploration import BaseExploration, EpsilonGreedyExploration
 from rlgammon.exploration.exploration_types import PossibleExploration
+from rlgammon.exploration.no_exploration import NoExploration
 from rlgammon.rlgammon_types import Input, MoveList
 from rlgammon.trainer.logger.logger import Logger
 from rlgammon.trainer.testing.base_testing import BaseTesting
@@ -64,10 +65,11 @@ class BaseTrainer:
 
         :return: testing object of the type provided in the parameters
         """
-        if self.parameters["testing_type"] == PossibleTesting.RANDOM:
-            testing = RandomTesting(self.parameters["episodes_in_test"])
-        else:
-            raise WrongTestingTypeError
+        match self.parameters["testing_type"]:
+            case PossibleTesting.RANDOM:
+                testing = RandomTesting(self.parameters["episodes_in_test"])
+            case _:
+                raise WrongTestingTypeError
         return testing
 
     def create_buffer_from_parameters(self, env: BackgammonEnv) -> BaseBuffer:
@@ -76,11 +78,11 @@ class BaseTrainer:
 
         :return: buffer of the type provided in the parameters
         """
-        if self.parameters["buffer"] == PossibleBuffers.UNIFORM:
-            buffer = UniformBuffer(env.observation_shape, env.action_shape, self.parameters["buffer_capacity"])
-        else:
-            raise WrongBufferTypeError
-
+        match self.parameters["buffer"]:
+            case PossibleBuffers.UNIFORM:
+                buffer = UniformBuffer(env.observation_shape, env.action_shape, self.parameters["buffer_capacity"])
+            case _:
+                raise WrongBufferTypeError
         return buffer
 
     def create_explorer_from_parameters(self) -> BaseExploration:
@@ -89,12 +91,15 @@ class BaseTrainer:
 
         :return: exploration algorithm of the type provided in the parameters
         """
-        if self.parameters["exploration"] == PossibleExploration.EPSILON_GREEDY:
-            explorer = EpsilonGreedyExploration(self.parameters["start_epsilon"], self.parameters["end_epsilon"],
-                                                self.parameters["update_decay"], self.parameters["steps_per_update"])
-        else:
-            raise WrongExplorationTypeError
-
+        match self.parameters["exploration"]:
+            case PossibleExploration.EPSILON_GREEDY:
+                explorer: EpsilonGreedyExploration | NoExploration = (
+                    EpsilonGreedyExploration(self.parameters["start_epsilon"], self.parameters["end_epsilon"],
+                                             self.parameters["update_decay"], self.parameters["steps_per_update"]))
+            case PossibleExploration.NO_EXPLORATION:
+                explorer = NoExploration()
+            case _:
+                raise WrongExplorationTypeError
         return explorer
 
     def is_ready_for_training(self) -> bool:

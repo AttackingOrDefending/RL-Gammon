@@ -17,4 +17,9 @@ class PossibleTesting(Enum):
         """
         if string_to_convert == PossibleTesting.RANDOM.value:
             return PossibleTesting.RANDOM
-        return None  # type: ignore[return-value]
+
+        match string_to_convert:
+            case "RND":
+                return PossibleTesting.RANDOM
+            case _:
+                return None  # type: ignore[return-value]
