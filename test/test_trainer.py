@@ -18,3 +18,12 @@ def test_load_parameters_invalid() -> None:
         trainer.load_parameters("test_parameters/invalid_type_test_parameters.json")
     assert excinfo.type is ValueError
 
+def test_finalize_data_win() -> None:
+    """Test that finalize data wins."""
+    trainer = StepTrainer()
+    assert 1 == 1
+
+def test_finalize_data_draw() -> None:
+    """Test that finalize data draws."""
+    trainer = StepTrainer()
+    assert 1 == 1

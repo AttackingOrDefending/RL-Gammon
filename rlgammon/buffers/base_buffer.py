@@ -3,12 +3,32 @@
 from abc import abstractmethod
 from uuid import UUID
 
+import numpy as np
+
 from rlgammon.buffers.buffer_types import BufferBatch
 from rlgammon.rlgammon_types import Input, MoveList
 
 
 class BaseBuffer:
     """Base class for all buffers used for training."""
+
+    def __init__(self, observation_shape: tuple[int, ...], action_shape: int, capacity: int) -> None:
+        """
+        Constructor for the BaseBuffer, that initializes the counter, and all the numpy arrays for storing data.
+
+        :param observation_shape: the shape of the environment states.
+        :param action_shape: the shape of the environment actions.
+        :param capacity: the number of samples that can maximally be stored in the buffer
+        """
+        self.capacity = capacity
+        self.update_counter = 0
+        self.action_shape = action_shape
+
+        self.state_buffer = np.zeros(shape=(self.capacity, *observation_shape), dtype=np.int8)
+        self.new_state_buffer = np.zeros(shape=(self.capacity, *observation_shape), dtype=np.int8)
+        self.action_buffer = np.zeros(shape=(self.capacity, action_shape), dtype=np.int8)
+        self.reward_buffer = np.zeros(shape=self.capacity, dtype=np.int8)
+        self.done_buffer = np.zeros(shape=self.capacity, dtype=np.bool)
 
     @abstractmethod
     def record(self, state: Input, next_state: Input, action: MoveList, reward: float, done: bool) -> None:
