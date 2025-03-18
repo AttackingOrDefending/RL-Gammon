@@ -7,6 +7,7 @@ class PossibleExploration(Enum):
     """Enumeration of possible exploration types."""
 
     EPSILON_GREEDY = "EG"
+    NO_EXPLORATION = "NO"
 
     @staticmethod
     def get_enum_from_string(string_to_convert: str) -> "PossibleExploration":
@@ -15,6 +16,10 @@ class PossibleExploration(Enum):
 
         :return: the corresponding enum, if none found, return null
         """
-        if string_to_convert == PossibleExploration.EPSILON_GREEDY.value:
-            return PossibleExploration.EPSILON_GREEDY
-        return None  # type: ignore[return-value]
+        match string_to_convert:
+            case "EG":
+                return PossibleExploration.EPSILON_GREEDY
+            case "NO":
+                return PossibleExploration.NO_EXPLORATION
+            case _:
+                return None # type: ignore[return-value]

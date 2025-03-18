@@ -22,4 +22,9 @@ class PossibleBuffers(Enum):
         """
         if string_to_convert == PossibleBuffers.UNIFORM.value:
             return PossibleBuffers.UNIFORM
-        return None  # type: ignore[return-value]
+
+        match string_to_convert:
+            case "U":
+                return PossibleBuffers.UNIFORM
+            case _:
+                return None # type: ignore[return-value]
