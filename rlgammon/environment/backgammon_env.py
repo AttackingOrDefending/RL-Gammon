@@ -58,7 +58,7 @@ class BackgammonEnv:
         :param player: the player to check
         :return: true, if the player has lost, false otherwise.
         """
-        return self.moves % 2 != player % 2
+        return self.moves % 2 != ((player - 1) / 2) % 2
 
     def get_input(self, get_normalized: bool = False) -> Input:
         """
