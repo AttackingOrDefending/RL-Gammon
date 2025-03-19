@@ -2,8 +2,14 @@
 
 import pytest
 
+from rlgammon.buffers import UniformBuffer
 from rlgammon.trainer.step_trainer import StepTrainer
 
+
+@pytest.fixture
+def init_buffer() -> UniformBuffer:
+    buffer = UniformBuffer((2, 2), 2, 10)
+    return buffer
 
 def test_load_parameters_valid() -> None:
     """Test that valid parameters are loaded."""
@@ -18,12 +24,35 @@ def test_load_parameters_invalid() -> None:
         trainer.load_parameters("test_parameters/invalid_type_test_parameters.json")
     assert excinfo.type is ValueError
 
-def test_finalize_data_win() -> None:
-    """Test that finalize data wins."""
+@pytest.mark.parametrize("init_buffer", [])
+def test_finalize_data_win(buffer: UniformBuffer) -> None:
+    """
+    Test that finalize data wins.
+
+    :param buffer: TODO
+    """
     trainer = StepTrainer()
+
+    episode_buffer = []
+    losing_player = 1
+    final_reward = 1
+
+    # TODO: Add data to test
+    trainer.finalize_data(episode_buffer, losing_player, final_reward, buffer)
     assert 1 == 1
 
-def test_finalize_data_draw() -> None:
-    """Test that finalize data draws."""
+@pytest.mark.parametrize("init_buffer", [])
+def test_finalize_data_draw(buffer: UniformBuffer) -> None:
+    """
+    Test that finalize data draws.
+
+    :param buffer: TODO
+    """
     trainer = StepTrainer()
+
+    episode_buffer = []
+    losing_player = -1
+    final_reward = 0
+    trainer.finalize_data(episode_buffer, losing_player, final_reward, buffer)
+
     assert 1 == 1

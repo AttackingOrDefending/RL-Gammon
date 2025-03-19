@@ -24,15 +24,22 @@ def buffer_init() -> UniformBuffer:
     buffer.record(state1, next_state1, action1, reward1, done1)
     return buffer
 
-@pytest.mark.parametrize("buffer_init")
-def test_record() -> None:
+@pytest.mark.parametrize("buffer_init", [])
+def test_record(buffer: UniformBuffer) -> None:
     """."""
     assert 1 == 1
 
-def test_has_element_count() -> None:
+def test_has_element_count(buffer: UniformBuffer) -> None:
     """."""
-    assert 1 == 1
+    assert buffer.has_element_count(1)
+    assert buffer.has_element_count(2)
 
-def test_get_batch() -> None:
+def test_has_not_element_count(buffer: UniformBuffer) -> None:
     """."""
+    assert not buffer.has_element_count(64)
+
+def test_get_batch(buffer: UniformBuffer) -> None:
+    """."""
+    batch = buffer.get_batch(2)
+    # TODO: CHECK IF DATA THE SAME
     assert 1 == 1

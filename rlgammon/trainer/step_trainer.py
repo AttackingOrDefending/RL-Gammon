@@ -1,9 +1,5 @@
 """Sequential trainer with training at each step."""
 
-# TODO: skip steps with no moves
-# TODO: Adjust ddqn agent ?
-# TODO: Bug when coming off from the bar
-
 import json
 from pathlib import Path
 import time
@@ -75,10 +71,15 @@ class StepTrainer(BaseTrainer):
 
                 # Get actions from the explorer and agent
                 dice = env.roll_dice()
-                if explorer.should_explore():
-                    actions = explorer.explore(env.get_all_complete_moves(dice))
-                else:
-                    actions = agent.choose_move(env, dice)
+                valid_moves = env.get_all_complete_moves(dice)
+
+                # If no moves can be made skip the turn, and go to the next player
+                if not valid_moves:
+                    env.flip()
+                    continue
+
+                # Get the action using exploration or from the agent
+                actions = explorer.explore(valid_moves) if explorer.should_explore() else agent.choose_move(env, dice)
 
                 # Iterate over action parts and add each intermediate state-action pair to the buffer
                 for _, action in actions:
