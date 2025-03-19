@@ -21,22 +21,23 @@ class DQN(nn.Module):
         """Initialize the DQN value network."""
         super().__init__()
         self.fc1 = nn.Linear(52, 64, dtype=torch.float32)
-        self.fc2 = nn.Linear(64, 64, dtype=torch.float32)
-        self.fc3 = nn.Linear(64, 1, dtype=torch.float32)
+        nn.init.xavier_uniform_(self.fc1.weight)
+        self.fc2 = nn.Linear(64, 1, dtype=torch.float32)
+        nn.init.xavier_uniform_(self.fc2.weight)
+        self.fc2.weight.data /= 1000
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass through the DQN value network."""
         x = nn.functional.relu(self.fc1(x))
-        x = nn.functional.relu(self.fc2(x))
-        return self.fc3(x)
+        return self.fc2(x)
 
 
 class DoubleDQNAgent(TrainableAgent):
     """A DQN agent for backgammon."""
 
     def __init__(self, main_filename: str = "ddqn-value",
-                 target_filename: str = "ddqn-target_value", optimizer_filename: str = "ddqn-optimizer", lr: float = 0.01,
-                 tau: float = 0.01, batch_size: int = 128, gamma: float = 0.99, max_grad_norm: float = 5) -> None:
+                 target_filename: str = "ddqn-target_value", optimizer_filename: str = "ddqn-optimizer", lr: float = 0.001,
+                 tau: float = 0.01, batch_size: int = 64, gamma: float = 0.99, max_grad_norm: float = 5) -> None:
         """Initialize the DQN agent."""
         super().__init__()
         self.main_filename = main_filename
@@ -54,7 +55,8 @@ class DoubleDQNAgent(TrainableAgent):
             self.value_network.load_state_dict(torch.load(main_filename))
         if target_filename and pathlib.Path(target_filename).exists():
             self.target_network.load_state_dict(torch.load(target_filename))
-        self.optimizer = torch.optim.AdamW(self.value_network.parameters())
+        self.optimizer = torch.optim.RMSprop(self.value_network.parameters(), lr=self.lr, momentum=0.9, eps=0.001,
+                                             centered=True)
         if optimizer_filename and pathlib.Path(optimizer_filename).exists():
             self.optimizer.load_state_dict(torch.load(optimizer_filename))
 

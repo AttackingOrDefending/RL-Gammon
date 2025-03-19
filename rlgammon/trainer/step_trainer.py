@@ -56,8 +56,6 @@ class StepTrainer(BaseTrainer):
         logger = self.create_logger_from_parameters()
         session_id = uuid.uuid4()
 
-        agent.value_network.eval()
-
         total_steps = 0
         for episode in range(self.parameters["episodes"]):
             print(f"Episode {episode + 1} of {self.parameters['episodes']}")
@@ -85,15 +83,17 @@ class StepTrainer(BaseTrainer):
                 next_state = env.get_input()
                 episode_buffer.append((state, next_state, actions, done, player))
 
+                # Only train agent when at least a batch of data in the buffer
+                if buffer.has_element_count(self.parameters["batch_size"]):
+                    agent.train(buffer)
+
+                total_steps += 1
+
             # Only train agent when at least a batch of data in the buffer
             total_steps += 1
 
             # Update the collected data based on the final result of the game
             self.finalize_data(episode_buffer, env.current_player, reward, buffer)
-            if buffer.has_element_count(self.parameters["batch_size"]):
-                agent.value_network.train()
-                agent.train(buffer)
-                agent.value_network.eval()
 
             if episode > 0 and episode % self.parameters["episodes_per_test"] == 0:
                 results = testing.test(agent)
