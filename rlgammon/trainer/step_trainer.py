@@ -58,6 +58,7 @@ class StepTrainer(BaseTrainer):
 
         total_steps = 0
         for episode in range(self.parameters["episodes"]):
+            print(f"Episode {episode + 1} of {self.parameters['episodes']}")
             env.reset()
             done = False
             trunc = False
@@ -87,6 +88,9 @@ class StepTrainer(BaseTrainer):
                     agent.train(buffer)
 
                 total_steps += 1
+
+            # Only train agent when at least a batch of data in the buffer
+            total_steps += 1
 
             # Update the collected data based on the final result of the game
             self.finalize_data(episode_buffer, env.current_player, reward, buffer)

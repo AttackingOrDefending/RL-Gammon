@@ -10,7 +10,7 @@ from torch import nn
 
 from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.buffers import BaseBuffer
-from rlgammon.environment import NO_MOVE_NUMBER, BackgammonEnv
+from rlgammon.environment import BackgammonEnv
 from rlgammon.rlgammon_types import MovePart
 
 
@@ -20,26 +20,23 @@ class DQN(nn.Module):
     def __init__(self) -> None:
         """Initialize the DQN value network."""
         super().__init__()
-        self.fc1 = nn.Linear(52, 128, dtype=torch.float32)
+        self.fc1 = nn.Linear(52, 64, dtype=torch.float32)
         nn.init.xavier_uniform_(self.fc1.weight)
-        self.fc2 = nn.Linear(128, 128, dtype=torch.float32)
+        self.fc2 = nn.Linear(64, 1, dtype=torch.float32)
         nn.init.xavier_uniform_(self.fc2.weight)
-        self.fc3 = nn.Linear(128, 1, dtype=torch.float32)
-        nn.init.xavier_uniform_(self.fc3.weight)
-        self.fc3.weight.data /= 1000
+        self.fc2.weight.data /= 1000
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass through the DQN value network."""
-        x = nn.functional.elu(self.fc1(x))
-        x = nn.functional.elu(self.fc2(x))
-        return self.fc3(x)
+        x = nn.functional.relu(self.fc1(x))
+        return self.fc2(x)
 
 
 class DoubleDQNAgent(TrainableAgent):
     """A DQN agent for backgammon."""
 
     def __init__(self, main_filename: str = "ddqn-value",
-                 target_filename: str = "ddqn-target_value", optimizer_filename: str = "ddqn-optimizer", lr: float = 0.0001,
+                 target_filename: str = "ddqn-target_value", optimizer_filename: str = "ddqn-optimizer", lr: float = 0.001,
                  tau: float = 0.01, batch_size: int = 64, gamma: float = 0.99, max_grad_norm: float = 5) -> None:
         """Initialize the DQN agent."""
         super().__init__()
@@ -71,7 +68,7 @@ class DoubleDQNAgent(TrainableAgent):
 
         scores_per_move = []
 
-        if actions[0][1][0][0] == -NO_MOVE_NUMBER:
+        if not actions:
             return []
         for board_after_move, moves in actions:
             value = -self.evaluate_position(board_after_move)  # Minimize opponent's value
