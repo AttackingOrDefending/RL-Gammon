@@ -88,7 +88,7 @@ class BackgammonEnv:
                 expanded_input += [1, 0, 0, 0]
             elif compressed_res[i] == 2:  # noqa: PLR2004
                 expanded_input += [1, 1, 0, 0]
-            elif compressed_res[i] == 3:  # noqa: PLR2004
+            else:  # noqa: PLR2004
                 expanded_input += [1, 1, 1, compressed_res[i] - 3]
         res = np.array(expanded_input, dtype=np.int8)
         if get_normalized:

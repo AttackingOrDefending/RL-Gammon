@@ -117,6 +117,7 @@ class Logger:
         logger_name = f"logger-{training_session_id}-({session_save_count}).pkl"
         logger_file_path = Path(__file__).parent
         logger_file_path = logger_file_path.joinpath("saved_loggers/")
+        logger_file_path.mkdir(parents=True, exist_ok=True)
         path = logger_file_path.joinpath(logger_name)
         with path.open("wb") as f:
             pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)

@@ -125,6 +125,7 @@ class UniformBuffer(BaseBuffer):
         buffer_name = f"uniform-buffer-{training_session_id}-({session_save_count}).pkl"
         buffer_file_path = Path(__file__).parent
         buffer_file_path = buffer_file_path.joinpath("saved_buffers/")
+        buffer_file_path.mkdir(parents=True, exist_ok=True)
         path = buffer_file_path.joinpath(buffer_name)
         with path.open("wb") as f:
             pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
