@@ -74,9 +74,12 @@ cell_stats = [
 ]
 
 
-def normalize_input(arr: Input, stats: list[tuple[float, float]]) -> Input:
+def normalize_input(arr: Input, stats: list[tuple[float, float]]) -> Input:  # noqa: ARG001
     """Normalize the observations."""
+    """
     standardized = np.empty_like(arr, dtype=np.float16)
     for i, (mean, std) in enumerate(stats):
         standardized[i] = (arr[i] - mean) / std
     return standardized
+    """
+    return arr
