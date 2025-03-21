@@ -20,7 +20,7 @@ class DQN(nn.Module):
     def __init__(self) -> None:
         """Initialize the DQN value network."""
         super().__init__()
-        self.fc1 = nn.Linear(52, 64, dtype=torch.float32)
+        self.fc1 = nn.Linear(208, 64, dtype=torch.float32)
         nn.init.xavier_uniform_(self.fc1.weight)
         self.fc2 = nn.Linear(64, 1, dtype=torch.float32)
         nn.init.xavier_uniform_(self.fc2.weight)
