@@ -5,6 +5,8 @@ from uuid import UUID
 
 import numpy as np
 
+import numpy as np
+
 from rlgammon.buffers.buffer_types import BufferBatch
 from rlgammon.rlgammon_types import Input, MoveList
 

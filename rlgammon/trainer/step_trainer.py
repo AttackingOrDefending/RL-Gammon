@@ -1,5 +1,11 @@
 """Sequential trainer with training at each step."""
 
+# TODO: skip steps with no moves
+# TODO: Add training time in logger
+# TODO: Adjust ddqn agent ?
+# TODO: Bug when coming off from the bar
+# TODO: Add functionality for adding empty folder
+
 import json
 from pathlib import Path
 import time
