@@ -43,6 +43,7 @@ class Logger:
         performance_msg = ("\nBeen training for:\n"
                    f"Episodes: {self.info['episodes'][-1]}\n"
                    f"Steps: {self.info['steps'][-1]}\n"
+                   f"Time: {self.info['training_time'][-1]}\n"
                    "Current performance:\n"
                    f"Win rate: {self.convert_win_rate_to_percent(self.info['win_rate'][-1])}\n")
         logging_message = performance_msg + break_line
@@ -127,5 +128,5 @@ class Logger:
 
     def clear(self) -> None:
         """Clear all data from the logger."""
-        self.info = {"episodes": [0], "steps": [0], "win_rate": [0.0]}
+        self.info = {"episodes": [0], "steps": [0], "win_rate": [0.0], "training_time": [0]}
         self.num_items, self.load_episode, self.load_step = 0, 0, 0

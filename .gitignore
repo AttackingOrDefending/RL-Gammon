@@ -169,3 +169,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Project files with saved training objects
+/rlgammon/agents/saved_agents/
+/rlgammon/trainer/logger/saved_loggers/
+/rlgammon/buffers/saved_buffers/

@@ -43,7 +43,7 @@ class BaseTrainer:
         :param buffer: buffer to which to add the data
         """
         for i, (state, next_state, action, done, player) in enumerate(reversed(episode_buffer)):
-            reward = final_reward * self.parameters["decay"] ** i
+            reward = final_reward * self.parameters["decay"] ** (max(0, i - 1))
             if player == losing_player:
                 reward *= -1
             buffer.record(state, next_state, action, reward, done)

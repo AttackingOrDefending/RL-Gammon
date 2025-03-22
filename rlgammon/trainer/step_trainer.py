@@ -1,15 +1,11 @@
 """Sequential trainer with training at each step."""
 
-# TODO: skip steps with no moves
-# TODO: Add training time in logger
-# TODO: Adjust ddqn agent ?
-# TODO: Bug when coming off from the bar
-# TODO: Add functionality for adding empty folder
-
 import json
 from pathlib import Path
 import time
 import uuid
+
+from tqdm import tqdm
 
 from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.environment import BackgammonEnv
@@ -65,11 +61,10 @@ class StepTrainer(BaseTrainer):
 
         total_steps = 0
         training_time_start = time.time()
-        for episode in range(self.parameters["episodes"]):
-            print(f"Episode {episode + 1} of {self.parameters['episodes']}")
+        for episode in tqdm(range(self.parameters["episodes"]), desc="Training Episodes"):
             env.reset()
-            done = True
-            trunc = True
+            done = False
+            trunc = False
             episode_buffer: list[tuple[Input, Input, MoveList, bool, int]] = []
             reward = 0.0
             while not done and not trunc:
@@ -108,13 +103,13 @@ class StepTrainer(BaseTrainer):
             # Update the collected data based on the final result of the game
             self.finalize_data(episode_buffer, env.current_player, reward, buffer)
 
-            if episode > 0 and episode % self.parameters["episodes_per_test"] == 0:
+            if  (episode + 1) % self.parameters["episodes_per_test"] == 0:
                 results = testing.test(agent)
                 training_time = time.time() - training_time_start
                 logger.update_log(episode, total_steps, results["win_rate"], training_time)
                 logger.print_log()
 
-            if episode > 0 and episode % self.parameters["save_every"] == 0:
+            if (episode + 1) % self.parameters["save_every"] == 0:
                 logger.save(session_id, episode // self.parameters["save_every"])
                 agent.save(session_id, episode // self.parameters["save_every"])
 

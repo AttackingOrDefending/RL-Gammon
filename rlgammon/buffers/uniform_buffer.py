@@ -55,7 +55,7 @@ class UniformBuffer(BaseBuffer):
         :param element_count: element count to check
         :return: boolean, indicating if the buffer has at least the specified element count
         """
-        return self.update_counter > element_count
+        return self.update_counter >= element_count
 
     def get_batch(self, batch_size: int) -> BufferBatch:
         """

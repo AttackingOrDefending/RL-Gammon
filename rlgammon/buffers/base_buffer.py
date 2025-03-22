@@ -5,8 +5,6 @@ from uuid import UUID
 
 import numpy as np
 
-import numpy as np
-
 from rlgammon.buffers.buffer_types import BufferBatch
 from rlgammon.rlgammon_types import Input, MoveList
 
@@ -64,6 +62,24 @@ class BaseBuffer:
         each of which having as their value a numpy array with batch size amount of elements
         """
         raise NotImplementedError
+
+    def contains_state(self, state: Input) -> bool:
+        """
+        Check if the provided state is stored in the buffer's state-array.
+
+        :param state: state to be searched
+        :return: true, if state is in the buffer, else false
+        """
+        return any(np.array_equal(state, self.state_buffer[i]) for i in range(self.state_buffer.shape[0]))
+
+    def contains_next_state(self, new_state: Input) -> bool:
+        """
+        Check if the provided state is stored in the buffer's new-state-array.
+
+        :param new_state: state to be searched
+        :return: true, if state is in the buffer, else false
+        """
+        return any(np.array_equal(new_state, self.new_state_buffer[i]) for i in range(self.new_state_buffer.shape[0]))
 
     @abstractmethod
     def clear(self) -> None:
