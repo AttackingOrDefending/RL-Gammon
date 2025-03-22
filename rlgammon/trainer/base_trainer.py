@@ -2,6 +2,7 @@
 
 from abc import abstractmethod
 from typing import Any
+from uuid import UUID
 
 from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.buffers import BaseBuffer, UniformBuffer
@@ -42,19 +43,19 @@ class BaseTrainer:
         :param buffer: buffer to which to add the data
         """
         for i, (state, next_state, action, done, player) in enumerate(reversed(episode_buffer)):
-            reward = final_reward * self.parameters["decay"] ** i
+            reward = final_reward * self.parameters["decay"] ** (max(0, i - 1))
             if player == losing_player:
                 reward *= -1
             buffer.record(state, next_state, action, reward, done)
 
-    def create_logger_from_parameters(self) -> Logger:
+    def create_logger_from_parameters(self, training_session_id: UUID) -> Logger:
         """
         Create a new logger, either an empty one just initialized
         or one loaded with the logger name provided in the parameters.
 
         :return: new logger
         """
-        logger = Logger()
+        logger = Logger(training_session_id)
         if self.parameters["load_logger"]:
             logger.load(self.parameters["logger_name"])
         return logger

@@ -46,16 +46,16 @@ class RandomTesting(BaseTesting):
                 for _, action in actions:
                     reward, done, trunc, _ = env.step(action)
 
-                if not done and not trunc:
-                    env.flip()
+                env.flip()
 
-            agent_player *= -1
             if reward == 0:
                 draws += 1
             elif env.has_lost(agent_player):
                 losses += 1
             else:
                 wins += 1
+
+            agent_player *= -1
 
         return {"win_rate": wins / self.episodes_in_test,
                 "draws": draws / self.episodes_in_test,

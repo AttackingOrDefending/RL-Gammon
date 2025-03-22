@@ -2,7 +2,10 @@
 
 import json
 from pathlib import Path
+import time
 import uuid
+
+from tqdm import tqdm  # type: ignore[import-untyped]
 
 from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.environment import BackgammonEnv
@@ -49,16 +52,16 @@ class StepTrainer(BaseTrainer):
         if not self.is_ready_for_training():
             raise NoParametersError
 
+        session_id = uuid.uuid4()
         env = BackgammonEnv()
         buffer = self.create_buffer_from_parameters(env)
         explorer = self.create_explorer_from_parameters()
         testing = self.create_testing_from_parameters()
-        logger = self.create_logger_from_parameters()
-        session_id = uuid.uuid4()
+        logger = self.create_logger_from_parameters(session_id)
 
         total_steps = 0
-        for episode in range(self.parameters["episodes"]):
-            print(f"Episode {episode + 1} of {self.parameters['episodes']}")
+        training_time_start = time.time()
+        for episode in tqdm(range(self.parameters["episodes"]), desc="Training Episodes"):
             env.reset()
             done = False
             trunc = False
@@ -69,10 +72,15 @@ class StepTrainer(BaseTrainer):
 
                 # Get actions from the explorer and agent
                 dice = env.roll_dice()
-                if explorer.should_explore():
-                    actions = explorer.explore(env.get_all_complete_moves(dice))
-                else:
-                    actions = agent.choose_move(env, dice)
+                valid_moves = env.get_all_complete_moves(dice)
+
+                # If no moves can be made skip the turn, and go to the next player
+                if not valid_moves:
+                    env.flip()
+                    continue
+
+                # Get the action using exploration or from the agent
+                actions = explorer.explore(valid_moves) if explorer.should_explore() else agent.choose_move(env, dice)
 
                 # Iterate over action parts and add each intermediate state-action pair to the buffer
                 for _, action in actions:
@@ -95,12 +103,13 @@ class StepTrainer(BaseTrainer):
             # Update the collected data based on the final result of the game
             self.finalize_data(episode_buffer, env.current_player, reward, buffer)
 
-            if episode > 0 and episode % self.parameters["episodes_per_test"] == 0:
+            if  (episode + 1) % self.parameters["episodes_per_test"] == 0:
                 results = testing.test(agent)
-                logger.update_log(episode, total_steps, results["win_rate"])
+                training_time = time.time() - training_time_start
+                logger.update_log(episode, total_steps, results["win_rate"], training_time)
                 logger.print_log()
 
-            if episode > 0 and episode % self.parameters["save_every"] == 0:
+            if (episode + 1) % self.parameters["save_every"] == 0:
                 logger.save(session_id, episode // self.parameters["save_every"])
                 agent.save(session_id, episode // self.parameters["save_every"])
 
