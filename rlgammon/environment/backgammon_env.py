@@ -55,6 +55,8 @@ class BackgammonEnv:
         to the player who should have played after the last move (i.e. the losing player).
         Have to be careful to only use it after done was returned to true and reward = 1.
 
+        When the number of moves is odd, player 1 lost, if even then player -1 lost
+
         :param player: the player to check
         :return: true, if the player has lost, false otherwise.
         """

@@ -46,8 +46,7 @@ class RandomTesting(BaseTesting):
                 for _, action in actions:
                     reward, done, trunc, _ = env.step(action)
 
-                if not done and not trunc:
-                    env.flip()
+                env.flip()
 
             if reward == 0:
                 draws += 1
