@@ -68,29 +68,62 @@ class BackgammonEnv:
         :return: Array containing board state, bar, and off information.
         """
         board = self.backgammon.board  # shape (24,)
-        # Pre-allocate the result array:
-        # our_pieces (24) + enemy_pieces (24) + bar (2) + off (2) = 52 elements.
-        # 52 * 4 (per square) = 208 elements.
-        compressed_res = np.empty(52, dtype=np.int8)
 
-        # Use np.maximum to replace elementwise comparison and assignment (vectorized).
-        np.maximum(board, 0, out=compressed_res[:24])  # our_pieces: all negative values become 0
-        np.maximum(-board, 0, out=compressed_res[24:48])  # enemy_pieces: all negative values (of -board) become 0
+        # Directly create the final output array (much faster than intermediate steps)
+        res = np.zeros(208, dtype=np.int8)
 
-        # Directly set bar and off.
-        compressed_res[48:50] = self.backgammon.bar
-        compressed_res[50:52] = self.backgammon.off
-        expanded_input = []
-        for i in range(52):
-            if compressed_res[i] == 0:
-                expanded_input += [0, 0, 0, 0]
-            elif compressed_res[i] == 1:
-                expanded_input += [1, 0, 0, 0]
-            elif compressed_res[i] == 2:  # noqa: PLR2004
-                expanded_input += [1, 1, 0, 0]
-            else:  # noqa: PLR2004
-                expanded_input += [1, 1, 1, compressed_res[i] - 3]
-        res = np.array(expanded_input, dtype=np.int8)
+        # Process board positions (our pieces)
+        for i in range(24):
+            pieces = max(board[i], 0)  # Our pieces (positive values)
+            if pieces > 0:
+                base_idx = i * 4
+                res[base_idx] = 1
+                if pieces > 1:
+                    res[base_idx + 1] = 1
+                    if pieces > 2:
+                        res[base_idx + 2] = 1
+                        if pieces > 3:
+                            res[base_idx + 3] = pieces - 3
+
+        # Process opponent pieces (negative values in board become positive)
+        for i in range(24):
+            pieces = max(-board[i], 0)  # Opponent pieces (negative values in original board)
+            if pieces > 0:
+                base_idx = (i + 24) * 4
+                res[base_idx] = 1
+                if pieces > 1:
+                    res[base_idx + 1] = 1
+                    if pieces > 2:
+                        res[base_idx + 2] = 1
+                        if pieces > 3:
+                            res[base_idx + 3] = pieces - 3
+
+        # Process bar
+        for i in range(2):
+            pieces = self.backgammon.bar[i]
+            if pieces > 0:
+                base_idx = (i + 48) * 4
+                res[base_idx] = 1
+                if pieces > 1:
+                    res[base_idx + 1] = 1
+                    if pieces > 2:
+                        res[base_idx + 2] = 1
+                        if pieces > 3:
+                            res[base_idx + 3] = pieces - 3
+
+        # Process off
+        for i in range(2):
+            pieces = self.backgammon.off[i]
+            if pieces > 0:
+                base_idx = (i + 50) * 4
+                res[base_idx] = 1
+                if pieces > 1:
+                    res[base_idx + 1] = 1
+                    if pieces > 2:
+                        res[base_idx + 2] = 1
+                        if pieces > 3:
+                            res[base_idx + 3] = pieces - 3
+
         if get_normalized:
             return normalize_input(res, cell_stats)  # Does nothing for now.
         return res
