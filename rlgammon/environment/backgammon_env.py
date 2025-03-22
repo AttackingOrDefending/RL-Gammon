@@ -1,3 +1,4 @@
+# ruff: noqa: PLR2004
 """A gym environment for backgammon."""
 
 from __future__ import annotations
