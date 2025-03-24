@@ -70,60 +70,37 @@ class BackgammonEnv:
         """
         board = self.backgammon.board  # shape (24,)
 
-        # Directly create the final output array (much faster than intermediate steps)
+        # Directly create the final output array
         res = np.zeros(208, dtype=np.int8)
+
+        def encode_pieces(pieces: int, base_idx: int) -> None:
+            """Encode pieces count at the given base index."""
+            if pieces <= 0:
+                return
+
+            # First 3 positions are binary flags (1 if pieces >= position+1)
+            for j in range(min(pieces, 3)):
+                res[base_idx + j] = 1
+
+            # Fourth position stores count-3 if pieces > 3
+            if pieces > 3:
+                res[base_idx + 3] = pieces - 3
 
         # Process board positions (our pieces)
         for i in range(24):
-            pieces = max(board[i], 0)  # Our pieces (positive values)
-            if pieces > 0:
-                base_idx = i * 4
-                res[base_idx] = 1
-                if pieces > 1:
-                    res[base_idx + 1] = 1
-                    if pieces > 2:
-                        res[base_idx + 2] = 1
-                        if pieces > 3:
-                            res[base_idx + 3] = pieces - 3
+            encode_pieces(max(board[i], 0), i * 4)
 
-        # Process opponent pieces (negative values in board become positive)
+        # Process opponent pieces
         for i in range(24):
-            pieces = max(-board[i], 0)  # Opponent pieces (negative values in original board)
-            if pieces > 0:
-                base_idx = (i + 24) * 4
-                res[base_idx] = 1
-                if pieces > 1:
-                    res[base_idx + 1] = 1
-                    if pieces > 2:
-                        res[base_idx + 2] = 1
-                        if pieces > 3:
-                            res[base_idx + 3] = pieces - 3
+            encode_pieces(max(-board[i], 0), (i + 24) * 4)
 
         # Process bar
         for i in range(2):
-            pieces = self.backgammon.bar[i]
-            if pieces > 0:
-                base_idx = (i + 48) * 4
-                res[base_idx] = 1
-                if pieces > 1:
-                    res[base_idx + 1] = 1
-                    if pieces > 2:
-                        res[base_idx + 2] = 1
-                        if pieces > 3:
-                            res[base_idx + 3] = pieces - 3
+            encode_pieces(self.backgammon.bar[i], (i + 48) * 4)
 
         # Process off
         for i in range(2):
-            pieces = self.backgammon.off[i]
-            if pieces > 0:
-                base_idx = (i + 50) * 4
-                res[base_idx] = 1
-                if pieces > 1:
-                    res[base_idx + 1] = 1
-                    if pieces > 2:
-                        res[base_idx + 2] = 1
-                        if pieces > 3:
-                            res[base_idx + 3] = pieces - 3
+            encode_pieces(self.backgammon.off[i], (i + 50) * 4)
 
         if get_normalized:
             return normalize_input(res, cell_stats)  # Does nothing for now.
