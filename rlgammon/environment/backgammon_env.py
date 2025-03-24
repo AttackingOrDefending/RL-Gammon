@@ -1,3 +1,4 @@
+# ruff: noqa: PLR2004
 """A gym environment for backgammon."""
 
 from __future__ import annotations
@@ -70,19 +71,41 @@ class BackgammonEnv:
         :return: Array containing board state, bar, and off information.
         """
         board = self.backgammon.board  # shape (24,)
-        # Pre-allocate the result array:
-        # our_pieces (24) + enemy_pieces (24) + bar (2) + off (2) = 52 elements.
-        res = np.empty(52, dtype=np.int8)
 
-        # Use np.maximum to replace elementwise comparison and assignment (vectorized).
-        np.maximum(board, 0, out=res[:24])  # our_pieces: all negative values become 0
-        np.maximum(-board, 0, out=res[24:48])  # enemy_pieces: all negative values (of -board) become 0
+        # Directly create the final output array
+        res = np.zeros(208, dtype=np.int8)
 
-        # Directly set bar and off.
-        res[48:50] = self.backgammon.bar
-        res[50:52] = self.backgammon.off
+        def encode_pieces(pieces: int, base_idx: int) -> None:
+            """Encode pieces count at the given base index."""
+            if pieces <= 0:
+                return
+
+            # First 3 positions are binary flags (1 if pieces >= position+1)
+            for j in range(min(pieces, 3)):
+                res[base_idx + j] = 1
+
+            # Fourth position stores count-3 if pieces > 3
+            if pieces > 3:
+                res[base_idx + 3] = pieces - 3
+
+        # Process board positions (our pieces)
+        for i in range(24):
+            encode_pieces(max(board[i], 0), i * 4)
+
+        # Process opponent pieces
+        for i in range(24):
+            encode_pieces(max(-board[i], 0), (i + 24) * 4)
+
+        # Process bar
+        for i in range(2):
+            encode_pieces(self.backgammon.bar[i], (i + 48) * 4)
+
+        # Process off
+        for i in range(2):
+            encode_pieces(self.backgammon.off[i], (i + 50) * 4)
+
         if get_normalized:
-            return normalize_input(res, cell_stats)
+            return normalize_input(res, cell_stats)  # Does nothing for now.
         return res
 
     def reset(self, seed: int | None = None,

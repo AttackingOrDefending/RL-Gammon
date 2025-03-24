@@ -17,10 +17,10 @@ from rlgammon.rlgammon_types import MovePart
 class DQN(nn.Module):
     """A simple DQN value network for backgammon."""
 
-    def __init__(self) -> None:
+    def __init__(self, input_dim: int) -> None:
         """Initialize the DQN value network."""
         super().__init__()
-        self.fc1 = nn.Linear(52, 64, dtype=torch.float32)
+        self.fc1 = nn.Linear(input_dim, 64, dtype=torch.float32)
         nn.init.xavier_uniform_(self.fc1.weight)
         self.fc2 = nn.Linear(64, 1, dtype=torch.float32)
         nn.init.xavier_uniform_(self.fc2.weight)
@@ -43,13 +43,14 @@ class DoubleDQNAgent(TrainableAgent):
         self.main_filename = main_filename
         self.target_filename = target_filename
         self.optimizer_filename = optimizer_filename
+        self.input_dim = BackgammonEnv().observation_shape[0]
         self.lr = lr
         self.tau = tau
         self.batch_size = batch_size
         self.gamma = gamma
         self.max_grad_norm = max_grad_norm
-        self.value_network = DQN()
-        self.target_network = DQN()
+        self.value_network = DQN(self.input_dim)
+        self.target_network = DQN(self.input_dim)
         self.target_network.load_state_dict(self.value_network.state_dict())
         if main_filename and pathlib.Path(main_filename).exists():
             self.value_network.load_state_dict(torch.load(main_filename))
@@ -133,6 +134,7 @@ class DoubleDQNAgent(TrainableAgent):
 
         agent_file_path = pathlib.Path(__file__).parent
         agent_file_path = agent_file_path.joinpath("saved_agents/")
+        agent_file_path.mkdir(parents=True, exist_ok=True)
 
         agent_file_path.mkdir(parents=True, exist_ok=True)
         torch.save(self.value_network.state_dict(), agent_file_path.joinpath(agent_main_filename))
