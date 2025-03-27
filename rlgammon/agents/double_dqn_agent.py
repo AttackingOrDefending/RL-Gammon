@@ -61,11 +61,29 @@ class DoubleDQNAgent(TrainableAgent):
         if optimizer_filename and pathlib.Path(optimizer_filename).exists():
             self.optimizer.load_state_dict(torch.load(optimizer_filename))
 
-    def choose_move(self, board: BackgammonEnv, dice: list[int]) -> list[tuple[int, MovePart]]:
+    def choose_move(self, board: BackgammonEnv) -> tuple[int, MovePart] | list:
+        """
+        Choose a move according to the DQN value network.
+
+        :param board TODO
+        :return: TODO
+        """
+        board_copy = board.copy()
+        valid_actions = board_copy.get_all_complete_moves()
+        scores_per_move = []
+
+        if not valid_actions:
+            return []
+        for board_after_move, moves in valid_actions:
+            value = -self.evaluate_position(board_after_move)  # Minimize opponent's value
+            scores_per_move.append((value, moves))
+        return max(scores_per_move, key=lambda x: x[0])[1]
+
+    def choose_move_deprecated(self, board: BackgammonEnv, dice: list[int]) -> list[tuple[int, MovePart]]:
         """Choose a move according to the DQN value network."""
         board_copy = board.copy()
         dice = dice.copy()
-        actions = board_copy.get_all_complete_moves(dice)
+        actions = board_copy.get_all_complete_moves_deprecated(dice)
 
         scores_per_move = []
 

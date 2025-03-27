@@ -8,7 +8,7 @@ import numpy as np
 
 from rlgammon.buffers.base_buffer import BaseBuffer
 from rlgammon.buffers.buffer_types import BufferBatch
-from rlgammon.rlgammon_types import Input, MoveList
+from rlgammon.rlgammon_types import Input, MovePart
 
 
 class UniformBuffer(BaseBuffer):
@@ -24,7 +24,7 @@ class UniformBuffer(BaseBuffer):
         """
         super().__init__(observation_shape, action_shape, capacity)
 
-    def record(self, state: Input, next_state: Input, action: MoveList, reward: float, done: bool) -> None:
+    def record(self, state: Input, next_state: Input, action: MovePart, reward: float, done: bool) -> None:
         """
         Store the environment observation into the buffer.
 
@@ -37,11 +37,14 @@ class UniformBuffer(BaseBuffer):
         current_index = self.update_counter % self.capacity
         self.state_buffer[current_index] = state
         self.new_state_buffer[current_index] = next_state
-        numpy_action = np.ones(self.action_shape, dtype=np.int8) * -2  # -1 is used for bear off
+
+        """
+        numpy_action = np.ones(self.max_action_shape, dtype=np.int8) * -2  # -1 is used for bear off
         for i, (_, move) in enumerate(action):
             numpy_action[i * 2] = move[0]
             numpy_action[i * 2 + 1] = move[1]
-        self.action_buffer[current_index] = numpy_action
+        """
+        self.action_buffer[current_index] = action
         self.reward_buffer[current_index] = reward
         self.done_buffer[current_index] = done
 

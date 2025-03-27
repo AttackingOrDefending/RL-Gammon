@@ -6,7 +6,7 @@ from uuid import UUID
 import numpy as np
 
 from rlgammon.buffers.buffer_types import BufferBatch
-from rlgammon.rlgammon_types import Input, MoveList
+from rlgammon.rlgammon_types import Input, MovePart
 
 
 class BaseBuffer:
@@ -31,7 +31,7 @@ class BaseBuffer:
         self.done_buffer = np.zeros(shape=self.capacity, dtype=np.bool)
 
     @abstractmethod
-    def record(self, state: Input, next_state: Input, action: MoveList, reward: float, done: bool) -> None:
+    def record(self, state: Input, next_state: Input, action: MovePart, reward: float, done: bool) -> None:
         """
         Store the environment observation into the buffer.
 

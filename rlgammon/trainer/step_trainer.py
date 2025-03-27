@@ -9,7 +9,7 @@ from tqdm import tqdm  # type: ignore[import-untyped]
 
 from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.environment import BackgammonEnv
-from rlgammon.rlgammon_types import Input, MoveList
+from rlgammon.rlgammon_types import Input, MoveList, MovePart
 from rlgammon.trainer.base_trainer import BaseTrainer
 from rlgammon.trainer.trainer_errors.trainer_errors import NoParametersError
 from rlgammon.trainer.trainer_parameters.parameter_verification import are_parameters_valid
@@ -65,31 +65,29 @@ class StepTrainer(BaseTrainer):
             env.reset()
             done = False
             trunc = False
-            episode_buffer: list[tuple[Input, Input, MoveList, bool, int]] = []
+            episode_buffer: list[tuple[Input, Input, MovePart, bool, int]] = []
             reward = 0.0
             while not done and not trunc:
                 state = env.get_input()
 
                 # Get actions from the explorer and agent
-                dice = env.roll_dice()
-                valid_moves = env.get_all_complete_moves(dice)
-
-                # If no moves can be made skip the turn, and go to the next player
-                if not valid_moves:
-                    env.flip()
-                    continue
-
-                # Get the action using exploration or from the agent
-                actions = explorer.explore(valid_moves) if explorer.should_explore() else agent.choose_move(env, dice)
-
+                if explorer.should_explore():
+                    action = explorer.explore(env.get_all_complete_moves())
+                else:
+                    action = agent.choose_move(env)
+                """
                 # Iterate over action parts and add each intermediate state-action pair to the buffer
                 for _, action in actions:
                     reward, done, trunc, _ = env.step(action)
+                """
 
                 player = env.current_player
-                env.flip()
-                next_state = env.get_input()
-                episode_buffer.append((state, next_state, actions, done, player))
+                reward, done, trunc, _ = env.step(action)
+
+                # env.flip()
+                if action:  # TODO: FIX
+                    next_state = env.get_input()
+                    episode_buffer.append((state, next_state, action[1], done, player))
 
                 # Only train agent when at least a batch of data in the buffer
                 if buffer.has_element_count(self.parameters["batch_size"]):
