@@ -37,7 +37,7 @@ class EpsilonGreedyExploration(BaseExploration):
         """
         return random.random() > self.current_epsilon
 
-    def explore(self, valid_actions: list[tuple[BackgammonEnv, tuple[int, MovePart]]]) -> list[tuple[int, MovePart]]:
+    def explore(self, valid_actions: list[tuple[BackgammonEnv, tuple[int, MovePart]]]) -> tuple[int, MovePart]:
         """
         Explore the environment by choosing a random action with a probability equal to the current value of epsilon.
 

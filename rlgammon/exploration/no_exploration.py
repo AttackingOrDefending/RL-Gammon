@@ -11,7 +11,7 @@ class NoExploration(BaseExploration):
         """Exploration should never occur so always returns False."""
         return False
 
-    def explore(self, valid_actions: list[tuple[BackgammonEnv, tuple[int, MovePart]]]) -> list[tuple[int, MovePart]]:
+    def explore(self, valid_actions: list[tuple[BackgammonEnv, tuple[int, MovePart]]]) -> tuple[int, MovePart]:
         """Exploration is not allowed, so raise an error, if it's attempted to run."""
         raise NotImplementedError
 

@@ -75,28 +75,20 @@ class StepTrainer(BaseTrainer):
                     action = explorer.explore(env.get_all_complete_moves())
                 else:
                     action = agent.choose_move(env)
-                """
-                # Iterate over action parts and add each intermediate state-action pair to the buffer
-                for _, action in actions:
-                    reward, done, trunc, _ = env.step(action)
-                """
 
                 player = env.current_player
+
+                # Make action and receive observation from state
                 reward, done, trunc, _ = env.step(action)
 
-                # env.flip()
                 if action:  # TODO: FIX
+                    total_steps += 1
                     next_state = env.get_input()
                     episode_buffer.append((state, next_state, action[1], done, player))
 
                 # Only train agent when at least a batch of data in the buffer
                 if buffer.has_element_count(self.parameters["batch_size"]):
                     agent.train(buffer)
-
-                total_steps += 1
-
-            # Only train agent when at least a batch of data in the buffer
-            total_steps += 1
 
             # Update the collected data based on the final result of the game
             self.finalize_data(episode_buffer, env.current_player, reward, buffer)

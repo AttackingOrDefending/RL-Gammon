@@ -11,7 +11,7 @@ from rlgammon.environment import BackgammonEnv
 from rlgammon.exploration import BaseExploration, EpsilonGreedyExploration
 from rlgammon.exploration.exploration_types import PossibleExploration
 from rlgammon.exploration.no_exploration import NoExploration
-from rlgammon.rlgammon_types import Input, MoveList
+from rlgammon.rlgammon_types import Input, MovePart
 from rlgammon.trainer.logger.logger import Logger
 from rlgammon.trainer.testing.base_testing import BaseTesting
 from rlgammon.trainer.testing.random_testing import RandomTesting
@@ -30,7 +30,7 @@ class BaseTrainer:
         """Constructor for the BaseTrainer containing the parameters for the trainer."""
         self.parameters: dict[str, Any] = {}
 
-    def finalize_data(self, episode_buffer: list[tuple[Input, Input, MoveList, bool, int]],
+    def finalize_data(self, episode_buffer: list[tuple[Input, Input, MovePart, bool, int]],
                       losing_player: int, final_reward: float, buffer: BaseBuffer) -> None:
         """
         Finalize the data by updating the rewards for each time step
