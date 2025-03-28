@@ -74,8 +74,14 @@ class DoubleDQNAgent(TrainableAgent):
 
         if not valid_actions:
             return []
+        my_player = board.current_player
         for board_after_move, moves in valid_actions:
-            value = -self.evaluate_position(board_after_move)  # Minimize opponent's value
+            player_after_move = board_after_move.current_player
+
+            # Multiplies player, player_after_move to check whether we want to minimize or maximize the value
+            # Minimize iff player != player_after_move => player * player_after_move = -1
+            value = (player_after_move * my_player *
+                     self.evaluate_position(board_after_move))
             scores_per_move.append((value, moves))
         return max(scores_per_move, key=lambda x: x[0])[1]
 
@@ -102,11 +108,15 @@ class DoubleDQNAgent(TrainableAgent):
         next_states = torch.tensor(batch["next_state"], dtype=torch.float32)
         rewards = torch.tensor(batch["reward"], dtype=torch.float32)
         dones = torch.tensor(batch["done"], dtype=torch.bool)
+        player = torch.tensor(batch["player"], dtype=torch.int8)
+        player_after = torch.tensor(batch["player_after"], dtype=torch.int8)
 
         current_q_values = self.value_network(states).squeeze()
 
         with torch.no_grad():
-            next_q_values = -self.target_network(next_states).squeeze()
+            value_inverter = player * player_after
+
+            next_q_values = value_inverter * self.target_network(next_states).squeeze()
             target_q_values = rewards + self.gamma * next_q_values * ~dones
 
         loss = nn.functional.mse_loss(current_q_values, target_q_values)

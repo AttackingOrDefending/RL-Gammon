@@ -30,7 +30,7 @@ class BaseTrainer:
         """Constructor for the BaseTrainer containing the parameters for the trainer."""
         self.parameters: dict[str, Any] = {}
 
-    def finalize_data(self, episode_buffer: list[tuple[Input, Input, MovePart, bool, int]],
+    def finalize_data(self, episode_buffer: list[tuple[Input, Input, MovePart, bool, int, int]],
                       losing_player: int, final_reward: float, buffer: BaseBuffer) -> None:
         """
         Finalize the data by updating the rewards for each time step
@@ -42,11 +42,11 @@ class BaseTrainer:
         :param final_reward: the reward given at the end of the game
         :param buffer: buffer to which to add the data
         """
-        for i, (state, next_state, action, done, player) in enumerate(reversed(episode_buffer)):
+        for i, (state, next_state, action, done, player, player_after) in enumerate(reversed(episode_buffer)):
             reward = final_reward * self.parameters["decay"] ** (max(0, i - 1))
             if player == losing_player:
                 reward *= -1
-            buffer.record(state, next_state, action, reward, done)
+            buffer.record(state, next_state, action, reward, done, player, player_after)
 
     def create_logger_from_parameters(self, training_session_id: UUID) -> Logger:
         """
