@@ -96,13 +96,6 @@ class StepTrainer(BaseTrainer):
                 # Only train agent when at least a batch of data in the buffer
                 if buffer.has_element_count(self.parameters["batch_size"]):
                     agent.train(buffer)
-            """
-            print("PLAYER", player)
-            print("LOSER", env.get_loser())
-            print("HAS LOST", env.has_lost(player))
-            print("MOVES", env.moves)
-            print(env)
-            """
 
             # Update the collected data based on the final result of the game
             self.finalize_data(episode_buffer, env.get_loser(), reward, buffer)

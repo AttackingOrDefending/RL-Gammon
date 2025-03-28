@@ -64,9 +64,10 @@ class DoubleDQNAgent(TrainableAgent):
     def choose_move(self, board: BackgammonEnv) -> tuple[int, MovePart] | list:
         """
         Choose a move according to the DQN value network.
+        By maximizing or minimizing the value of the next state, depending on who is playing next.
 
-        :param board TODO
-        :return: TODO
+        :param board: current state of the game
+        :return: the action deemed optimal, by the agent
         """
         board_copy = board.copy()
         valid_actions = board_copy.get_all_complete_moves()

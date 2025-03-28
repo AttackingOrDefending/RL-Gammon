@@ -14,8 +14,8 @@ class RandomAgent(BaseAgent):
         """
         Choose a random move from the legal moves.
 
-        :param board TODO
-        :return:
+        :param board: current state of the game
+        :return: random action from the list of valid actions
         """
         valid_actions = board.get_all_complete_moves()
         return random.choice([move for _, move in valid_actions]) if valid_actions else []
