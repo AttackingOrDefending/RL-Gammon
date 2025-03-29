@@ -1,6 +1,7 @@
 """Base trainer class for all trainers used for training rl-algorithms."""
-
 from abc import abstractmethod
+import json
+from pathlib import Path
 from typing import Any
 from uuid import UUID
 
@@ -21,6 +22,7 @@ from rlgammon.trainer.trainer_errors.trainer_errors import (
     WrongExplorationTypeError,
     WrongTestingTypeError,
 )
+from rlgammon.trainer.trainer_parameters.parameter_verification import are_parameters_valid
 
 
 class BaseTrainer:
@@ -107,14 +109,25 @@ class BaseTrainer:
         """Checks if the parameters have been loaded, which indicates whether trainer is ready."""
         return bool(self.parameters)
 
-    @abstractmethod
     def load_parameters(self, json_parameters_name: str) -> None:
         """
-        Load parameters to be used for training.
+        Load parameters to be used for training, and verify their validity.
 
         :param json_parameters_name: name of the json parameters file
+        :raises: ValueError: the parameters are invalid, i.e. don't contain some data, or have invalid types
         """
-        raise NotImplementedError
+        parameter_file_path = Path(__file__).parent
+        parameter_file_path = parameter_file_path.joinpath("trainer_parameters/parameters/")
+        path = parameter_file_path.joinpath(json_parameters_name)
+
+        with path.open() as json_parameters:
+            parameters = json.load(json_parameters)
+
+        if are_parameters_valid(parameters):
+            self.parameters = parameters
+        else:
+            msg = "Invalid parameters"
+            raise ValueError(msg)
 
     @abstractmethod
     def train(self, agent: TrainableAgent) -> None:

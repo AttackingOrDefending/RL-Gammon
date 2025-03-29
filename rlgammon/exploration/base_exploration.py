@@ -19,7 +19,7 @@ class BaseExploration:
         raise NotImplementedError
 
     @abstractmethod
-    def explore(self, valid_actions: list[tuple[BackgammonEnv, tuple[int, MovePart]]]) -> tuple[int, MovePart]:
+    def explore(self, valid_actions: list[tuple[BackgammonEnv, tuple[int, MovePart]]]) -> tuple[int, MovePart] | None:
         """
         Method to conduct exploration.
 

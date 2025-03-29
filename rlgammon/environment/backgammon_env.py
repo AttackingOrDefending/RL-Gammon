@@ -6,7 +6,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 import random
 import sys
-from typing import Any
+from typing import Any, no_type_check
 
 import numpy as np
 
@@ -83,7 +83,7 @@ class BackgammonEnv:
         board = self.backgammon.board  # shape (24,)
 
         # Directly create the final output array
-        res = np.zeros(212, dtype=np.int8)
+        res = np.zeros(213, dtype=np.int8)
 
         def encode_pieces(pieces: int, base_idx: int) -> None:
             """Encode pieces count at the given base index."""
@@ -115,10 +115,13 @@ class BackgammonEnv:
             encode_pieces(self.backgammon.off[i], (i + 50) * 4)
 
         # Include dice rolls in the agent input
-        res[-1] = self.dice[3] if len(self.dice) >= 4 else 0
-        res[-2] = self.dice[2] if len(self.dice) >= 3 else 0
-        res[-3] = self.dice[1] if len(self.dice) >= 2 else 0
-        res[-4] = self.dice[0] if len(self.dice) >= 1 else 0
+        res[-2] = self.dice[3] if len(self.dice) >= 4 else 0
+        res[-3] = self.dice[2] if len(self.dice) >= 3 else 0
+        res[-4] = self.dice[1] if len(self.dice) >= 2 else 0
+        res[-5] = self.dice[0] if len(self.dice) >= 1 else 0
+
+        # Include the player playing from this state
+        res[-1] = self.current_player
 
         if get_normalized:
             return normalize_input(res, cell_stats)  # Does nothing for now.
@@ -141,7 +144,7 @@ class BackgammonEnv:
         self._cache.clear()
         return self.get_input(), {}
 
-    def deterministic_dice(self, dice_values: list[int]) -> list[int]:
+    def roll_deterministic_dice(self, dice_values: list[int]) -> list[int]:
         """
         Set dice values with the specified parameters.
 
@@ -170,7 +173,8 @@ class BackgammonEnv:
 
     def flip(self) -> Input:
         """
-        Flip the board.
+        Flip the board, changing the perspective to the opposing player.
+        Marks the end of the turn, which requires updating the game stats.
 
         :return: New board state after flipping.
         """
@@ -180,7 +184,7 @@ class BackgammonEnv:
         self.roll_dice()
         return self.get_input()
 
-    def step(self, dice_action: tuple[int, MovePart] | tuple) -> tuple[float, bool, bool, dict[str, Any]]:
+    def step(self, dice_action: tuple[int, MovePart] | None) -> tuple[float, bool, bool, dict[str, Any]]:
         """
         Take a step in the environment.
 
@@ -218,6 +222,7 @@ class BackgammonEnv:
             reward = self.backgammon.get_winner()
         return reward, done, self.moves >= self.max_moves and not done, {}
 
+    @no_type_check
     def step_deprecated(self, action: MovePart) -> tuple[float, bool, bool, dict[str, Any]]:
         """
         Take a step in the environment.
@@ -283,24 +288,12 @@ class BackgammonEnv:
             actions += [(roll, move) for move in actions_per_roll[roll]]
         return actions
 
-    def is_move_valid(self, move: MovePart) -> bool:
-        """
-        Check if the provided move can be executed, i.e. whether it is a valid move.
-
-        :param move: move, which is to be checked
-        :return: true, if the move is valid for the current position, else false
-        """
-        # TODO
-
-        raise NotImplementedError
-
     def get_all_complete_moves(self) -> list[tuple[BackgammonEnv, tuple[int, MovePart]]]:
         """
         Return all (single) moves for the list of dice remaining for the player.
 
         :return: list of moves and their associated dice
         """
-        # TODO WORK
         possible_moves = self.get_legal_moves(self.dice)
         returned_moves: list[tuple[BackgammonEnv, tuple[int, MovePart]]] = []
         for move in possible_moves:
@@ -319,6 +312,7 @@ class BackgammonEnv:
         """
         raise NotImplementedError
 
+    @no_type_check
     def get_all_complete_moves_deprecated(
         self,
         dice: list[int],

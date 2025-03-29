@@ -10,7 +10,7 @@ from rlgammon.rlgammon_types import MovePart
 class RandomAgent(BaseAgent):
     """A random agent for backgammon."""
 
-    def choose_move(self, board: BackgammonEnv) -> tuple[int, MovePart]:
+    def choose_move(self, board: BackgammonEnv) -> tuple[int, MovePart] | None:
         """
         Choose a random move from the legal moves.
 
@@ -18,7 +18,7 @@ class RandomAgent(BaseAgent):
         :return: random action from the list of valid actions
         """
         valid_actions = board.get_all_complete_moves()
-        return random.choice([move for _, move in valid_actions]) if valid_actions else []
+        return random.choice([move for _, move in valid_actions]) if valid_actions else None
 
     def choose_move_deprecated(self, board: BackgammonEnv, dice: list[int]) -> list[tuple[int, MovePart]]:
         """Choose a random move from the legal moves."""

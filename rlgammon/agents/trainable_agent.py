@@ -10,7 +10,7 @@ from rlgammon.rlgammon_types import MovePart
 class TrainableAgent(BaseAgent):
     """Base class for all trainable agents in the backgammon game."""
 
-    def choose_move(self, board: BackgammonEnv) -> tuple[int, MovePart]:
+    def choose_move(self, board: BackgammonEnv) -> tuple[int, MovePart] | None:
         """
         Chooses a move to make given the current board and dice roll.
 

@@ -10,11 +10,13 @@ def test_get_epsilon_from_string() -> None:
     """Test conversion of the string representation of epsilon-greedy exploration to enum."""
     assert PossibleExploration.get_enum_from_string("NO") == PossibleExploration.NO_EXPLORATION
 
+
 def test_should_not_explore() -> None:
     """Test that the no exploration class doesn't request for exploration."""
     exploration = NoExploration()
     assert not exploration.should_explore()
     assert not exploration.should_explore()
+
 
 def test_exploration_not_allowed() -> None:
     """
