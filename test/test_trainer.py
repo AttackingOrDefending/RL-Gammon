@@ -76,12 +76,12 @@ def test_finalize_data_win(episode_buffer: list[tuple[Input, Input, MovePart, bo
 
     trainer.finalize_data(episode_buffer, losing_player, final_reward, buffer)
 
-    assert buffer.reward_buffer[0] == final_reward                                 # reward for player -1 (winning)
+    assert buffer.reward_buffer[0] == final_reward                                   # reward for player -1 (winning)
     assert buffer.reward_buffer[1] == -final_reward                                  # reward for player 1 (losing)
-    assert np.array_equal(buffer.state_buffer[0], episode_buffer[0][1])
+    assert np.array_equal(buffer.state_buffer[0], episode_buffer[1][0])
     assert np.array_equal(buffer.state_buffer[1], episode_buffer[0][0])
     assert np.array_equal(buffer.new_state_buffer[0], episode_buffer[1][1])
-    assert np.array_equal(buffer.new_state_buffer[1], episode_buffer[1][0])
+    assert np.array_equal(buffer.new_state_buffer[1], episode_buffer[0][1])
 
 
 def test_finalize_data_draw(episode_buffer: list[tuple[Input, Input, MovePart, bool, int, int]],
@@ -103,7 +103,7 @@ def test_finalize_data_draw(episode_buffer: list[tuple[Input, Input, MovePart, b
     trainer.finalize_data(episode_buffer, losing_player, final_reward, buffer)
     assert buffer.reward_buffer[0] == 0
     assert buffer.reward_buffer[1] == 0
-    assert np.array_equal(buffer.state_buffer[0], episode_buffer[0][1])
+    assert np.array_equal(buffer.state_buffer[0], episode_buffer[1][0])
     assert np.array_equal(buffer.state_buffer[1], episode_buffer[0][0])
     assert np.array_equal(buffer.new_state_buffer[0], episode_buffer[1][1])
-    assert np.array_equal(buffer.new_state_buffer[1], episode_buffer[1][0])
+    assert np.array_equal(buffer.new_state_buffer[1], episode_buffer[0][1])

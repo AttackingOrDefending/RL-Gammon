@@ -31,8 +31,8 @@ class DQN(nn.Module):
         """Forward pass through the DQN value network."""
         x = nn.functional.relu(self.fc1(x))
 
-        # Sigmoid added to bound the network values to range 0 - 1, which is the range of possible state value
-        return nn.functional.sigmoid(self.fc2(x))
+        # Sigmoid added to bound the network values to range -1 to 1, which is the range of possible state values
+        return nn.functional.tanh(self.fc2(x))
 
 
 class DoubleDQNAgent(TrainableAgent):
@@ -79,16 +79,14 @@ class DoubleDQNAgent(TrainableAgent):
 
         if not valid_actions:
             return None
-        my_player = board.current_player
+        player = board.current_player
         for board_after_move, moves in valid_actions:
             player_after_move = board_after_move.current_player
 
             # Get the value of the next state
-            # If the next state is an enemy state, then need to take 1 - enemyVal, as
-            # the greater enemyVal, the worse our position
-            value = self.evaluate_position(board_after_move)
-            if my_player != player_after_move:
-                value = 1 - value
+            # If the next state is the opponent's, negate the value,
+            # as their win is our gain (and vice versa)
+            value = (player * player_after_move) * self.evaluate_position(board_after_move)
             scores_per_move.append((value, moves))
         return max(scores_per_move, key=lambda x: x[0])[1]
 
@@ -125,14 +123,10 @@ class DoubleDQNAgent(TrainableAgent):
         current_q_values = self.value_network(states).squeeze()
 
         with torch.no_grad():
-            # Get the value of the next states
-            # If the next state is an enemy state, then need to take 1 - enemyVal, as
-            # the greater enemyVal, the worse our position
-            next_q_values = self.target_network(next_states).squeeze()
-            for i in range(self.batch_size):
-                if player[i] != player_after[i]:
-                    next_q_values[i] = 1 - next_q_values[i]
-
+            # Get the value of the next state
+            # If the next state is the opponent's, negate the value,
+            # as their win is our gain (and vice versa)
+            next_q_values = (player * player_after) * self.target_network(next_states).squeeze()
             target_q_values = rewards + self.gamma * next_q_values * ~dones
 
         loss = nn.functional.mse_loss(current_q_values, target_q_values)
