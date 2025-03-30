@@ -3,6 +3,7 @@
 
 from functools import cache
 import pathlib
+from typing import no_type_check
 from uuid import UUID
 
 import torch
@@ -29,14 +30,17 @@ class DQN(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass through the DQN value network."""
         x = nn.functional.relu(self.fc1(x))
-        return self.fc2(x)
+
+        # Sigmoid added to bound the network values to range -1 to 1, which is the range of possible state values
+        return 3 * nn.functional.tanh(self.fc2(x))
 
 
 class DoubleDQNAgent(TrainableAgent):
     """A DQN agent for backgammon."""
 
     def __init__(self, main_filename: str = "ddqn-value",
-                 target_filename: str = "ddqn-target_value", optimizer_filename: str = "ddqn-optimizer", lr: float = 0.001,
+                 target_filename: str = "ddqn-target_value", optimizer_filename: str = "ddqn-optimizer",
+                 lr: float = 0.001,
                  tau: float = 0.01, batch_size: int = 64, gamma: float = 0.99, max_grad_norm: float = 5) -> None:
         """Initialize the DQN agent."""
         super().__init__()
@@ -61,11 +65,37 @@ class DoubleDQNAgent(TrainableAgent):
         if optimizer_filename and pathlib.Path(optimizer_filename).exists():
             self.optimizer.load_state_dict(torch.load(optimizer_filename))
 
-    def choose_move(self, board: BackgammonEnv, dice: list[int]) -> list[tuple[int, MovePart]]:
+    def choose_move(self, board: BackgammonEnv) -> tuple[int, MovePart] | None:
+        """
+        Choose a move according to the DQN value network.
+        By maximizing or minimizing the value of the next state, depending on who is playing next.
+
+        :param board: current state of the game
+        :return: the action deemed optimal, by the agent
+        """
+        board_copy = board.copy()
+        valid_actions = board_copy.get_all_complete_moves()
+        scores_per_move = []
+
+        if not valid_actions:
+            return None
+        player = board.current_player
+        for board_after_move, moves in valid_actions:
+            player_after_move = board_after_move.current_player
+
+            # Get the value of the next state
+            # If the next state is the opponent's, negate the value,
+            # as their win is our gain (and vice versa)
+            value = (player * player_after_move) * self.evaluate_position(board_after_move)
+            scores_per_move.append((value, moves))
+        return max(scores_per_move, key=lambda x: x[0])[1]
+
+    @no_type_check
+    def choose_move_deprecated(self, board: BackgammonEnv, dice: list[int]) -> list[tuple[int, MovePart]]:
         """Choose a move according to the DQN value network."""
         board_copy = board.copy()
         dice = dice.copy()
-        actions = board_copy.get_all_complete_moves(dice)
+        actions = board_copy.get_all_complete_moves_deprecated(dice)
 
         scores_per_move = []
 
@@ -78,17 +108,25 @@ class DoubleDQNAgent(TrainableAgent):
         return max(scores_per_move, key=lambda x: x[0])[1]
 
     def train(self, replay_buffer: BaseBuffer) -> None:
-        """Train the DQN value network using the replay buffer. We don't use actions as we are building a value network."""
+        """
+        Train the DQN value network using the replay buffer.
+        We don't use actions as we are building a value network.
+        """
         batch = replay_buffer.get_batch(self.batch_size)
         states = torch.tensor(batch["state"], dtype=torch.float32)
         next_states = torch.tensor(batch["next_state"], dtype=torch.float32)
         rewards = torch.tensor(batch["reward"], dtype=torch.float32)
         dones = torch.tensor(batch["done"], dtype=torch.bool)
+        player = torch.tensor(batch["player"], dtype=torch.int8)
+        player_after = torch.tensor(batch["player_after"], dtype=torch.int8)
 
         current_q_values = self.value_network(states).squeeze()
 
         with torch.no_grad():
-            next_q_values = -self.target_network(next_states).squeeze()
+            # Get the value of the next state
+            # If the next state is the opponent's, negate the value,
+            # as their win is our gain (and vice versa)
+            next_q_values = (player * player_after) * self.target_network(next_states).squeeze()
             target_q_values = rewards + self.gamma * next_q_values * ~dones
 
         loss = nn.functional.mse_loss(current_q_values, target_q_values)
@@ -101,7 +139,8 @@ class DoubleDQNAgent(TrainableAgent):
         for target_param, param in zip(self.target_network.parameters(), self.value_network.parameters(), strict=True):
             target_param.data.copy_(self.tau * param.data + (1 - self.tau) * target_param.data)
         # Copy batch norm layer stats as well as they are not part of the parameters.
-        for target_param, param in zip(self.target_network.named_buffers(), self.value_network.named_buffers(), strict=True):
+        for target_param, param in zip(self.target_network.named_buffers(), self.value_network.named_buffers(),
+                                       strict=True):
             if "running_mean" in target_param[0]:
                 target_param[1].copy_(param[1])
             if "running_var" in target_param[0]:

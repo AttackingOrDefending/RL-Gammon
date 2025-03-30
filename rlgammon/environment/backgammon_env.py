@@ -6,7 +6,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 import random
 import sys
-from typing import Any
+from typing import Any, no_type_check
 
 import numpy as np
 
@@ -43,8 +43,9 @@ class BackgammonEnv:
         self.max_moves: int = 500
         self.moves: int = 0
         self.current_player = 1
+        self.dice: list[int] = []
+        self.action_shape = 2
         self.observation_shape = self.get_input().shape
-        self.action_shape = 8
         self._cache: dict[
             tuple[int, tuple[int, ...]] | tuple[int, int, int],
             list[tuple[BackgammonEnv, list[tuple[int, MovePart]]]],
@@ -63,6 +64,15 @@ class BackgammonEnv:
         """
         return self.moves % 2 != ((player - 1) / 2) % 2
 
+    def get_loser(self) -> int:
+        """
+        Get the player that lost the game,
+        have to be careful to only use it after done was returned to true and reward = 1.
+
+        :return: 1 or -1, representing the player that lost the game.
+        """
+        return 1 if self.has_lost(1) else -1
+
     def get_input(self, get_normalized: bool = False) -> Input:
         """
         Return the input for the current player.
@@ -73,7 +83,7 @@ class BackgammonEnv:
         board = self.backgammon.board  # shape (24,)
 
         # Directly create the final output array
-        res = np.zeros(208, dtype=np.int8)
+        res = np.zeros(213, dtype=np.int8)
 
         def encode_pieces(pieces: int, base_idx: int) -> None:
             """Encode pieces count at the given base index."""
@@ -104,6 +114,15 @@ class BackgammonEnv:
         for i in range(2):
             encode_pieces(self.backgammon.off[i], (i + 50) * 4)
 
+        # Include dice rolls in the agent input
+        res[-2] = self.dice[3] if len(self.dice) >= 4 else 0
+        res[-3] = self.dice[2] if len(self.dice) >= 3 else 0
+        res[-4] = self.dice[1] if len(self.dice) >= 2 else 0
+        res[-5] = self.dice[0] if len(self.dice) >= 1 else 0
+
+        # Include the player playing from this state
+        res[-1] = self.current_player
+
         if get_normalized:
             return normalize_input(res, cell_stats)  # Does nothing for now.
         return res
@@ -125,29 +144,86 @@ class BackgammonEnv:
         self._cache.clear()
         return self.get_input(), {}
 
-    @staticmethod
-    def roll_dice() -> list[int]:
+    def roll_deterministic_dice(self, dice_values: list[int]) -> list[int]:
         """
-        Roll the dice.
+        Set dice values with the specified parameters.
 
-        :return: List of dice values (doubled if same value rolled).
+        :param dice_values: the value of the dice to set
         """
+        if dice_values[0] == dice_values[1]:
+            dice_values *= 2
+        self.dice = dice_values
+        return dice_values
+
+    def roll_dice(self) -> list[int]:
+        """Roll the dice."""
         rolls: list[int] = [random.randint(1, 6), random.randint(1, 6)]
         if rolls[0] == rolls[1]:
-            return rolls * 2
+            rolls *= 2
+        self.dice = rolls
         return rolls
+
+    def is_movement_possible(self) -> bool:
+        """
+        Checks whether any movement can be made.
+
+        :return: true, if a movement can be made, otherwise false
+        """
+        return len(self.get_all_complete_moves()) != 0
 
     def flip(self) -> Input:
         """
-        Flip the board.
+        Flip the board, changing the perspective to the opposing player.
+        Marks the end of the turn, which requires updating the game stats.
 
         :return: New board state after flipping.
         """
+        self.moves += 1
         self.backgammon.flip()
         self.current_player *= -1
+        self.roll_dice()
         return self.get_input()
 
-    def step(self, action: MovePart) -> tuple[float, bool, bool, dict[str, Any]]:
+    def step(self, dice_action: tuple[int, MovePart] | None) -> tuple[float, bool, bool, dict[str, Any]]:
+        """
+        Take a step in the environment.
+
+        :param dice_action: Tuple of (dice, (from_point, to_point)) representing the move and the dice used.
+        :return: Tuple containing (reward, done, truncated, info).
+        """
+        if dice_action:
+
+            dice = dice_action[0]
+            action = dice_action[1]
+
+            white_pieces = (np.sum(self.backgammon.board[self.backgammon.board > 0]) + self.backgammon.off[0]
+                            + self.backgammon.bar[0])
+            black_pieces = (np.sum(-self.backgammon.board[self.backgammon.board < 0]) + self.backgammon.off[1]
+                            + self.backgammon.bar[1])
+            self.backgammon.make_move(action)
+            white_pieces_new = (np.sum(-self.backgammon.board[self.backgammon.board < 0]) + self.backgammon.off[1]
+                                + self.backgammon.bar[1])
+            black_pieces_new = (np.sum(self.backgammon.board[self.backgammon.board > 0]) + self.backgammon.off[0]
+                                + self.backgammon.bar[0])
+            if black_pieces != black_pieces_new or white_pieces != white_pieces_new:
+                self.render("text")
+                print(action)
+                print("Black pieces:", black_pieces, "Black pieces new:", black_pieces_new)
+                print("White pieces:", white_pieces, "White pieces new:", white_pieces_new)
+                sys.exit()
+            self.dice.remove(dice)
+        done = self.backgammon.is_terminal()
+        reward = 0.0
+
+        if not dice_action or len(self.dice) == 0:
+            self.flip()
+
+        if done:
+            reward = self.backgammon.get_winner()
+        return reward, done, self.moves >= self.max_moves and not done, {}
+
+    @no_type_check
+    def step_deprecated(self, action: MovePart) -> tuple[float, bool, bool, dict[str, Any]]:
         """
         Take a step in the environment.
 
@@ -212,7 +288,32 @@ class BackgammonEnv:
             actions += [(roll, move) for move in actions_per_roll[roll]]
         return actions
 
-    def get_all_complete_moves(
+    def get_all_complete_moves(self) -> list[tuple[BackgammonEnv, tuple[int, MovePart]]]:
+        """
+        Return all (single) moves for the list of dice remaining for the player.
+
+        :return: list of moves and their associated dice
+        """
+        possible_moves = self.get_legal_moves(self.dice)
+        returned_moves: list[tuple[BackgammonEnv, tuple[int, MovePart]]] = []
+        for move in possible_moves:
+            board_copy = self.copy()
+            board_copy.step(move)
+            returned_moves.append((board_copy, move))
+        return returned_moves
+
+    def get_next_state_from_action(self, state: BackgammonEnv, action: MovePart) -> BackgammonEnv:
+        """
+        Perform the provided action on the given state to obtain the next state.
+
+        :param state: starting state
+        :param action: action to be performed
+        :return: state after performing the action (next state)
+        """
+        raise NotImplementedError
+
+    @no_type_check
+    def get_all_complete_moves_deprecated(
         self,
         dice: list[int],
     ) -> list[tuple[BackgammonEnv, list[tuple[int, MovePart]]]]:
@@ -244,7 +345,7 @@ class BackgammonEnv:
             board_copy.step(action)
             next_dice = dice.copy()
             next_dice.remove(roll)
-            next_moves = board_copy.get_all_complete_moves(next_dice) if next_dice else []
+            next_moves = board_copy.get_all_complete_moves_deprecated(next_dice) if next_dice else []
             if next_moves:
                 moves += [(position, [(roll, action), *move]) for position, move in next_moves]
             else:
@@ -276,6 +377,8 @@ class BackgammonEnv:
         env.backgammon = self.backgammon.copy()
         env.max_moves = self.max_moves
         env.moves = self.moves
+        env.current_player = self.current_player
+        env.dice = self.dice.copy()
         # Propagate the cache reference so that all copies share the same cache.
         env._cache = self._cache
         return env

@@ -1,6 +1,7 @@
 """Base trainer class for all trainers used for training rl-algorithms."""
-
 from abc import abstractmethod
+import json
+from pathlib import Path
 from typing import Any
 from uuid import UUID
 
@@ -11,7 +12,7 @@ from rlgammon.environment import BackgammonEnv
 from rlgammon.exploration import BaseExploration, EpsilonGreedyExploration
 from rlgammon.exploration.exploration_types import PossibleExploration
 from rlgammon.exploration.no_exploration import NoExploration
-from rlgammon.rlgammon_types import Input, MoveList
+from rlgammon.rlgammon_types import Input, MovePart
 from rlgammon.trainer.logger.logger import Logger
 from rlgammon.trainer.testing.base_testing import BaseTesting
 from rlgammon.trainer.testing.random_testing import RandomTesting
@@ -21,6 +22,7 @@ from rlgammon.trainer.trainer_errors.trainer_errors import (
     WrongExplorationTypeError,
     WrongTestingTypeError,
 )
+from rlgammon.trainer.trainer_parameters.parameter_verification import are_parameters_valid
 
 
 class BaseTrainer:
@@ -30,7 +32,7 @@ class BaseTrainer:
         """Constructor for the BaseTrainer containing the parameters for the trainer."""
         self.parameters: dict[str, Any] = {}
 
-    def finalize_data(self, episode_buffer: list[tuple[Input, Input, MoveList, bool, int]],
+    def finalize_data(self, episode_buffer: list[tuple[Input, Input, MovePart, bool, int, int]],
                       losing_player: int, final_reward: float, buffer: BaseBuffer) -> None:
         """
         Finalize the data by updating the rewards for each time step
@@ -42,11 +44,11 @@ class BaseTrainer:
         :param final_reward: the reward given at the end of the game
         :param buffer: buffer to which to add the data
         """
-        for i, (state, next_state, action, done, player) in enumerate(reversed(episode_buffer)):
+        for i, (state, next_state, action, done, player, player_after) in enumerate(reversed(episode_buffer)):
             reward = final_reward * self.parameters["decay"] ** (max(0, i - 1))
             if player == losing_player:
                 reward *= -1
-            buffer.record(state, next_state, action, reward, done)
+            buffer.record(state, next_state, action, reward, done, player, player_after)
 
     def create_logger_from_parameters(self, training_session_id: UUID) -> Logger:
         """
@@ -107,14 +109,25 @@ class BaseTrainer:
         """Checks if the parameters have been loaded, which indicates whether trainer is ready."""
         return bool(self.parameters)
 
-    @abstractmethod
     def load_parameters(self, json_parameters_name: str) -> None:
         """
-        Load parameters to be used for training.
+        Load parameters to be used for training, and verify their validity.
 
         :param json_parameters_name: name of the json parameters file
+        :raises: ValueError: the parameters are invalid, i.e. don't contain some data, or have invalid types
         """
-        raise NotImplementedError
+        parameter_file_path = Path(__file__).parent
+        parameter_file_path = parameter_file_path.joinpath("trainer_parameters/parameters/")
+        path = parameter_file_path.joinpath(json_parameters_name)
+
+        with path.open() as json_parameters:
+            parameters = json.load(json_parameters)
+
+        if are_parameters_valid(parameters):
+            self.parameters = parameters
+        else:
+            msg = "Invalid parameters"
+            raise ValueError(msg)
 
     @abstractmethod
     def train(self, agent: TrainableAgent) -> None:

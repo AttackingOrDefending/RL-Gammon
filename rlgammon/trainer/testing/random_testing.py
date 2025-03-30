@@ -37,26 +37,15 @@ class RandomTesting(BaseTesting):
             trunc = False
             reward = 0.0
             while not done and not trunc:
-                dice = env.roll_dice()
-                if env.current_player == agent_player:
-                    actions = agent.choose_move(env, dice)
-                else:
-                    actions = self.testing_agent.choose_move(env, dice)
-
-                for _, action in actions:
-                    reward, done, trunc, _ = env.step(action)
-
-                env.flip()
-
+                action = agent.choose_move(env) if env.current_player == agent_player else self.testing_agent.choose_move(env)
+                reward, done, trunc, _ = env.step(action)
             if reward == 0:
                 draws += 1
             elif env.has_lost(agent_player):
                 losses += 1
             else:
                 wins += 1
-
             agent_player *= -1
-
         return {"win_rate": wins / self.episodes_in_test,
                 "draws": draws / self.episodes_in_test,
                 "losses": losses / self.episodes_in_test}

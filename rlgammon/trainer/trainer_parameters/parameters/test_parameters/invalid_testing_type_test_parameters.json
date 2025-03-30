@@ -14,5 +14,7 @@
   "update_decay": 0.99,
   "steps_per_update": 10,
   "load_logger": false,
-  "logger_name": ""
+  "logger_name": "",
+  "save_progress": false
+
 }

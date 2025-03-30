@@ -41,16 +41,16 @@ class Logger:
         """Print the most recent logger data to the termial using the python logging library."""
         break_line = "=" * 10 + "\n"
         performance_msg = ("\nBeen training for:\n"
-                   f"Episodes: {self.info['episodes'][-1]}\n"
-                   f"Steps: {self.info['steps'][-1]}\n"
-                   f"Time: {self.info['training_time'][-1]}\n"
-                   "Current performance:\n"
-                   f"Win rate: {self.convert_win_rate_to_percent(self.info['win_rate'][-1])}\n")
+                           f"Episodes: {self.info['episodes'][-1]}\n"
+                           f"Steps: {self.info['steps'][-1]}\n"
+                           f"Time: {self.info['training_time'][-1]}s\n"
+                           "Current performance:\n"
+                           f"Win rate: {self.convert_win_rate_to_percent(self.info['win_rate'][-1])}\n")
         logging_message = performance_msg + break_line
         self.logger.info(logging_message)
 
     @staticmethod
-    def convert_win_rate_to_percent(win_rate:float) -> str:
+    def convert_win_rate_to_percent(win_rate: float) -> str:
         """
         Utility function to convert fractional win rate to percent of one data point.
 

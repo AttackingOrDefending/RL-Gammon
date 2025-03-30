@@ -8,7 +8,7 @@ import numpy as np
 
 from rlgammon.buffers.base_buffer import BaseBuffer
 from rlgammon.buffers.buffer_types import BufferBatch
-from rlgammon.rlgammon_types import Input, MoveList
+from rlgammon.rlgammon_types import Input, MovePart
 
 
 class UniformBuffer(BaseBuffer):
@@ -23,8 +23,11 @@ class UniformBuffer(BaseBuffer):
         :param capacity: the number of samples that can maximally be stored in the buffer
         """
         super().__init__(observation_shape, action_shape, capacity)
+        self.player_buffer = np.zeros(capacity, dtype=np.int8)
+        self.player_after_buffer = np.zeros(capacity, dtype=np.int8)
 
-    def record(self, state: Input, next_state: Input, action: MoveList, reward: float, done: bool) -> None:
+    def record(self, state: Input, next_state: Input, action: MovePart,
+               reward: float, done: bool, player: int, player_after: int) -> None:
         """
         Store the environment observation into the buffer.
 
@@ -33,17 +36,17 @@ class UniformBuffer(BaseBuffer):
         :param action: the action performed at the recorded step
         :param reward: the reward obtained at the recorded step
         :param done: boolean indicating if the episode ended at the recorded step
+        :param player: the player who made the action
+        :param player_after: the player who is to player after the action
         """
         current_index = self.update_counter % self.capacity
         self.state_buffer[current_index] = state
         self.new_state_buffer[current_index] = next_state
-        numpy_action = np.ones(self.action_shape, dtype=np.int8) * -2  # -1 is used for bear off
-        for i, (_, move) in enumerate(action):
-            numpy_action[i * 2] = move[0]
-            numpy_action[i * 2 + 1] = move[1]
-        self.action_buffer[current_index] = numpy_action
+        self.action_buffer[current_index] = action
         self.reward_buffer[current_index] = reward
         self.done_buffer[current_index] = done
+        self.player_buffer[current_index] = player
+        self.player_after_buffer[current_index] = player_after
 
         self.update_counter += 1
 
@@ -63,7 +66,7 @@ class UniformBuffer(BaseBuffer):
 
         :param batch_size: the number of samples to return
         :return: a dict with the following keys: "state", "next_state", "action", "reward", "done",
-        each of which having as their value a numpy array with batch size amount of elements
+        "player", "player_after" each having as their value a numpy array with batch size amount of elements
         """
         index_map = np.random.choice(np.arange(min(self.update_counter, self.capacity)), size=batch_size)
         batch_state = self.state_buffer[index_map]
@@ -71,6 +74,8 @@ class UniformBuffer(BaseBuffer):
         batch_action = self.action_buffer[index_map]
         batch_reward = self.reward_buffer[index_map]
         batch_done = self.done_buffer[index_map]
+        batch_player = self.player_buffer[index_map]
+        batch_player_after = self.player_after_buffer[index_map]
 
         return {
             "state": batch_state,
@@ -78,6 +83,8 @@ class UniformBuffer(BaseBuffer):
             "action": batch_action,
             "reward": batch_reward,
             "done": batch_done,
+            "player": batch_player,
+            "player_after": batch_player_after,
         }
 
     def clear(self) -> None:

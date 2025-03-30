@@ -6,7 +6,7 @@ from uuid import UUID
 import numpy as np
 
 from rlgammon.buffers.buffer_types import BufferBatch
-from rlgammon.rlgammon_types import Input, MoveList
+from rlgammon.rlgammon_types import Input, MovePart
 
 
 class BaseBuffer:
@@ -31,7 +31,8 @@ class BaseBuffer:
         self.done_buffer = np.zeros(shape=self.capacity, dtype=np.bool)
 
     @abstractmethod
-    def record(self, state: Input, next_state: Input, action: MoveList, reward: float, done: bool) -> None:
+    def record(self, state: Input, next_state: Input, action: MovePart,
+               reward: float, done: bool, player: int, player_after: int) -> None:
         """
         Store the environment observation into the buffer.
 
@@ -40,6 +41,8 @@ class BaseBuffer:
         :param action: the action performed at the recorded step
         :param reward: the reward obtained at the recorded step
         :param done: boolean indicating if the episode ended at the recorded step
+        :param player: the player who made the action
+        :param player_after: the player who is to player after the action
         """
         raise NotImplementedError
 

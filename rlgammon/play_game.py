@@ -31,18 +31,12 @@ def play_game() -> None:
         dice = env.roll_dice()
 
         print(f"Color: {'White' if i%2==1 else 'Black'} Roll: {dice}")
+        action = exploration.explore(env.get_all_complete_moves()) \
+            if exploration.should_explore() else agent.choose_move(env)
+        reward, done, trunc, _ = env.step(action)
 
-        if exploration.should_explore():
-            actions = exploration.explore(env.get_all_complete_moves(dice))
-        else:
-            actions = agent.choose_move(env, dice)
-        for _, action in actions:
-            reward, done, trunc, _ = env.step(action)
+        print(f"Reward: {reward}")
 
-            print(f"Reward: {reward}")
-
-        if not done and not trunc:
-            env.flip()
         exploration.update()
     print_env(env, i)
 
