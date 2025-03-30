@@ -32,7 +32,7 @@ class DQN(nn.Module):
         x = nn.functional.relu(self.fc1(x))
 
         # Sigmoid added to bound the network values to range -1 to 1, which is the range of possible state values
-        return nn.functional.tanh(self.fc2(x))
+        return 3 * nn.functional.tanh(self.fc2(x))
 
 
 class DoubleDQNAgent(TrainableAgent):

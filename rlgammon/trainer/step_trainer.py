@@ -3,7 +3,7 @@
 import time
 import uuid
 
-from tqdm import tqdm
+from tqdm import tqdm  # type-ignore[import-untyped]
 
 from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.environment import BackgammonEnv
