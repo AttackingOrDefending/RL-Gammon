@@ -6,8 +6,7 @@ import uuid
 from tqdm import tqdm
 
 from rlgammon.agents.trainable_agent import TrainableAgent
-from rlgammon.environment import BackgammonEnv
-from rlgammon.rlgammon_types import Input, MovePart
+from rlgammon.environment.backgammon_env import BackgammonEnv
 from rlgammon.trainer.base_trainer import BaseTrainer
 from rlgammon.trainer.trainer_errors.trainer_errors import NoParametersError
 
@@ -32,7 +31,6 @@ class StepTrainer(BaseTrainer):
 
         session_id = uuid.uuid4()
         env = BackgammonEnv()
-        buffer = self.create_buffer_from_parameters(env)
         explorer = self.create_explorer_from_parameters()
         testing = self.create_testing_from_parameters()
         logger = self.create_logger_from_parameters(session_id)
@@ -40,13 +38,18 @@ class StepTrainer(BaseTrainer):
         total_steps = 0
         training_time_start = time.time()
         for episode in tqdm(range(self.parameters["episodes"]), desc="Training Episodes"):
-            env.reset()
+            agent_color, first_roll, state = env.reset()
             done = False
             trunc = False
-            episode_buffer: list[tuple[Input, Input, MovePart, bool, int, int]] = []
-            reward = 0.0
             while not done and not trunc:
-                state = env.get_input()
+                # If this is the first step, take the roll from env, else roll yourself
+                if first_roll:
+                    roll = first_roll
+                    first_roll = None
+                else:
+                    roll = agent.roll_dice()
+
+                # TODO p = model(state)
 
                 # Get actions from the explorer and agent
                 if explorer.should_explore():
@@ -54,23 +57,16 @@ class StepTrainer(BaseTrainer):
                 else:
                     action = agent.choose_move(env)
 
-                player = env.current_player
                 # Make action and receive observation from state
                 reward, done, trunc, _ = env.step(action)
-                player_after_move = env.current_player
 
-                next_state = env.get_input()
+                actions = env.get_valid_actions(roll)
+                action = agent.choose_move(actions, env)
+                next_state, reward, done, winner = env.step(action)
+                # TODO p_next = model(observation_next) * model.gamma
+                explorer.update()
 
-                if action:
-                    episode_buffer.append((state, next_state, action[1], done, player, player_after_move))
-                    total_steps += 1
-
-                # Only train agent when at least a batch of data in the buffer
-                if buffer.has_element_count(self.parameters["batch_size"]):
-                    agent.train(buffer)
-
-            # Update the collected data based on the final result of the game
-            self.finalize_data(episode_buffer, env.get_loser(), reward, buffer)
+                total_steps += 1
 
             if (episode + 1) % self.parameters["episodes_per_test"] == 0:
                 results = testing.test(agent)

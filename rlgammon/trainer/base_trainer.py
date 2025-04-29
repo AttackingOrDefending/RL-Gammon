@@ -6,9 +6,7 @@ from typing import Any
 from uuid import UUID
 
 from rlgammon.agents.trainable_agent import TrainableAgent
-from rlgammon.buffers import BaseBuffer, UniformBuffer
-from rlgammon.buffers.buffer_types import PossibleBuffers
-from rlgammon.environment import BackgammonEnv
+from rlgammon.environment.backgammon_env import BackgammonEnv
 from rlgammon.exploration import BaseExploration, EpsilonGreedyExploration
 from rlgammon.exploration.exploration_types import PossibleExploration
 from rlgammon.exploration.no_exploration import NoExploration
@@ -31,24 +29,6 @@ class BaseTrainer:
     def __init__(self) -> None:
         """Constructor for the BaseTrainer containing the parameters for the trainer."""
         self.parameters: dict[str, Any] = {}
-
-    def finalize_data(self, episode_buffer: list[tuple[Input, Input, MovePart, bool, int, int]],
-                      losing_player: int, final_reward: float, buffer: BaseBuffer) -> None:
-        """
-        Finalize the data by updating the rewards for each time step
-        to take into account the loss of value of rewards closer to the start of the game, and
-        to set the reward negative for the losing player.
-
-        :param episode_buffer: the data from the completed episode
-        :param losing_player: the player who lost the game
-        :param final_reward: the reward given at the end of the game
-        :param buffer: buffer to which to add the data
-        """
-        for i, (state, next_state, action, done, player, player_after) in enumerate(reversed(episode_buffer)):
-            reward = final_reward * self.parameters["decay"] ** (max(0, i - 1))
-            if player == losing_player:
-                reward *= -1
-            buffer.record(state, next_state, action, reward, done, player, player_after)
 
     def create_logger_from_parameters(self, training_session_id: UUID) -> Logger:
         """
@@ -74,19 +54,6 @@ class BaseTrainer:
             case _:
                 raise WrongTestingTypeError
         return testing
-
-    def create_buffer_from_parameters(self, env: BackgammonEnv) -> BaseBuffer:
-        """
-        Create a new buffer of the type provided in the parameters.
-
-        :return: buffer of the type provided in the parameters
-        """
-        match self.parameters["buffer"]:
-            case PossibleBuffers.UNIFORM:
-                buffer = UniformBuffer(env.observation_shape, env.action_shape, self.parameters["buffer_capacity"])
-            case _:
-                raise WrongBufferTypeError
-        return buffer
 
     def create_explorer_from_parameters(self) -> BaseExploration:
         """

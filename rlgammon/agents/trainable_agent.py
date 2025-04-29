@@ -2,38 +2,19 @@
 from uuid import UUID
 
 from rlgammon.agents.base_agent import BaseAgent
-from rlgammon.buffers.base_buffer import BaseBuffer
-from rlgammon.environment import BackgammonEnv
-from rlgammon.rlgammon_types import MovePart
+from rlgammon.environment.backgammon_env import BackgammonEnv
 
 
 class TrainableAgent(BaseAgent):
     """Base class for all trainable agents in the backgammon game."""
 
-    def choose_move(self, board: BackgammonEnv) -> tuple[int, MovePart] | None:
-        """
-        Chooses a move to make given the current board and dice roll.
-
-        :param board: The current board state
-        :return: The chosen move to make
-        """
-        raise NotImplementedError
-
-    def choose_move_deprecated(self, board: BackgammonEnv, dice: list[int]) -> list[tuple[int, MovePart]]:
-        """
-        Chooses a move to make given the current board and dice roll.
-
-        :param board: The current board state
-        :param dice: The current dice roll
-        :return: The chosen move to make
-        """
-        raise NotImplementedError
-
-    def train(self, buffer: BaseBuffer) -> None:
+    def update_weights(self, state_value: float, next_state_value: float) -> int:
         """
         Train the agent from the given buffer.
 
-        :param buffer: buffer with stored observations
+        :param state_value: the value of the current state
+        :param next_state_value: the value of the next state
+        :return: loss associated with update
         """
         raise NotImplementedError
 

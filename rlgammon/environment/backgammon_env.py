@@ -1,396 +1,128 @@
-# ruff: noqa: PLR2004
-"""A gym environment for backgammon."""
-
-from __future__ import annotations
-
-from collections.abc import Iterable
-import random
-import sys
-from typing import Any, no_type_check
-
+import gym
+from gym.spaces import Box
+from gym_backgammon.envs.backgammon import Backgammon as Game, WHITE, BLACK, COLORS
+from random import randint
+from gym_backgammon.envs.rendering import Viewer
 import numpy as np
 
-from rlgammon.environment import backgammon as bg, human_renderer
-from rlgammon.environment.text_renderer import text_render
-from rlgammon.environment.utils.normalize_input import cell_stats, normalize_input
-from rlgammon.rlgammon_types import Input, MoveList, MovePart
+STATE_W = 96
+STATE_H = 96
+
+SCREEN_W = 600
+SCREEN_H = 500
 
 
-class BackgammonEnv:
-    """
-    A gym environment for backgammon.
+class BackgammonEnv(gym.Env):
+    metadata = {'render.modes': ['human', 'rgb_array', 'state_pixels']}
 
-    Variables:
-    - backgammon: Instance of the Backgammon game.
-    - max_moves: Maximum number of moves allowed in a game.
-    - moves: Current number of moves made in the game.
-    - _cache: Internal cache to speed up get_all_complete_moves.
-    """
+    def __init__(self):
+        self.game = Game()
+        self.current_agent = None
 
-    def __init__(self) -> None:
-        """
-        Initialize the environment.
+        low = np.zeros((198, 1))
+        high = np.ones((198, 1))
 
-        Variables:
-        - backgammon: New Backgammon game instance.
-        - max_moves: Set to 500 moves.
-        - moves: Initialize move counter to 0.
-        - current_player: the current player's orientation of board
-        - _cache: Dictionary used for caching computed move combinations.
-        """
-        super().__init__()
-        self.backgammon: bg.Backgammon = bg.Backgammon()
-        self.max_moves: int = 500
-        self.moves: int = 0
-        self.current_player = 1
-        self.dice: list[int] = []
-        self.action_shape = 2
-        self.observation_shape = self.get_input().shape
-        self._cache: dict[
-            tuple[int, tuple[int, ...]] | tuple[int, int, int],
-            list[tuple[BackgammonEnv, list[tuple[int, MovePart]]]],
-        ] = {}
+        for i in range(3, 97, 4):
+            high[i] = 6.0
+        high[96] = 7.5
 
-    def has_lost(self, player: int) -> bool:
-        """
-        Basic way to check if a player has lost, by comparing the provided player
-        to the player who should have played after the last move (i.e. the losing player).
-        Have to be careful to only use it after done was returned to true and reward = 1.
+        for i in range(101, 195, 4):
+            high[i] = 6.0
+        high[194] = 7.5
 
-        When the number of moves is odd, player 1 lost, if even then player -1 lost
+        self.observation_space = Box(low=low, high=high)
+        self.counter = 0
+        self.max_length_episode = 10000
+        self.viewer = None
 
-        :param player: the player to check
-        :return: true, if the player has lost, false otherwise.
-        """
-        return self.moves % 2 != ((player - 1) / 2) % 2
+    def step(self, action):
+        self.game.execute_play(self.current_agent, action)
 
-    def get_loser(self) -> int:
-        """
-        Get the player that lost the game,
-        have to be careful to only use it after done was returned to true and reward = 1.
+        # get the board representation from the opponent player perspective (the current player has already performed the move)
+        observation = self.game.get_board_features(self.game.get_opponent(self.current_agent))
 
-        :return: 1 or -1, representing the player that lost the game.
-        """
-        return 1 if self.has_lost(1) else -1
+        reward = 0
+        done = False
 
-    def get_input(self, get_normalized: bool = False) -> Input:
-        """
-        Return the input for the current player.
+        winner = self.game.get_winner()
 
-        :param get_normalized: Whether to normalize the input.
-        :return: Array containing board state, bar, and off information.
-        """
-        board = self.backgammon.board  # shape (24,)
+        if winner is not None or self.counter > self.max_length_episode:
+            # practical-issues-in-temporal-difference-learning, pag.3
+            # ...leading to a final reward signal z. In the simplest case, z = 1 if White wins and z = 0 if Black wins
+            if winner == WHITE:
+                reward = 1
+            done = True
 
-        # Directly create the final output array
-        res = np.zeros(213, dtype=np.int8)
+        self.counter += 1
 
-        def encode_pieces(pieces: int, base_idx: int) -> None:
-            """Encode pieces count at the given base index."""
-            if pieces <= 0:
-                return
+        return observation, reward, done, winner
 
-            # First 3 positions are binary flags (1 if pieces >= position+1)
-            for j in range(min(pieces, 3)):
-                res[base_idx + j] = 1
+    def reset(self):
+        # roll the dice
+        roll = randint(1, 6), randint(1, 6)
 
-            # Fourth position stores count-3 if pieces > 3
-            if pieces > 3:
-                res[base_idx + 3] = pieces - 3
+        # roll the dice until they are different
+        while roll[0] == roll[1]:
+            roll = randint(1, 6), randint(1, 6)
 
-        # Process board positions (our pieces)
-        for i in range(24):
-            encode_pieces(max(board[i], 0), i * 4)
-
-        # Process opponent pieces
-        for i in range(24):
-            encode_pieces(max(-board[i], 0), (i + 24) * 4)
-
-        # Process bar
-        for i in range(2):
-            encode_pieces(self.backgammon.bar[i], (i + 48) * 4)
-
-        # Process off
-        for i in range(2):
-            encode_pieces(self.backgammon.off[i], (i + 50) * 4)
-
-        # Include dice rolls in the agent input
-        res[-2] = self.dice[3] if len(self.dice) >= 4 else 0
-        res[-3] = self.dice[2] if len(self.dice) >= 3 else 0
-        res[-4] = self.dice[1] if len(self.dice) >= 2 else 0
-        res[-5] = self.dice[0] if len(self.dice) >= 1 else 0
-
-        # Include the player playing from this state
-        res[-1] = self.current_player
-
-        if get_normalized:
-            return normalize_input(res, cell_stats)  # Does nothing for now.
-        return res
-
-    def reset(self, seed: int | None = None,
-              options: dict[str, Any] | None = None) -> tuple[Input, dict[str, Any]]:
-        """
-        Reset the environment.
-
-        :param seed: Random seed for reproducibility.
-        :param options: Additional options for reset (unused).
-        :return: Tuple of initial observation and an empty dict.
-        """
-        self.seed(seed)
-        self.backgammon.reset()
-        self.moves = 0
-        self.max_moves = options.get("max_moves", 500) if options is not None else 500
-        # Clear the cache on reset.
-        self._cache.clear()
-        return self.get_input(), {}
-
-    def roll_deterministic_dice(self, dice_values: list[int]) -> list[int]:
-        """
-        Set dice values with the specified parameters.
-
-        :param dice_values: the value of the dice to set
-        """
-        if dice_values[0] == dice_values[1]:
-            dice_values *= 2
-        self.dice = dice_values
-        return dice_values
-
-    def roll_dice(self) -> list[int]:
-        """Roll the dice."""
-        rolls: list[int] = [random.randint(1, 6), random.randint(1, 6)]
-        if rolls[0] == rolls[1]:
-            rolls *= 2
-        self.dice = rolls
-        return rolls
-
-    def is_movement_possible(self) -> bool:
-        """
-        Checks whether any movement can be made.
-
-        :return: true, if a movement can be made, otherwise false
-        """
-        return len(self.get_all_complete_moves()) != 0
-
-    def flip(self) -> Input:
-        """
-        Flip the board, changing the perspective to the opposing player.
-        Marks the end of the turn, which requires updating the game stats.
-
-        :return: New board state after flipping.
-        """
-        self.moves += 1
-        self.backgammon.flip()
-        self.current_player *= -1
-        self.roll_dice()
-        return self.get_input()
-
-    def step(self, dice_action: tuple[int, MovePart] | None) -> tuple[float, bool, bool, dict[str, Any]]:
-        """
-        Take a step in the environment.
-
-        :param dice_action: Tuple of (dice, (from_point, to_point)) representing the move and the dice used.
-        :return: Tuple containing (reward, done, truncated, info).
-        """
-        if dice_action:
-
-            dice = dice_action[0]
-            action = dice_action[1]
-
-            white_pieces = (np.sum(self.backgammon.board[self.backgammon.board > 0]) + self.backgammon.off[0]
-                            + self.backgammon.bar[0])
-            black_pieces = (np.sum(-self.backgammon.board[self.backgammon.board < 0]) + self.backgammon.off[1]
-                            + self.backgammon.bar[1])
-            self.backgammon.make_move(action)
-            white_pieces_new = (np.sum(-self.backgammon.board[self.backgammon.board < 0]) + self.backgammon.off[1]
-                                + self.backgammon.bar[1])
-            black_pieces_new = (np.sum(self.backgammon.board[self.backgammon.board > 0]) + self.backgammon.off[0]
-                                + self.backgammon.bar[0])
-            if black_pieces != black_pieces_new or white_pieces != white_pieces_new:
-                self.render("text")
-                print(action)
-                print("Black pieces:", black_pieces, "Black pieces new:", black_pieces_new)
-                print("White pieces:", white_pieces, "White pieces new:", white_pieces_new)
-                sys.exit()
-            self.dice.remove(dice)
-        done = self.backgammon.is_terminal()
-        reward = 0.0
-
-        if not dice_action or len(self.dice) == 0:
-            self.flip()
-
-        if done:
-            reward = self.backgammon.get_winner()
-        return reward, done, self.moves >= self.max_moves and not done, {}
-
-    @no_type_check
-    def step_deprecated(self, action: MovePart) -> tuple[float, bool, bool, dict[str, Any]]:
-        """
-        Take a step in the environment.
-
-        :param action: Tuple of (from_point, to_point) representing the move.
-        :return: Tuple containing (reward, done, truncated, info).
-        """
-        self.moves += 1
-        white_pieces = (np.sum(self.backgammon.board[self.backgammon.board > 0]) + self.backgammon.off[0]
-                        + self.backgammon.bar[0])
-        black_pieces = (np.sum(-self.backgammon.board[self.backgammon.board < 0]) + self.backgammon.off[1]
-                        + self.backgammon.bar[1])
-        self.backgammon.make_move(action)
-        white_pieces_new = (np.sum(-self.backgammon.board[self.backgammon.board < 0]) + self.backgammon.off[1]
-                            + self.backgammon.bar[1])
-        black_pieces_new = (np.sum(self.backgammon.board[self.backgammon.board > 0]) + self.backgammon.off[0]
-                            + self.backgammon.bar[0])
-        if black_pieces != black_pieces_new or white_pieces != white_pieces_new:
-            self.render("text")
-            print(action)
-            print("Black pieces:", black_pieces, "Black pieces new:", black_pieces_new)
-            print("White pieces:", white_pieces, "White pieces new:", white_pieces_new)
-            sys.exit()
-        done = self.backgammon.is_terminal()
-        reward = 0.0
-        if done:
-            reward = self.backgammon.get_winner()
-        return reward, done, self.moves >= self.max_moves and not done, {}
-
-    def render(self, mode: str = "human") -> None:
-        """
-        Render the environment.
-
-        :param mode: Rendering mode ("human" for GUI, else text-based).
-        """
-        if mode == "human":
-            render = human_renderer.BackgammonRenderer()
-            render.render(self.backgammon.board, self.backgammon.bar, self.backgammon.off)
+        # set the current agent
+        if roll[0] > roll[1]:
+            self.current_agent = WHITE
+            roll = (-roll[0], -roll[1])
         else:
-            print(self)
+            self.current_agent = BLACK
 
-    @staticmethod
-    def seed(seed: int | None = None) -> None:
-        """
-        Set the seed for the environment.
+        self.game = Game()
+        self.counter = 0
 
-        :param seed: Random seed for reproducibility.
-        """
-        if seed is not None:
-            random.seed(seed)
-            np.random.Generator(np.random.MT19937(seed))
+        return self.current_agent, roll, self.game.get_board_features(self.current_agent)
 
-    def get_legal_moves(self, dice: Iterable[int]) -> MoveList:
-        """
-        Return the legal moves for the current player.
+    def render(self, mode='human'):
+        assert mode in ['human', 'rgb_array', 'state_pixels'], print(mode)
 
-        :param dice: Iterable of dice values.
-        :return: List of legal moves as tuples of (roll, move).
-        """
-        actions_per_roll = self.backgammon.get_legal_moves(dice)
-        actions = []
-        for roll in dice:
-            actions += [(roll, move) for move in actions_per_roll[roll]]
-        return actions
+        if mode == 'human':
+            self.game.render()
+            return True
+        else:
+            if self.viewer is None:
+                self.viewer = Viewer(SCREEN_W, SCREEN_H)
 
-    def get_all_complete_moves(self) -> list[tuple[BackgammonEnv, tuple[int, MovePart]]]:
-        """
-        Return all (single) moves for the list of dice remaining for the player.
+            if mode == 'rgb_array':
+                width = SCREEN_W
+                height = SCREEN_H
 
-        :return: list of moves and their associated dice
-        """
-        possible_moves = self.get_legal_moves(self.dice)
-        returned_moves: list[tuple[BackgammonEnv, tuple[int, MovePart]]] = []
-        for move in possible_moves:
-            board_copy = self.copy()
-            board_copy.step(move)
-            returned_moves.append((board_copy, move))
-        return returned_moves
-
-    def get_next_state_from_action(self, state: BackgammonEnv, action: MovePart) -> BackgammonEnv:
-        """
-        Perform the provided action on the given state to obtain the next state.
-
-        :param state: starting state
-        :param action: action to be performed
-        :return: state after performing the action (next state)
-        """
-        raise NotImplementedError
-
-    @no_type_check
-    def get_all_complete_moves_deprecated(
-        self,
-        dice: list[int],
-    ) -> list[tuple[BackgammonEnv, list[tuple[int, MovePart]]]]:
-        """
-        Return all possible complete moves for the current player.
-        Uses internal caching (self._cache) to avoid redundant computations.
-        Special handling is provided for lists of dice that contain the same value (doubles).
-
-        :param dice: List of dice values.
-        :return: List of all possible complete moves.
-        """
-        if not dice:
-            return []
-        # Use a canonical key for caching.
-        key = (hash(self), dice[0], len(dice)) if len(dice) > 0 and len(set(dice)) == 1 else (hash(self), tuple(dice))
-
-        if key in self._cache:
-            return self._cache[key]
-
-        actions = self.get_legal_moves(dice)
-        if not actions:
-            result: list[tuple[BackgammonEnv, list[tuple[int, MovePart]]]] = []
-            self._cache[key] = result
-            return result
-
-        moves: list[tuple[BackgammonEnv, list[tuple[int, MovePart]]]] = []
-        for roll, action in actions:
-            board_copy = self.copy()
-            board_copy.step(action)
-            next_dice = dice.copy()
-            next_dice.remove(roll)
-            next_moves = board_copy.get_all_complete_moves_deprecated(next_dice) if next_dice else []
-            if next_moves:
-                moves += [(position, [(roll, action), *move]) for position, move in next_moves]
             else:
-                moves += [(board_copy, [(roll, action)])]
+                assert mode == 'state_pixels', print(mode)
+                width = STATE_W
+                height = STATE_H
 
-        max_moves = max(len(move) for _, move in moves) if moves else 0
-        # Filter out moves that are not the longest.
-        moves = [move for move in moves if len(move[1]) == max_moves]
-        # If not all rolls can be used, use the one with the largest roll.
+            return self.viewer.render(board=self.game.board, bar=self.game.bar, off=self.game.off, state_w=width, state_h=height)
 
-        if len(dice) > 1 and dice[0] != dice[1] and max_moves == 1:
-            max_roll = max(dice)
-            moves_max_roll = [move for move in moves if move[1][0][0] == max_roll]
-            if moves_max_roll:
-                moves = moves_max_roll
+    def close(self):
+        if self.viewer:
+            self.viewer.close()
+            self.viewer = None
 
-        for board, _ in moves:
-            board.flip()
+    def get_valid_actions(self, roll):
+        return self.game.get_valid_plays(self.current_agent, roll)
 
-        self._cache[key] = moves
-        return moves
+    def get_opponent_agent(self):
+        self.current_agent = self.game.get_opponent(self.current_agent)
+        return self.current_agent
 
-    def copy(self) -> BackgammonEnv:
-        """
-        Return a copy of the current environment.
-        Also propagates the internal cache to the new copy.
-        """
-        env = BackgammonEnv()
-        env.backgammon = self.backgammon.copy()
-        env.max_moves = self.max_moves
-        env.moves = self.moves
-        env.current_player = self.current_player
-        env.dice = self.dice.copy()
-        # Propagate the cache reference so that all copies share the same cache.
-        env._cache = self._cache
-        return env
 
-    def __hash__(self) -> int:
-        """Return the hash of the input array."""
-        return hash(tuple(self.get_input().tolist()))  # type: ignore[arg-type]
+class BackgammonEnvPixel(BackgammonEnv):
 
-    def __eq__(self, other: BackgammonEnv) -> bool:  # type: ignore[override]
-        """Return whether the input arrays are equal."""
-        return np.array_equal(self.get_input(), other.get_input())
+    def __init__(self):
+        super(BackgammonEnvPixel, self).__init__()
+        self.observation_space = Box(low=0, high=255, shape=(STATE_H, STATE_W, 3), dtype=np.uint8)
 
-    def __repr__(self) -> str:
-        """Represent the environment with text."""
-        return text_render(self.backgammon)
+    def step(self, action):
+        observation, reward, done, winner = super().step(action)
+        observation = self.render(mode='state_pixels')
+        return observation, reward, done, winner
+
+    def reset(self):
+        current_agent, roll, observation = super().reset()
+        observation = self.render(mode='state_pixels')
+        return current_agent, roll, observation

@@ -1,5 +1,2 @@
-"""Init file for the environment module."""
-
-from rlgammon.environment.backgammon_env import BackgammonEnv
-
-__all__ = ["BackgammonEnv"]
+from gym_backgammon.envs.backgammon_env import BackgammonEnv
+from gym_backgammon.envs.backgammon_env import BackgammonEnvPixel
