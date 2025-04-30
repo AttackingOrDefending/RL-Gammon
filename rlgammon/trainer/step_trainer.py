@@ -10,8 +10,6 @@ from rlgammon.environment.backgammon_env import BackgammonEnv
 from rlgammon.trainer.base_trainer import BaseTrainer
 from rlgammon.trainer.trainer_errors.trainer_errors import NoParametersError
 
-# Check validity of implementation
-
 
 class StepTrainer(BaseTrainer):
     """Sequential trainer with training at each step."""
@@ -49,23 +47,16 @@ class StepTrainer(BaseTrainer):
                 else:
                     roll = agent.roll_dice()
 
-                # TODO p = model(state)
-
                 # Get actions from the explorer and agent
-                if explorer.should_explore():
-                    action = explorer.explore(env.get_all_complete_moves())
-                else:
-                    action = agent.choose_move(env)
+                actions = env.get_valid_actions(roll)
+                action = explorer.explore(actions) if explorer.should_explore() else agent.choose_move(actions, env)
 
                 # Make action and receive observation from state
-                reward, done, trunc, _ = env.step(action)
-
-                actions = env.get_valid_actions(roll)
-                action = agent.choose_move(actions, env)
                 next_state, reward, done, winner = env.step(action)
-                # TODO p_next = model(observation_next) * model.gamma
-                explorer.update()
 
+                # Update agent, exploration, and total step count
+                _ = agent.train(state, next_state, reward, done)
+                explorer.update()
                 total_steps += 1
 
             if (episode + 1) % self.parameters["episodes_per_test"] == 0:

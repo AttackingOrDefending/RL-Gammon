@@ -5,6 +5,9 @@ from enum import Enum
 import numpy as np
 from numpy.typing import NDArray
 
+WHITE = 0
+BLACK = 1
+
 Action = tuple[tuple[int, int], ...]
 ActionSet = set[Action]
 State = NDArray[np.float32]
