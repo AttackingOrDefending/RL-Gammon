@@ -5,6 +5,10 @@ from enum import Enum
 import numpy as np
 from numpy.typing import NDArray
 
+Action = tuple[tuple[int, int], ...]
+ActionSet = set[Action]
+State = NDArray[np.float32]
+
 MovePart = tuple[int, int]
 MoveDict = dict[int, set[MovePart]]
 Move = list[MovePart]

@@ -3,13 +3,13 @@
 import random
 
 from rlgammon.environment.backgammon_env import BackgammonEnv
-from rlgammon.rlgammon_types import MovePart
+from rlgammon.rlgammon_types import Action, ActionSet
 
 
 class BaseAgent:
     """Base class for all agents in the backgammon game."""
 
-    def choose_move(self, actions: set, env: BackgammonEnv) -> tuple[int, MovePart] | None:
+    def choose_move(self, actions: ActionSet, env: BackgammonEnv) -> Action:
         """
         Chooses a move to make given the current board and dice roll.
 

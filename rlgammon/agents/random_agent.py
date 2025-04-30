@@ -4,13 +4,13 @@ import random
 
 from rlgammon.agents.base_agent import BaseAgent
 from rlgammon.environment.backgammon_env import BackgammonEnv
-from rlgammon.rlgammon_types import MovePart
+from rlgammon.rlgammon_types import Action, ActionSet
 
 
 class RandomAgent(BaseAgent):
     """A random agent for backgammon."""
 
-    def choose_move(self, actions: set, env: BackgammonEnv) -> tuple[int, MovePart] | None:  # noqa: ARG002
+    def choose_move(self, actions: ActionSet, env: BackgammonEnv) -> Action:
         """
         Choose a random move from the legal moves.
 

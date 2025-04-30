@@ -4,10 +4,11 @@ import numpy as np
 
 from rlgammon.agents.td_agent import TDAgent
 from rlgammon.environment.backgammon_env import BackgammonEnv
+from rlgammon.rlgammon_types import Action, ActionSet
 
 
 class TDAgentGnu(TDAgent):
-    def choose_move(self, actions: set, env: BackgammonEnv) -> list:
+    def choose_move(self, actions: ActionSet, env: BackgammonEnv) -> Action:
         """
         Chooses a move to make given the current board and dice roll,
         which goes to the state with maximal value, when playing against a GNU agent.

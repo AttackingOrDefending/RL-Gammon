@@ -4,6 +4,7 @@ import torch as th
 
 from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.environment.backgammon_env import BackgammonEnv
+from rlgammon.rlgammon_types import Action, ActionSet
 from utils.utils import copy
 
 
@@ -11,7 +12,7 @@ class TDAgent(TrainableAgent):
     def __init__(self):
         """TODO."""
 
-    def choose_move(self, actions: set, env: BackgammonEnv) -> list:
+    def choose_move(self, actions: ActionSet, env: BackgammonEnv) -> Action:
         """
         Chooses a move to make given the current board and dice roll, which goes to the state with maximal value.
 
