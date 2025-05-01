@@ -31,8 +31,17 @@ class BaseModel(nn.Module):
         th.manual_seed(seed)
         random.seed(seed)
 
+    def forward(self, x: State) -> th.Tensor:
+        """
+        TODO.
+
+        :param x:
+        :return:
+        """
+        pass
+
     @abstractmethod
-    def update_weights(self, p: float, p_next: float) -> float:
+    def update_weights(self, p: th.Tensor, p_next: th.Tensor | int) -> float:
         """
         TODO>.
 
@@ -41,33 +50,6 @@ class BaseModel(nn.Module):
         :return:
         """
         raise NotImplementedError
-
-    @abstractmethod
-    def forward(self, x: State) -> th.Tensor:
-        """
-        TODO.
-
-        :param x:
-        :return:
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def init_weights(self) -> None:
-        """
-        TODO.
-
-        :return:
-        """
-        raise NotImplementedError
-
-    def init_eligibility_traces(self) -> None:
-        """
-        TODO.
-
-        :return:
-        """
-        self.eligibility_traces = [th.zeros(weights.shape, requires_grad=False) for weights in list(self.parameters())]
 
     def checkpoint(self, checkpoint_path: str, step: int, name_experiment: str):
         """
