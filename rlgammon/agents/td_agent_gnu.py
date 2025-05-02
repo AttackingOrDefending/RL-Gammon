@@ -1,17 +1,27 @@
-"""TODO"""
+"""TODO."""
+from functools import cache
 from uuid import UUID
 
 import numpy as np
+import torch as th
 
 from rlgammon.agents.gnu_agent import GNUAgent
 from rlgammon.agents.td_agent import TDAgent
 from rlgammon.environment.backgammon_env import BackgammonEnv
-from rlgammon.environment.gnubg.gnubg_backgammon import GnubgInterface
-from rlgammon.rlgammon_types import Action, ActionSet
+from rlgammon.environment.gnubg.gnubg_backgammon import GnubgInterface, gnubgState
+from rlgammon.rlgammon_types import WHITE, Action, ActionSet, State
 
 
 class TDAgentGnu(TDAgent, GNUAgent):
     """TODO."""
+
+    def __init__(self, gnubg_interface: GnubgInterface) -> None:
+        """
+        TODO.
+
+        :param gnubg_interface:
+        """
+        super().__init__(gnubg_interface)
 
     def choose_move(self, actions: ActionSet, env: BackgammonEnv) -> Action:
         """
@@ -29,8 +39,6 @@ class TDAgentGnu(TDAgent, GNUAgent):
             values = [0.0] * len(actions)
             state = game.save_state()
 
-            best_value = float("-inf") if self.color == WHITE else float("inf")
-            best_action = None
             for i, action in enumerate(actions):
                 game.execute_play(self.color, action)
                 opponent = game.get_opponent(self.color)
@@ -49,7 +57,59 @@ class TDAgentGnu(TDAgent, GNUAgent):
 
         return best_action
 
+    def handle_opponent_move(self, gnubg: gnubgState) -> gnubgState:
+        """
+        TODO.
+
+        :param gnubg:
+        :return:
+        """
+        # Once I roll the dice, 2 possible situations can happen:
+        # 1) I can move (the value gnubg.roll is not None)
+        # 2) I cannot move, so my opponent rolls the dice and makes its move, and eventually ask for doubling,
+        #    so I have to roll the dice again
+
+        # One way to distinguish between the above cases,
+        # is to check the color of the player that performs the last move in gnubg:
+
+        # - if the player's color is the same as the TD Agent, it means I can send the 'move' command
+        #   (no other moves have been performed after the 'roll' command) - case 1);
+        # - if the player's color is not the same as the TD Agent,
+        #   this means that the last move performed after the 'roll' is not of the TD agent - case 2)
+
+        previous_agent = gnubg.agent
+        if previous_agent == self.color:  # case 1)
+            return gnubg
+        # case 2)
+        while previous_agent != self.color and gnubg.winner is None:
+            # check if my opponent asks for doubling
+            # always take when opponent asks for doubling
+            gnubg = self.gnubg_interface.send_command("take") \
+                if gnubg.double else self.gnubg_interface.send_command("roll")
+            previous_agent = gnubg.agent
+        return gnubg
+
+    def save(self, training_session_id: UUID, session_save_count: int, main_filename: str | None = None,
+             target_filename: str | None = None, optimizer_filename: str | None = None) -> None:
+        pass
+
+    def clear_cache(self) -> None:
+        """Clear the cache of the evaluate_position method."""
+        self.evaluate_position.cache_clear()
+
+    @cache
+    def evaluate_position(self, state: State) -> float:
+        """
+        TODO.
+        :param state:
+        :return:
+        """
+        state = th.tensor(state, dtype=th.float32)
+        return float(self.model(state))
+
 """
+THIS OPTIMIZATION TO BE IMPLEMENTED
+
 best_action = None
 best_value = float("-inf") if self.color == WHITE else float("inf")
 for action in actions:
