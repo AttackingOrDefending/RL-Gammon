@@ -38,8 +38,7 @@ class StepTrainer(BaseTrainer):
         for episode in tqdm(range(self.parameters["episodes"]), desc="Training Episodes"):
             agent_color, first_roll, state = env.reset()
             done = False
-            trunc = False
-            while not done and not trunc:
+            while not done:
                 # If this is the first step, take the roll from env, else roll yourself
                 if first_roll:
                     roll = first_roll

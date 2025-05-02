@@ -2,7 +2,8 @@
 
 from rlgammon.agents.base_agent import BaseAgent
 from rlgammon.agents.random_agent import RandomAgent
-from rlgammon.environment import BackgammonEnv
+from rlgammon.environment.backgammon_env import BackgammonEnv
+from rlgammon.rlgammon_types import WHITE
 from rlgammon.trainer.testing.base_testing import BaseTesting
 
 
@@ -26,19 +27,29 @@ class RandomTesting(BaseTesting):
         :param agent: agent to be tested
         :return: results of test, with win, draw, and loss rate recorded (as fractions)
         """
+        # TODO CHECK COLORS
+
         wins = 0
         draws = 0
         losses = 0
         env = BackgammonEnv()
-        agent_player = 1
+        agent_player = WHITE
         for _test_game in range(self.episodes_in_test):
-            env.reset()
+            agent_color, first_roll, state = env.reset()
             done = False
-            trunc = False
             reward = 0.0
-            while not done and not trunc:
-                action = agent.choose_move(env) if env.current_player == agent_player else self.testing_agent.choose_move(env)
-                reward, done, trunc, _ = env.step(action)
+            while not done:
+                # If this is the first step, take the roll from env, else roll yourself
+                if first_roll:
+                    roll = first_roll
+                    first_roll = None
+                else:
+                    roll = agent.roll_dice()
+
+                actions = env.get_valid_actions(roll)
+                action = agent.choose_move(actions, env) \
+                    if env.current_player == agent_player else self.testing_agent.choose_move(actions, env)
+                next_state, reward, done, winner = env.step(action)
             if reward == 0:
                 draws += 1
             elif env.has_lost(agent_player):

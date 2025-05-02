@@ -13,6 +13,7 @@ from rlgammon.exploration.no_exploration import NoExploration
 from rlgammon.rlgammon_types import Input, MovePart
 from rlgammon.trainer.logger.logger import Logger
 from rlgammon.trainer.testing.base_testing import BaseTesting
+from rlgammon.trainer.testing.gnu_testing import GNUTesting
 from rlgammon.trainer.testing.random_testing import RandomTesting
 from rlgammon.trainer.testing.testing_types import PossibleTesting
 from rlgammon.trainer.trainer_errors.trainer_errors import (
@@ -51,6 +52,8 @@ class BaseTrainer:
         match self.parameters["testing_type"]:
             case PossibleTesting.RANDOM:
                 testing = RandomTesting(self.parameters["episodes_in_test"])
+            case PossibleTesting.GNU:
+                testing = GNUTesting(self.parameters["episodes_in_test"])
             case _:
                 raise WrongTestingTypeError
         return testing

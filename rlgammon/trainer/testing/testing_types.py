@@ -7,6 +7,7 @@ class PossibleTesting(Enum):
     """Enumeration of possible testing types."""
 
     RANDOM = "RND"
+    GNU = "GNU"
 
     @staticmethod
     def get_enum_from_string(string_to_convert: str) -> "PossibleTesting":
@@ -21,5 +22,7 @@ class PossibleTesting(Enum):
         match string_to_convert:
             case "RND":
                 return PossibleTesting.RANDOM
+            case "GNU":
+                return PossibleTesting.GNU
             case _:
                 return None  # type: ignore[return-value]

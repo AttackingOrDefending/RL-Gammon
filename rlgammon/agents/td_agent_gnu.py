@@ -1,13 +1,18 @@
 """TODO"""
+from uuid import UUID
 
 import numpy as np
 
+from rlgammon.agents.gnu_agent import GNUAgent
 from rlgammon.agents.td_agent import TDAgent
 from rlgammon.environment.backgammon_env import BackgammonEnv
+from rlgammon.environment.gnubg.gnubg_backgammon import GnubgInterface
 from rlgammon.rlgammon_types import Action, ActionSet
 
 
-class TDAgentGnu(TDAgent):
+class TDAgentGnu(TDAgent, GNUAgent):
+    """TODO."""
+
     def choose_move(self, actions: ActionSet, env: BackgammonEnv) -> Action:
         """
         Chooses a move to make given the current board and dice roll,
