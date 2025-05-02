@@ -11,13 +11,22 @@ from utils.utils import copy
 class TDAgent(TrainableAgent):
     """TODO."""
 
-    def __init__(self, model: th.nn.Module | None = None, color: int=WHITE) -> None:
-        """TODO."""
+    def __init__(self, model: th.nn.Module | None = None, lr: float = 0.01,
+                 gamma: float = 0.99, lamda: float = 0.99, color: int=WHITE) -> None:
+        """
+        TODO.
+
+        :param model:
+        :param lr:
+        :param gamma:
+        :param lamda:
+        :param color:
+        """
+        super().__init__(color)
         self.model = model if model else model_factory([], [])
-        self.lr = 0.01
-        self.gamma = 0.99
-        self.lamda = 0.99
-        self.color = color
+        self.lr = lr
+        self.gamma = gamma
+        self.lamda = lamda
 
     def train(self, state: State, next_state: State, reward: int, done: bool) -> float:
         """

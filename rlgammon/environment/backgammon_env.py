@@ -1,9 +1,11 @@
+from random import randint
+
 import gym
 from gym.spaces import Box
-from gym_backgammon.envs.backgammon import Backgammon as Game, WHITE, BLACK, COLORS
-from random import randint
-from gym_backgammon.envs.rendering import Viewer
 import numpy as np
+
+from rlgammon.environment.backgammon import BLACK, WHITE, Backgammon as Game
+from rlgammon.environment.rendering import Viewer
 
 STATE_W = 96
 STATE_H = 96
@@ -13,7 +15,7 @@ SCREEN_H = 500
 
 
 class BackgammonEnv(gym.Env):
-    metadata = {'render.modes': ['human', 'rgb_array', 'state_pixels']}
+    metadata = {"render.modes": ["human", "rgb_array", "state_pixels"]}
 
     def __init__(self):
         self.game = Game()
@@ -77,26 +79,25 @@ class BackgammonEnv(gym.Env):
 
         return self.current_agent, roll, self.game.get_board_features(self.current_agent)
 
-    def render(self, mode='human'):
-        assert mode in ['human', 'rgb_array', 'state_pixels'], print(mode)
+    def render(self, mode="human"):
+        assert mode in ["human", "rgb_array", "state_pixels"], print(mode)
 
-        if mode == 'human':
+        if mode == "human":
             self.game.render()
             return True
+        if self.viewer is None:
+            self.viewer = Viewer(SCREEN_W, SCREEN_H)
+
+        if mode == "rgb_array":
+            width = SCREEN_W
+            height = SCREEN_H
+
         else:
-            if self.viewer is None:
-                self.viewer = Viewer(SCREEN_W, SCREEN_H)
+            assert mode == "state_pixels", print(mode)
+            width = STATE_W
+            height = STATE_H
 
-            if mode == 'rgb_array':
-                width = SCREEN_W
-                height = SCREEN_H
-
-            else:
-                assert mode == 'state_pixels', print(mode)
-                width = STATE_W
-                height = STATE_H
-
-            return self.viewer.render(board=self.game.board, bar=self.game.bar, off=self.game.off, state_w=width, state_h=height)
+        return self.viewer.render(board=self.game.board, bar=self.game.bar, off=self.game.off, state_w=width, state_h=height)
 
     def close(self):
         if self.viewer:
@@ -119,10 +120,10 @@ class BackgammonEnvPixel(BackgammonEnv):
 
     def step(self, action):
         observation, reward, done, winner = super().step(action)
-        observation = self.render(mode='state_pixels')
+        observation = self.render(mode="state_pixels")
         return observation, reward, done, winner
 
     def reset(self):
         current_agent, roll, observation = super().reset()
-        observation = self.render(mode='state_pixels')
+        observation = self.render(mode="state_pixels")
         return current_agent, roll, observation

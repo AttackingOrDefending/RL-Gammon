@@ -1,25 +1,27 @@
+from collections import namedtuple
+from itertools import count
 import os
 import sys
 import time
-from collections import namedtuple
-from itertools import count
+
 import requests
-from gym_backgammon.envs.backgammon import Backgammon as Game, WHITE, BLACK, NUM_POINTS, COLORS, assert_board
-from gym_backgammon.envs.backgammon_env import STATE_W, STATE_H, SCREEN_W, SCREEN_H
-from gym_backgammon.envs.rendering import Viewer
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from rlgammon.environment.backgammon import BLACK, NUM_POINTS, WHITE, Backgammon as Game, assert_board
+from rlgammon.environment.backgammon_env import SCREEN_H, SCREEN_W, STATE_H, STATE_W
+from rlgammon.environment.rendering import Viewer
 
-gnubgState = namedtuple('GNUState', ['agent', 'roll', 'move', 'board', 'double', 'winner', 'n_moves', 'action', 'resigned', 'history'])
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+gnubgState = namedtuple("GNUState", ["agent", "roll", "move", "board", "double", "winner", "n_moves", "action", "resigned", "history"])
 
 
 class GnubgInterface:
     def __init__(self, host, port):
-        self.url = "http://{}:{}".format(host, port)
+        self.url = f"http://{host}:{port}"
         # Mapping from gnu board representation to representation used by the environment
         self.gnu_to_idx = {23 - k: k for k in range(NUM_POINTS)}
         # In GNU Backgammon, position 25 (here 24 because I start from 0-24) represents the 'bar' move
-        self.gnu_to_idx[24] = 'bar'
+        self.gnu_to_idx[24] = "bar"
         self.gnu_to_idx[-1] = -1
 
     def send_command(self, command):
@@ -27,7 +29,7 @@ class GnubgInterface:
             resp = requests.post(url=self.url, data={"command": command})
             return self.parse_response(resp.json())
         except Exception as e:
-            print("Error during connection to {}: {} (Remember to run gnubg -t -p bridge.py)".format(self.url, e))
+            print(f"Error during connection to {self.url}: {e} (Remember to run gnubg -t -p bridge.py)")
 
     def parse_response(self, response):
         gnubg_board = response["board"]
@@ -44,22 +46,22 @@ class GnubgInterface:
         agent = None
 
         if info:
-            winner = info['winner']
-            n_moves = info['n_moves']
-            resigned = info['resigned']
+            winner = info["winner"]
+            n_moves = info["n_moves"]
+            resigned = info["resigned"]
 
         if action:
 
-            agent = WHITE if action['player'] == 'O' else BLACK
+            agent = WHITE if action["player"] == "O" else BLACK
 
-            if action['action'] == "double":
+            if action["action"] == "double":
                 double = True
-            elif 'dice' in action:
-                roll = tuple(action['dice'])
+            elif "dice" in action:
+                roll = tuple(action["dice"])
                 roll = (-roll[0], -roll[1]) if agent == WHITE else (roll[0], roll[1])
 
-            if action['action'] == 'move':
-                move = tuple(tuple([self.gnu_to_idx[a - 1], self.gnu_to_idx[b - 1]]) for (a, b) in action['move'])
+            if action["action"] == "move":
+                move = tuple(tuple([self.gnu_to_idx[a - 1], self.gnu_to_idx[b - 1]]) for (a, b) in action["move"])
 
         return gnubgState(agent=agent, roll=roll, move=move, board=gnubg_board[:], double=double, winner=winner, n_moves=n_moves, action=action, resigned=resigned, history=response["info"])
 
@@ -68,20 +70,20 @@ class GnubgInterface:
         if action:
             for move in action:
                 src, target = move
-                if src == 'bar':
-                    result += "bar/{},".format(target + 1)
+                if src == "bar":
+                    result += f"bar/{target + 1},"
                 elif target == -1:
-                    result += "{}/off,".format(src + 1)
+                    result += f"{src + 1}/off,"
                 else:
-                    result += "{}/{},".format(src + 1, target + 1)
+                    result += f"{src + 1}/{target + 1},"
 
         return result[:-1]  # remove the last semicolon
 
 
 class GnubgEnv:
-    DIFFICULTIES = ['beginner', 'intermediate', 'advanced', 'world_class']
+    DIFFICULTIES = ["beginner", "intermediate", "advanced", "world_class"]
 
-    def __init__(self, gnubg_interface, difficulty='beginner', model_type='nn'):
+    def __init__(self, gnubg_interface, difficulty="beginner", model_type="nn"):
         self.game = Game()
         self.current_agent = WHITE
         self.gnubg_interface = gnubg_interface
@@ -102,20 +104,20 @@ class GnubgEnv:
         if self.gnubg.double and self.gnubg.winner is None:
             self.gnubg = self.gnubg_interface.send_command("take")
 
-        if self.gnubg.agent == WHITE and self.gnubg.action['action'] == 'move' and self.gnubg.winner is None:
-            if self.gnubg.winner != 'O':
+        if self.gnubg.agent == WHITE and self.gnubg.action["action"] == "move" and self.gnubg.winner is None:
+            if self.gnubg.winner != "O":
                 self.gnubg = self.gnubg_interface.send_command("accept")
-                assert self.gnubg.winner == 'O', print(self.gnubg)
-                assert self.gnubg.action['action'] == 'resign' and self.gnubg.agent == 1 and self.gnubg.action['player'] == 'X'
+                assert self.gnubg.winner == "O", print(self.gnubg)
+                assert self.gnubg.action["action"] == "resign" and self.gnubg.agent == 1 and self.gnubg.action["player"] == "X"
                 assert self.gnubg.resigned
 
         self.update_game_board(self.gnubg.board)
 
-        observation = self.game.get_board_features(self.current_agent) if self.model_type == 'nn' else self.render(mode='state_pixels')
+        observation = self.game.get_board_features(self.current_agent) if self.model_type == "nn" else self.render(mode="state_pixels")
 
         winner = self.gnubg.winner
         if winner is not None:
-            winner = WHITE if winner == 'O' else BLACK
+            winner = WHITE if winner == "O" else BLACK
 
             if winner == WHITE:
                 reward = 1
@@ -136,7 +138,7 @@ class GnubgEnv:
         self.game = Game()
         self.update_game_board(self.gnubg.board)
 
-        observation = self.game.get_board_features(self.current_agent) if self.model_type == 'nn' else self.render(mode='state_pixels')
+        observation = self.game.get_board_features(self.current_agent) if self.model_type == "nn" else self.render(mode="state_pixels")
         return observation, roll
 
     def update_game_board(self, gnu_board):
@@ -171,67 +173,66 @@ class GnubgEnv:
     def set_difficulty(self):
         self.is_difficulty_set = True
 
-        self.gnubg_interface.send_command('set automatic roll off')
-        self.gnubg_interface.send_command('set automatic game off')
+        self.gnubg_interface.send_command("set automatic roll off")
+        self.gnubg_interface.send_command("set automatic game off")
 
-        if self.difficulty == 'beginner':
-            self.gnubg_interface.send_command('set player gnubg chequer evaluation plies 0')
-            self.gnubg_interface.send_command('set player gnubg chequer evaluation prune off')
-            self.gnubg_interface.send_command('set player gnubg chequer evaluation noise 0.060')
-            self.gnubg_interface.send_command('set player gnubg cube evaluation plies 0')
-            self.gnubg_interface.send_command('set player gnubg cube evaluation prune off')
-            self.gnubg_interface.send_command('set player gnubg cube evaluation noise 0.060')
+        if self.difficulty == "beginner":
+            self.gnubg_interface.send_command("set player gnubg chequer evaluation plies 0")
+            self.gnubg_interface.send_command("set player gnubg chequer evaluation prune off")
+            self.gnubg_interface.send_command("set player gnubg chequer evaluation noise 0.060")
+            self.gnubg_interface.send_command("set player gnubg cube evaluation plies 0")
+            self.gnubg_interface.send_command("set player gnubg cube evaluation prune off")
+            self.gnubg_interface.send_command("set player gnubg cube evaluation noise 0.060")
 
-        elif self.difficulty == 'intermediate':
-            self.gnubg_interface.send_command('set player gnubg chequer evaluation noise 0.040')
-            self.gnubg_interface.send_command('set player gnubg cube evaluation noise 0.040')
+        elif self.difficulty == "intermediate":
+            self.gnubg_interface.send_command("set player gnubg chequer evaluation noise 0.040")
+            self.gnubg_interface.send_command("set player gnubg cube evaluation noise 0.040")
 
-        elif self.difficulty == 'advanced':
-            self.gnubg_interface.send_command('set player gnubg chequer evaluation plies 0')
-            self.gnubg_interface.send_command('set player gnubg chequer evaluation prune off')
-            self.gnubg_interface.send_command('set player gnubg chequer evaluation noise 0.015')
-            self.gnubg_interface.send_command('set player gnubg cube evaluation plies 0')
-            self.gnubg_interface.send_command('set player gnubg cube evaluation prune off')
-            self.gnubg_interface.send_command('set player gnubg cube evaluation noise 0.015')
+        elif self.difficulty == "advanced":
+            self.gnubg_interface.send_command("set player gnubg chequer evaluation plies 0")
+            self.gnubg_interface.send_command("set player gnubg chequer evaluation prune off")
+            self.gnubg_interface.send_command("set player gnubg chequer evaluation noise 0.015")
+            self.gnubg_interface.send_command("set player gnubg cube evaluation plies 0")
+            self.gnubg_interface.send_command("set player gnubg cube evaluation prune off")
+            self.gnubg_interface.send_command("set player gnubg cube evaluation noise 0.015")
 
-        elif self.difficulty == 'world_class':
-            self.gnubg_interface.send_command('set player gnubg chequer evaluation plies 2')
-            self.gnubg_interface.send_command('set player gnubg chequer evaluation prune on')
-            self.gnubg_interface.send_command('set player gnubg chequer evaluation noise 0.000')
-            
-            self.gnubg_interface.send_command('set player gnubg movefilter 1 0 0 8 0.160')
-            self.gnubg_interface.send_command('set player gnubg movefilter 2 0 0 8 0.160')
-            self.gnubg_interface.send_command('set player gnubg movefilter 3 0 0 8 0.160')
-            self.gnubg_interface.send_command('set player gnubg movefilter 3 2 0 2 0.040')
-            self.gnubg_interface.send_command('set player gnubg movefilter 4 0 0 8 0.160')
-            self.gnubg_interface.send_command('set player gnubg movefilter 4 2 0 2 0.040')
+        elif self.difficulty == "world_class":
+            self.gnubg_interface.send_command("set player gnubg chequer evaluation plies 2")
+            self.gnubg_interface.send_command("set player gnubg chequer evaluation prune on")
+            self.gnubg_interface.send_command("set player gnubg chequer evaluation noise 0.000")
 
-            self.gnubg_interface.send_command('set player gnubg cube evaluation plies 2')
-            self.gnubg_interface.send_command('set player gnubg cube evaluation prune on')
-            self.gnubg_interface.send_command('set player gnubg cube evaluation noise 0.000')
+            self.gnubg_interface.send_command("set player gnubg movefilter 1 0 0 8 0.160")
+            self.gnubg_interface.send_command("set player gnubg movefilter 2 0 0 8 0.160")
+            self.gnubg_interface.send_command("set player gnubg movefilter 3 0 0 8 0.160")
+            self.gnubg_interface.send_command("set player gnubg movefilter 3 2 0 2 0.040")
+            self.gnubg_interface.send_command("set player gnubg movefilter 4 0 0 8 0.160")
+            self.gnubg_interface.send_command("set player gnubg movefilter 4 2 0 2 0.040")
 
-        self.gnubg_interface.send_command('save setting')
+            self.gnubg_interface.send_command("set player gnubg cube evaluation plies 2")
+            self.gnubg_interface.send_command("set player gnubg cube evaluation prune on")
+            self.gnubg_interface.send_command("set player gnubg cube evaluation noise 0.000")
 
-    def render(self, mode='human'):
-        assert mode in ['human', 'rgb_array', 'state_pixels'], print(mode)
+        self.gnubg_interface.send_command("save setting")
 
-        if mode == 'human':
+    def render(self, mode="human"):
+        assert mode in ["human", "rgb_array", "state_pixels"], print(mode)
+
+        if mode == "human":
             self.game.render()
             return True
+        if self.viewer is None:
+            self.viewer = Viewer(SCREEN_W, SCREEN_H)
+
+        if mode == "rgb_array":
+            width = SCREEN_W
+            height = SCREEN_H
+
         else:
-            if self.viewer is None:
-                self.viewer = Viewer(SCREEN_W, SCREEN_H)
+            assert mode == "state_pixels", print(mode)
+            width = STATE_W
+            height = STATE_H
 
-            if mode == 'rgb_array':
-                width = SCREEN_W
-                height = SCREEN_H
-
-            else:
-                assert mode == 'state_pixels', print(mode)
-                width = STATE_W
-                height = STATE_H
-
-            return self.viewer.render(board=self.game.board, bar=self.game.bar, off=self.game.off, state_w=width, state_h=height)
+        return self.viewer.render(board=self.game.board, bar=self.game.bar, off=self.game.off, state_w=width, state_h=height)
 
 
 def evaluate_vs_gnubg(agent, env, n_episodes):
@@ -256,7 +257,7 @@ def evaluate_vs_gnubg(agent, env, n_episodes):
             # env.render(mode='rgb_array')
 
             if done:
-                winner = WHITE if env.gnubg.winner == 'O' else BLACK
+                winner = WHITE if env.gnubg.winner == "O" else BLACK
                 wins[winner] += 1
                 tot = wins[WHITE] + wins[BLACK]
                 break

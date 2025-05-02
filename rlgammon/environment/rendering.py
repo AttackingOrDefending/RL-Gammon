@@ -1,22 +1,25 @@
-import pyglet
-from pyglet import gl
-import numpy as np
 from collections import namedtuple
-from gym_backgammon.envs.backgammon import WHITE, BLACK, NUM_POINTS
 import os
 import platform
-Coords = namedtuple('Coords', ['x', 'y'])
 
-SCALING = 2 if platform.system() == 'Darwin' else 1
+import numpy as np
+import pyglet
+from pyglet import gl
 
-class Viewer(object):
+from rlgammon.environment.backgammon import BLACK, NUM_POINTS, WHITE
+
+Coords = namedtuple("Coords", ["x", "y"])
+
+SCALING = 2 if platform.system() == "Darwin" else 1
+
+class Viewer:
     def __init__(self, width, height):
         self.width = width
         self.height = height
 
         self.window = pyglet.window.Window(width=width, height=height, display=None)
 
-        pyglet.resource.path = [os.path.dirname(__file__) + '/resources']
+        pyglet.resource.path = [os.path.dirname(__file__) + "/resources"]
         pyglet.resource.reindex()
 
         empty_board_image = pyglet.resource.image("board.png")
@@ -29,8 +32,8 @@ class Viewer(object):
         self.checker_diameter = self.width / 15  # 40
 
         self.checkers = {
-            WHITE: {i: pyglet.resource.image("white_{}.png".format(i)) for i in range(1, 16)},
-            BLACK: {i: pyglet.resource.image("black_{}.png".format(i)) for i in range(1, 16)}
+            WHITE: {i: pyglet.resource.image(f"white_{i}.png") for i in range(1, 16)},
+            BLACK: {i: pyglet.resource.image(f"black_{i}.png") for i in range(1, 16)},
         }
 
         coords = {}
@@ -44,11 +47,11 @@ class Viewer(object):
             else:
                 coords[i] = Coords(x=width - (shifts[index] * self.checker_diameter), y=height - self.checker_diameter)
 
-        coords['bar_{}'.format(WHITE)] = Coords(x=width - (8 * self.checker_diameter), y=height - self.checker_diameter)
-        coords['bar_{}'.format(BLACK)] = Coords(x=width - (8 * self.checker_diameter), y=self.checker_diameter)
+        coords[f"bar_{WHITE}"] = Coords(x=width - (8 * self.checker_diameter), y=height - self.checker_diameter)
+        coords[f"bar_{BLACK}"] = Coords(x=width - (8 * self.checker_diameter), y=self.checker_diameter)
 
-        coords['off_{}'.format(WHITE)] = Coords(x=width - self.checker_diameter, y=self.checker_diameter)
-        coords['off_{}'.format(BLACK)] = Coords(x=width - self.checker_diameter, y=height - self.checker_diameter)
+        coords[f"off_{WHITE}"] = Coords(x=width - self.checker_diameter, y=self.checker_diameter)
+        coords[f"off_{BLACK}"] = Coords(x=width - self.checker_diameter, y=height - self.checker_diameter)
 
         self.points_coord = coords
 
@@ -74,13 +77,13 @@ class Viewer(object):
         for point, (checkers, player) in enumerate(board):
 
             if player is not None:
-                assert player in [WHITE, BLACK], print("Should be WHITE (0) or BLACK (1), not {}".format(player))
-                assert point in self.points_coord, print("Should be 0 <= point < 24, not {}".format(point))
-                assert 0 <= checkers <= 15, print("Should be 0 <= checkers <= 15, not {}".format(checkers))
+                assert player in [WHITE, BLACK], print(f"Should be WHITE (0) or BLACK (1), not {player}")
+                assert point in self.points_coord, print(f"Should be 0 <= point < 24, not {point}")
+                assert 0 <= checkers <= 15, print(f"Should be 0 <= checkers <= 15, not {checkers}")
 
                 c = self.points_coord[point]
                 img = self.checkers[player][checkers]
-                checkers = 5 if checkers > 5 else checkers
+                checkers = min(checkers, 5)
                 img.width = self.checker_diameter
                 img.height = self.checker_diameter * checkers
 
@@ -96,10 +99,10 @@ class Viewer(object):
             # BAR
             checkers = bar[player]
             if checkers > 0:
-                c = self.points_coord['bar_{}'.format(player)]
+                c = self.points_coord[f"bar_{player}"]
 
                 img = self.checkers[player][checkers]
-                checkers = 5 if checkers > 5 else checkers
+                checkers = min(checkers, 5)
                 img.width = self.checker_diameter
                 img.height = self.checker_diameter * checkers
 
@@ -114,9 +117,9 @@ class Viewer(object):
             checkers = off[player]
             if checkers > 0:
 
-                c = self.points_coord['off_{}'.format(player)]
+                c = self.points_coord[f"off_{player}"]
                 img = self.checkers[player][checkers]
-                checkers = 5 if checkers > 5 else checkers
+                checkers = min(checkers, 5)
                 img.width = self.checker_diameter
                 img.height = self.checker_diameter * checkers
 
@@ -138,7 +141,7 @@ class Viewer(object):
         if return_rgb_array:
             buffer = pyglet.image.get_buffer_manager().get_color_buffer()
             image_data = buffer.get_image_data()
-            arr = np.fromstring(image_data.data, dtype=np.uint8, sep='')
+            arr = np.fromstring(image_data.data, dtype=np.uint8, sep="")
             arr = arr.reshape((state_h, state_w, 4))
             arr = arr[::-1, :, 0:3]
 

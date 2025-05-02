@@ -1,15 +1,15 @@
-import itertools
 from collections import namedtuple
+import itertools
 
 WHITE = 0
 BLACK = 1
 NUM_POINTS = 24
 BAR = "bar"
-OFF = 'off'
+OFF = "off"
 TOKEN = {WHITE: "X", BLACK: "O"}
-COLORS = {WHITE: "White", BLACK: 'Black'}
+COLORS = {WHITE: "White", BLACK: "Black"}
 
-BackgammonState = namedtuple('BackgammonState', ['board', 'bar', 'off', 'players_positions'])
+BackgammonState = namedtuple("BackgammonState", ["board", "bar", "off", "players_positions"])
 
 
 # c = checker
@@ -281,14 +281,12 @@ class Backgammon:
                             move = (move1, move1)
                         elif self.board[out][0] == 3:
                             move = (move1, move1, move1)
-                    else:
-                        if self.is_valid(player, t2) and self.board[out][0] == 1:
-                            if t2 in home_positions:  # I used 2 dice to move 1 checker from the only position out of home board, to home board
-                                move = (move1, move2)
-                            else:
-                                if self.is_valid(player, t3):
-                                    if t3 in home_positions:  # I used 3 dice to move 1 checker from the only position out of home board to home board
-                                        move = (move1, move2, move3)
+                    elif self.is_valid(player, t2) and self.board[out][0] == 1:
+                        if t2 in home_positions:  # I used 2 dice to move 1 checker from the only position out of home board, to home board
+                            move = (move1, move2)
+                        elif self.is_valid(player, t3):
+                            if t3 in home_positions:  # I used 3 dice to move 1 checker from the only position out of home board to home board
+                                move = (move1, move2, move3)
 
         elif len(out_of_home) == 2:  # there are 2 positions where there is/are checker(s) out of home
             out1 = out_of_home[0]
@@ -468,7 +466,7 @@ class Backgammon:
 
         else:
             candidate_src = [s for s in active_positions if s not in home_positions]
-            assert len(candidate_src) == 1, print("Should be 1 instead of {}".format(candidate_src))
+            assert len(candidate_src) == 1, print(f"Should be 1 instead of {candidate_src}")
             candidate_src = candidate_src[0]
             t1 = candidate_src + r1
             t2 = candidate_src + r2
@@ -523,7 +521,7 @@ class Backgammon:
             # I execute the move needed to move all the checkers that are not in home board to home board (in order to update the board - I saved the state)
             self.execute_play(player, out_of_home_move)
             self.players_positions = self.get_players_positions()
-        assert len(list(out_of_home_move)) <= 3, print("Should be <= 3 instead of {}".format(out_of_home_move))
+        assert len(list(out_of_home_move)) <= 3, print(f"Should be <= 3 instead of {out_of_home_move}")
         # number of dice used to move all the checkers that are not in home board to home board (should be <= 3)
         dice_used = len(out_of_home_move)
 
@@ -559,26 +557,26 @@ class Backgammon:
                         plays.add((move, move, move, move))
                 elif dice_used == 1:
                         if self.board[s1][0] >= 1:
-                            plays.add((out_of_home_move + (move, )))
+                            plays.add(out_of_home_move + (move, ))
                             plays.update([(out_of_home_move + (move, ) + (single, )) for single in single_moves])
                             plays.update([(out_of_home_move + (move, ) + (double[0], ) + (double[1], )) for double in double_moves])
 
                         if self.board[s1][0] >= 2:
-                            plays.add((out_of_home_move + (move, ) + (move, )))
+                            plays.add(out_of_home_move + (move, ) + (move, ))
                             plays.update([(out_of_home_move + (move, ) + (move, ) + (single, )) for single in single_moves])
 
                         if self.board[s1][0] >= 3:
-                            plays.add((out_of_home_move + (move, ) + (move, ) + (move, )))
+                            plays.add(out_of_home_move + (move, ) + (move, ) + (move, ))
                 elif dice_used == 2:
                     if self.board[s1][0] >= 1:
-                        plays.add((out_of_home_move + (move, )))
+                        plays.add(out_of_home_move + (move, ))
                         plays.update([(out_of_home_move + (move, ) + (single, )) for single in single_moves])
 
                     if self.board[s1][0] >= 2:
-                        plays.add((out_of_home_move + (move, ) + (move, )))
+                        plays.add(out_of_home_move + (move, ) + (move, ))
                 elif dice_used == 3:
                         if self.board[s1][0] >= 1:
-                            plays.add((out_of_home_move + (move, )))
+                            plays.add(out_of_home_move + (move, ))
 
                 for s in active_positions:
                     if dice_used == 0:
@@ -603,19 +601,19 @@ class Backgammon:
                         t1 = s + r
                         if self.is_valid(player, t1):
                             if t1 == s1:
-                                plays.add((out_of_home_move + (move,) + ((s, t1), )))
+                                plays.add(out_of_home_move + (move,) + ((s, t1), ))
                                 if self.board[s1][0] >= 1:
-                                    plays.add((out_of_home_move + (move, ) + (move, ) + ((s, t1), )))
+                                    plays.add(out_of_home_move + (move, ) + (move, ) + ((s, t1), ))
                             else:
                                 t2 = t1 + r
                                 if self.is_valid(player, t2):
                                     if t2 == s1:
-                                        plays.add((out_of_home_move + (move, ) + ((s, t1), ) + ((t1, t2), )))
+                                        plays.add(out_of_home_move + (move, ) + ((s, t1), ) + ((t1, t2), ))
                     elif dice_used == 2:
                         t1 = s + r
                         if self.is_valid(player, t1):
                             if t1 == s1:
-                                plays.add((out_of_home_move + (move,) + ((s, t1),)))
+                                plays.add(out_of_home_move + (move,) + ((s, t1),))
 
             # I don't have a checker on the exact position from which I can bear off, but I try to move higher checkers to that position
             for s in higher_src:
@@ -673,7 +671,7 @@ class Backgammon:
                     if self.is_valid(player, t1):
                         if t1 == s1:
                             if self.board[s][0] >= 1:
-                                plays.add((out_of_home_move + ((s, t1),) + (move,)))
+                                plays.add(out_of_home_move + ((s, t1),) + (move,))
 
                                 if self.board[s][0] == 1:
                                     tmp = active_positions - {s}
@@ -683,19 +681,19 @@ class Backgammon:
                                     plays.update([(out_of_home_move + ((s, t1),) + (move, ) + (single, )) for single in single_moves])
 
                             if self.board[s][0] >= 2:
-                                plays.add((out_of_home_move + ((s, t1),) + ((s, t1),) + (move,)))
+                                plays.add(out_of_home_move + ((s, t1),) + ((s, t1),) + (move,))
                         else:
                             t2 = s + r + r
                             if self.is_valid(player, t2):
                                 if t2 == s1:
                                     if self.board[s][0] >= 1:
-                                        plays.add((out_of_home_move + ((s, t1),) + ((t1, t2),) + (move,)))
+                                        plays.add(out_of_home_move + ((s, t1),) + ((t1, t2),) + (move,))
                 elif dice_used == 2:
                     t1 = s + r
                     if self.is_valid(player, t1):
                         if t1 == s1:
                             if self.board[s][0] >= 1:
-                                plays.add((out_of_home_move + ((s, t1),) + (move,)))
+                                plays.add(out_of_home_move + ((s, t1),) + (move,))
             if len(higher_src) == 0:
                 s1_highest = highest(player, [s for s in active_positions if comp1(player, s, r)])
                 active_positions -= {s1_highest}
@@ -773,50 +771,50 @@ class Backgammon:
 
                     elif dice_used == 1:
                         if self.board[s1_highest][0] == 1:
-                            plays.add((out_of_home_move + (move1,)))
+                            plays.add(out_of_home_move + (move1,))
 
                             if s2_highest is not None:
                                 move2 = (s2_highest, clamp(s2_highest + r))
 
                                 if self.board[s2_highest][0] == 1:
-                                    plays.add((out_of_home_move + (move1,) + (move2, )))
+                                    plays.add(out_of_home_move + (move1,) + (move2, ))
 
                                     if s3_highest is not None:
                                         move3 = (s3_highest, clamp(s3_highest + r))
 
                                         if self.board[s3_highest][0] >= 1:
-                                            plays.add((out_of_home_move + (move1, ) + (move2, ) + (move3, )))
+                                            plays.add(out_of_home_move + (move1, ) + (move2, ) + (move3, ))
 
                                 elif self.board[s2_highest][0] >= 2:
-                                    plays.add((out_of_home_move + (move1, ) + (move2, ) + (move2, )))
+                                    plays.add(out_of_home_move + (move1, ) + (move2, ) + (move2, ))
 
                         elif self.board[s1_highest][0] == 2:
-                            plays.add((out_of_home_move + (move1,) + (move1, )))
+                            plays.add(out_of_home_move + (move1,) + (move1, ))
 
                             if s2_highest is not None:
                                 move2 = (s2_highest, clamp(s2_highest + r))
 
                                 if self.board[s2_highest][0] >= 1:
-                                    plays.add((out_of_home_move + (move1,) + (move1,) + (move2, )))
+                                    plays.add(out_of_home_move + (move1,) + (move1,) + (move2, ))
 
                         elif self.board[s1_highest][0] >= 3:
-                            plays.add((out_of_home_move + (move1,) + (move1,) + (move1, )))
+                            plays.add(out_of_home_move + (move1,) + (move1,) + (move1, ))
 
                     elif dice_used == 2:
                         if self.board[s1_highest][0] == 1:
-                            plays.add((out_of_home_move + (move1,)))
+                            plays.add(out_of_home_move + (move1,))
 
                             if s2_highest is not None:
                                 move2 = (s2_highest, clamp(s2_highest + r))
 
                                 if self.board[s2_highest][0] >= 1:
-                                    plays.add((out_of_home_move + (move1,) + (move2,)))
+                                    plays.add(out_of_home_move + (move1,) + (move2,))
 
                         elif self.board[s1_highest][0] >= 2:
-                            plays.add((out_of_home_move + (move1,) + (move1,)))
+                            plays.add(out_of_home_move + (move1,) + (move1,))
 
                     elif dice_used == 3:
-                        plays.add((out_of_home_move + (move1,)))
+                        plays.add(out_of_home_move + (move1,))
 
             if len(higher_src) == 1:
                 if dice_used == 0:
@@ -982,7 +980,7 @@ class Backgammon:
 
                                     if c1 == 1:
                                         s2_highest = highest(player, [s for s in active_positions if comp1(player, s, r)])
-                                        plays.add((out_of_home_move + (move1,) + (move_s1, )))
+                                        plays.add(out_of_home_move + (move1,) + (move_s1, ))
 
                                         if s2_highest is not None:
                                             if self.board[s2_highest][1] != player:
@@ -993,10 +991,10 @@ class Backgammon:
                                             move_s2 = (s2_highest, clamp(s2_highest + r))
 
                                             if c2 >= 1:
-                                                plays.add((out_of_home_move + (move1,) + (move_s1,) + (move_s2, )))
+                                                plays.add(out_of_home_move + (move1,) + (move_s1,) + (move_s2, ))
 
                                     elif c1 >= 2:
-                                        plays.add((out_of_home_move + (move1, ) + (move_s1, ) + (move_s1, )))
+                                        plays.add(out_of_home_move + (move1, ) + (move_s1, ) + (move_s1, ))
 
                             elif self.is_valid(player, t2):
 
@@ -1013,7 +1011,7 @@ class Backgammon:
                                         move_s1 = (s1_highest, clamp(s1_highest + r))
 
                                         if c1 >= 1:
-                                            plays.add((out_of_home_move + (move1, ) + (move2,) + (move_s1, )))
+                                            plays.add(out_of_home_move + (move1, ) + (move2,) + (move_s1, ))
 
                         elif self.board[high_src][0] == 2:
                             if comp3(player, s1, t1):
@@ -1029,7 +1027,7 @@ class Backgammon:
 
                                     if c1 >= 1:
                                         active_positions -= {s1_highest}
-                                        plays.add((out_of_home_move + (move1,) + (move1,) + (move_s1, )))
+                                        plays.add(out_of_home_move + (move1,) + (move1,) + (move_s1, ))
 
                 if dice_used == 2:
                     high_src = list(higher_src)[0]
@@ -1058,7 +1056,7 @@ class Backgammon:
                                     move_s1 = (s1_highest, clamp(s1_highest + r))
 
                                     if c1 >= 1:
-                                        plays.add((out_of_home_move + (move1,) + (move_s1,)))
+                                        plays.add(out_of_home_move + (move1,) + (move_s1,))
             if len(higher_src) == 2:
                 if dice_used == 0:
 
@@ -1181,7 +1179,7 @@ class Backgammon:
                                     if self.board[high_src1][0] == 1 and self.board[high_src2][0] == 1:
 
                                         if c1 >= 1:
-                                            plays.add((out_of_home_move + (move11,) + (move12,) + (move_s1, )))
+                                            plays.add(out_of_home_move + (move11,) + (move12,) + (move_s1, ))
             if len(higher_src) == 3:
                 if dice_used == 0:
                     high_src1 = list(higher_src)[0]
@@ -1355,11 +1353,11 @@ class Backgammon:
         assert len(bottom_checkers_color) + len(top_checkers_color) == 24
 
         print("| 12 | 13 | 14 | 15 | 16 | 17 | BAR | 18 | 19 | 20 | 21 | 22 | 23 | OFF |")
-        print("|--------Outer Board----------|     |-------P={} Home Board--------|     |".format(TOKEN[BLACK]))
+        print(f"|--------Outer Board----------|     |-------P={TOKEN[BLACK]} Home Board--------|     |")
         self.print_half_board(top_board, top_checkers_color, WHITE, reversed_=1)
         print("|-----------------------------|     |-----------------------------|     |")
         self.print_half_board(bottom_board, bottom_checkers_color, BLACK, reversed_=-1)
-        print("|--------Outer Board----------|     |-------P={} Home Board--------|     |".format(TOKEN[WHITE]))
+        print(f"|--------Outer Board----------|     |-------P={TOKEN[WHITE]} Home Board--------|     |")
         print("| 11 | 10 |  9 |  8 |  7 |  6 | BAR |  5 |  4 |  3 |  2 |  1 |  0 | OFF |\n")
 
     def print_half_board(self, half_board, checkers_color, player, reversed_=-1):
@@ -1367,8 +1365,8 @@ class Backgammon:
         max_length = max(max(half_board), max([self.bar[player], self.off[player]]))
         for i in range(max_length)[::reversed_]:
             row = [str(checkers_color[k]) if half_board[k] > i else " " for k in range(len(half_board))]
-            bar = ["{} ".format(token) if self.bar[player] > i else "  "]
-            off = ["{} ".format(token) if self.off[player] > i else "  "]
+            bar = [f"{token} " if self.bar[player] > i else "  "]
+            off = [f"{token} " if self.off[player] > i else "  "]
             row = row[:6] + bar + row[6:] + off
             print("|  " + " |  ".join(row) + " |")
 
@@ -1459,7 +1457,7 @@ class Backgammon:
     def get_winner(self):
         if self.off[WHITE] == 15:
             return WHITE
-        elif self.off[BLACK] == 15:
+        if self.off[BLACK] == 15:
             return BLACK
         return None
 
@@ -1477,7 +1475,7 @@ class Backgammon:
         """
         features_vector = []
         for p in [WHITE, BLACK]:
-            for point in range(0, NUM_POINTS):
+            for point in range(NUM_POINTS):
                 checkers, player = self.board[point]
                 if player == p and checkers > 0:
                     if checkers == 1:
@@ -1497,7 +1495,7 @@ class Backgammon:
         else:
             # features_vector += [1.0, 0.0]
             features_vector += [0.0, 1.0]
-        assert len(features_vector) == 198, print("Should be 198 instead of {}".format(len(features_vector)))
+        assert len(features_vector) == 198, print(f"Should be 198 instead of {len(features_vector)}")
         return features_vector
 
 
@@ -1524,4 +1522,4 @@ def print_assert(game, sum_white, sum_black, bar, off, action, old_board):
     if old_board is not None:
         game.board = old_board
         game.render()
-    print("sum_white={} | sum_black={} | bar={} | off={} | action={}".format(sum_white, sum_black, bar, off, action))
+    print(f"sum_white={sum_white} | sum_black={sum_black} | bar={bar} | off={off} | action={action}")
