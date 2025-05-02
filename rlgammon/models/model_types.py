@@ -27,7 +27,7 @@ class ActivationType(Enum):
     LINEAR: partial = partial(th.nn.functional.linear)
     RELU: partial = partial(th.relu)
     SIGMOID: partial = partial(th.sigmoid)
-    TANH: partial = partial(th.Tanh)
+    TANH: partial = partial(th.tanh)
 
     def __call__(self, x: th.Tensor) -> th.Tensor:
         """

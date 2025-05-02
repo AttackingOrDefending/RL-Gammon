@@ -10,7 +10,7 @@ from rlgammon.trainer.testing.base_testing import BaseTesting
 class RandomTesting(BaseTesting):
     """Testing class, where agents are tested against a random agent."""
 
-    def __init__(self, episodes_in_test: int) -> None:
+    def __init__(self, episodes_in_test: int, color: int = WHITE) -> None:
         """
         Constructor for RandomTesting, that initializes the random agent,
         and stores the specified number of episodes in each test.
@@ -18,7 +18,7 @@ class RandomTesting(BaseTesting):
         :param episodes_in_test: test episodes to be run in each test
         """
         self.episodes_in_test = episodes_in_test
-        self.testing_agent = RandomAgent()
+        self.testing_agent = RandomAgent(color)
 
     def test(self, agent: BaseAgent) -> dict[str, float]:
         """
