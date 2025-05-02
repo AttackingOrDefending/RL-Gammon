@@ -4,6 +4,7 @@ import torch as th
 from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.environment.backgammon_env import BackgammonEnv
 from rlgammon.models.model_factory import model_factory
+from rlgammon.models.model_types import ActivationList, LayerList
 from rlgammon.rlgammon_types import WHITE, Action, ActionSet, State
 from utils.utils import copy
 
@@ -11,8 +12,9 @@ from utils.utils import copy
 class TDAgent(TrainableAgent):
     """TODO."""
 
-    def __init__(self, model: th.nn.Module | None = None, lr: float = 0.01,
-                 gamma: float = 0.99, lamda: float = 0.99, color: int=WHITE) -> None:
+    def __init__(self, pre_made_model: th.nn.Module | None = None, lr: float = 0.01,
+                 gamma: float = 0.99, lamda: float = 0.99, color: int=WHITE,
+                 layer_list: LayerList = None, activation_list: ActivationList = None) -> None:
         """
         TODO.
 
@@ -23,7 +25,7 @@ class TDAgent(TrainableAgent):
         :param color:
         """
         super().__init__(color)
-        self.model = model if model else model_factory([], [])
+        self.model = pre_made_model if pre_made_model else model_factory(layer_list, activation_list)
         self.lr = lr
         self.gamma = gamma
         self.lamda = lamda
@@ -41,8 +43,7 @@ class TDAgent(TrainableAgent):
         p = self.model(state)
         p_next = self.model(next_state) * self.gamma
 
-        loss = self.model.update_weights(p, reward) if done else self.model.update_weights(p, p_next)
-        return loss
+        return self.model.update_weights(p, reward) if done else self.model.update_weights(p, p_next)
 
     def choose_move(self, actions: ActionSet, env: BackgammonEnv) -> Action:
         """

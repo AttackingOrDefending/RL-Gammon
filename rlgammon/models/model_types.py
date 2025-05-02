@@ -1,3 +1,5 @@
+"""TODO."""
+
 from enum import Enum
 from functools import partial
 
@@ -37,3 +39,7 @@ class ActivationType(Enum):
         :return:
         """
         return self.value(x)
+
+
+LayerList = list[LayerType]
+ActivationList = list[ActivationType]
