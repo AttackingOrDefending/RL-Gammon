@@ -2,8 +2,9 @@
 from abc import abstractmethod
 from uuid import UUID
 
+import torch as th
+
 from rlgammon.agents.base_agent import BaseAgent
-from rlgammon.environment.backgammon_env import BackgammonEnv
 from rlgammon.rlgammon_types import State
 
 
@@ -23,30 +24,22 @@ class TrainableAgent(BaseAgent):
         raise NotImplementedError
 
     @abstractmethod
-    def save(self, training_session_id: UUID, session_save_count: int, main_filename: str | None = None,
-             target_filename: str | None = None, optimizer_filename: str | None = None) -> None:
+    def save(self, training_session_id: UUID, session_save_count: int, model_filename: str | None = None) -> None:
         """
         Save the agent.
 
         :param training_session_id: uuid of the training session
         :param session_save_count: number of saved sessions
-        :param main_filename: filename where the main network is to be saved
-        :param target_filename: filename where the target network is to be saved
-        :param optimizer_filename: filename where the optimizer is to be saved
+        :param model_filename: .
         """
         raise NotImplementedError
 
     @abstractmethod
-    def clear_cache(self) -> None:
-        """Clear the cache of the evaluate_position method."""
-        raise NotImplementedError
-
-    @abstractmethod
-    def evaluate_position(self, board: BackgammonEnv) -> float:
+    def load(self, agent_main_filename: str) -> th.nn.Module:
         """
-        Evaluate the position of the current board state.
+        TODO.
 
-        :param board: The current board state
-        :return: value of the current position
+        :param agent_main_filename:
+        :return:
         """
         raise NotImplementedError
