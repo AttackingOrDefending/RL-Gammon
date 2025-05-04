@@ -1,29 +1,35 @@
 """TODO."""
-from functools import cache
-from uuid import UUID
 
 import numpy as np
-import torch as th
 
 from rlgammon.agents.gnu_agent import GNUAgent
 from rlgammon.agents.td_agent import TDAgent
 from rlgammon.environment.backgammon_env import BackgammonEnv
 from rlgammon.environment.gnubg.gnubg_backgammon import GnubgInterface, gnubgState
-from rlgammon.rlgammon_types import WHITE, Action, ActionSet, State
+from rlgammon.models.model_types import ActivationList, LayerList
+from rlgammon.rlgammon_types import WHITE, Action, ActionSet
 
 
 class TDAgentGnu(TDAgent, GNUAgent):
     """TODO."""
 
-    def __init__(self, gnubg_interface: GnubgInterface) -> None:
+    def __init__(self, gnubg_interface: GnubgInterface, pre_made_model_path: str | None = None, lr: float = 0.01,
+                 gamma: float = 0.99, lamda: float = 0.99, seed: int = 123, color: int=WHITE,
+                 layer_list: LayerList = None, activation_list: ActivationList = None) -> None:
         """
         TODO.
 
         :param gnubg_interface:
         """
-        super().__init__(gnubg_interface)
+        super().__init__(pre_made_model_path, lr, gamma, lamda, seed, color, layer_list, activation_list)
+        self.gnubg_interface = gnubg_interface
 
-    def choose_move(self, actions: ActionSet, env: BackgammonEnv) -> Action:
+    def roll_dice(self) -> tuple[int, int] | gnubgState:
+        """TODO."""
+        gnubg = self.gnubg_interface.send_command("roll")
+        return self.handle_opponent_move(gnubg)
+
+    def choose_best_action(self, actions: ActionSet, env: BackgammonEnv) -> Action:
         """
         Chooses a move to make given the current board and dice roll,
         which goes to the state with maximal value, when playing against a GNU agent.
@@ -88,24 +94,6 @@ class TDAgentGnu(TDAgent, GNUAgent):
                 if gnubg.double else self.gnubg_interface.send_command("roll")
             previous_agent = gnubg.agent
         return gnubg
-
-    def save(self, training_session_id: UUID, session_save_count: int, main_filename: str | None = None,
-             target_filename: str | None = None, optimizer_filename: str | None = None) -> None:
-        pass
-
-    def clear_cache(self) -> None:
-        """Clear the cache of the evaluate_position method."""
-        self.evaluate_position.cache_clear()
-
-    @cache
-    def evaluate_position(self, state: State) -> float:
-        """
-        TODO.
-        :param state:
-        :return:
-        """
-        state = th.tensor(state, dtype=th.float32)
-        return float(self.model(state))
 
 """
 THIS OPTIMIZATION TO BE IMPLEMENTED

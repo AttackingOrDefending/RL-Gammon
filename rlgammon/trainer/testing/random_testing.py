@@ -6,6 +6,7 @@ from rlgammon.environment.backgammon_env import BackgammonEnv
 from rlgammon.rlgammon_types import BLACK, WHITE
 from rlgammon.trainer.testing.base_testing import BaseTesting
 
+# TODO CHECK IF CORRECT
 
 class RandomTesting(BaseTesting):
     """Testing class, where agents are tested against a random agent."""
@@ -58,9 +59,9 @@ class RandomTesting(BaseTesting):
             if winner == agent.color:
                 wins += 1
             elif not winner:
-                losses += 1
-            else:
                 draws += 1
+            else:
+                losses += 1
 
             agent.flip_color()
             self.testing_agent.flip_color()

@@ -36,6 +36,7 @@ class StepTrainer(BaseTrainer):
         total_steps = 0
         training_time_start = time.time()
         for episode in tqdm(range(self.parameters["episodes"]), desc="Training Episodes"):
+            # print(total_steps)
             agent.episode_setup()
             agent_color, first_roll, state = env.reset()
             agent.set_color(agent_color)

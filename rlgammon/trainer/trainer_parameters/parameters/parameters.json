@@ -1,9 +1,9 @@
 {
   "episodes": 20000,
   "save_every": 25,
-  "testing_type": "RND",
+  "testing_type": "GNU",
   "episodes_in_test": 100,
-  "episodes_per_test": 1000,
+  "episodes_per_test": 500,
   "batch_size": 64,
   "buffer": "U",
   "buffer_capacity": 50000,
