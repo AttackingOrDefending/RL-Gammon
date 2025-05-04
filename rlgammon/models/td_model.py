@@ -3,14 +3,18 @@ import torch as th
 
 from rlgammon.models.base_model import BaseModel
 from rlgammon.models.model_errors.model_errors import EligibilityTracesNotInitializedError
+from rlgammon.models.model_types import ActivationList, LayerList
 
 
 class TDModel(BaseModel):
     """TODO."""
 
-    def __init__(self, lr: float, lamda: float, seed: int=123) -> None:
+    def __init__(self, lr: float, gamma: float, lamda: float, seed: int=123,
+                 layer_list: LayerList = None, activation_list: ActivationList = None) -> None:
         """TODO."""
-        super().__init__(lr, lamda, seed)
+        super().__init__(lr, seed, layer_list, activation_list)
+        self.gamma = gamma
+        self.lamda = lamda
         self.initialized = False
         self.eligibility_traces = None
 

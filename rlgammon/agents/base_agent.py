@@ -1,5 +1,6 @@
 """Base class for all agents in the backgammon game."""
 
+from abc import abstractmethod
 import random
 
 from rlgammon.environment.backgammon_env import BackgammonEnv
@@ -16,6 +17,11 @@ class BaseAgent:
         :param color:
         """
         self.color = color
+
+    @abstractmethod
+    def episode_setup(self) -> None:
+        """TODO."""
+        raise NotImplementedError
 
     def choose_move(self, actions: ActionSet, env: BackgammonEnv) -> Action:
         """
