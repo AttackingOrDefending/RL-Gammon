@@ -3,7 +3,7 @@
 from rlgammon.agents.base_agent import BaseAgent
 from rlgammon.agents.random_agent import RandomAgent
 from rlgammon.environment.backgammon_env import BackgammonEnv
-from rlgammon.rlgammon_types import WHITE
+from rlgammon.rlgammon_types import BLACK, WHITE
 from rlgammon.trainer.testing.base_testing import BaseTesting
 
 
@@ -33,30 +33,38 @@ class RandomTesting(BaseTesting):
         draws = 0
         losses = 0
         env = BackgammonEnv()
-        agent_player = WHITE
+        agent.set_color(WHITE)
+        self.testing_agent.set_color(BLACK)
         for _test_game in range(self.episodes_in_test):
             agent_color, first_roll, state = env.reset()
             done = False
-            reward = 0.0
+            winner = None
             while not done:
                 # If this is the first step, take the roll from env, else roll yourself
                 if first_roll:
                     roll = first_roll
                     first_roll = None
-                else:
+                elif env.current_agent == agent.color:
                     roll = agent.roll_dice()
+                else:
+                    roll = self.testing_agent.roll_dice()
 
                 actions = env.get_valid_actions(roll)
                 action = agent.choose_move(actions, env) \
-                    if env.current_player == agent_player else self.testing_agent.choose_move(actions, env)
+                    if env.current_agent == agent.color else self.testing_agent.choose_move(actions, env)
                 next_state, reward, done, winner = env.step(action)
-            if reward == 0:
-                draws += 1
-            elif env.has_lost(agent_player):
+                state = next_state
+
+            if winner == agent.color:
+                wins += 1
+            elif not winner:
                 losses += 1
             else:
-                wins += 1
-            agent_player *= -1
+                draws += 1
+
+            agent.flip_color()
+            self.testing_agent.flip_color()
+
         return {"win_rate": wins / self.episodes_in_test,
                 "draws": draws / self.episodes_in_test,
                 "losses": losses / self.episodes_in_test}

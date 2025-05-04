@@ -10,7 +10,10 @@ from rlgammon.rlgammon_types import Action, ActionSet
 class RandomAgent(BaseAgent):
     """A random agent for backgammon."""
 
-    def choose_move(self, actions: ActionSet, env: BackgammonEnv) -> Action:
+    def episode_setup(self) -> None:
+        """TODO."""
+
+    def choose_move(self, actions: ActionSet, env: BackgammonEnv | None = None) -> Action:
         """
         Choose a random move from the legal moves.
 
@@ -18,4 +21,4 @@ class RandomAgent(BaseAgent):
         :param env: the current environment (and it's associated state)
         :return: random action from the list of valid actions
         """
-        return random.choice(list(actions))
+        return random.choice(list(actions)) if actions else None

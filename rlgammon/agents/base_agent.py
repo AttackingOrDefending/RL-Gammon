@@ -4,7 +4,7 @@ from abc import abstractmethod
 import random
 
 from rlgammon.environment.backgammon_env import BackgammonEnv
-from rlgammon.rlgammon_types import WHITE, Action, ActionSet
+from rlgammon.rlgammon_types import BLACK, WHITE, Action, ActionSet
 
 
 class BaseAgent:
@@ -32,6 +32,19 @@ class BaseAgent:
         :return: the chosen move to make.
         """
         raise NotImplementedError
+
+    def flip_color(self) -> None:
+        """TODO."""
+        self.color = WHITE if self.color == BLACK else BLACK
+
+    def set_color(self, color: int) -> None:
+        """
+        TODO.
+
+        :param color:
+        :return:
+        """
+        self.color = color
 
     def roll_dice(self) -> tuple[int, int]:
         """

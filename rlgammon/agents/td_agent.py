@@ -48,8 +48,7 @@ class TDAgent(TrainableAgent):
         :return:
         """
         p = self.model(state)
-        p_next = self.model(next_state) * self.gamma
-
+        p_next = self.model(next_state) # * self.gamma
         return self.model.update_weights(p, reward) if done else self.model.update_weights(p, p_next)
 
     def choose_move(self, actions: ActionSet, env: BackgammonEnv) -> Action:

@@ -34,7 +34,6 @@ class BaseModel(nn.Module):
         self.fc1 = nn.Linear(198, 128)
         self.fc3 = nn.Linear(128, 1)
 
-        self.eligibility_traces = None
         self.optimizer = None
 
         th.manual_seed(seed)

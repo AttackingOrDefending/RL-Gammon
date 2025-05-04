@@ -44,7 +44,7 @@ class EpsilonGreedyExploration(BaseExploration):
         :param valid_actions: all valid actions from the current state
         :return: the final action to execute
         """
-        return random.choice([move for _, move in valid_actions]) if valid_actions else None
+        return random.choice(list(valid_actions)) if valid_actions else None
 
     def update(self) -> None:
         """

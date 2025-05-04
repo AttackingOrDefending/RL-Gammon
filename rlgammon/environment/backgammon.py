@@ -1508,6 +1508,8 @@ def assert_board(action, board, bar, off, game=None, old_board=None):
         elif player == BLACK:
             sum_black += checkers
 
+    # print("ASSERT:", sum_white, sum_black)
+
     assert 0 <= sum_white <= 15 and 0 <= sum_black <= 15, print_assert(game, sum_white, sum_black, bar, off, action, old_board)
     assert bar[WHITE] < 16 and bar[BLACK] < 16, print_assert(game, sum_white, sum_black, bar, off, action, old_board)
     assert off[WHITE] < 16 and off[BLACK] < 16, print_assert(game, sum_white, sum_black, bar, off, action, old_board)

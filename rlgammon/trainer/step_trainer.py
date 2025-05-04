@@ -38,6 +38,7 @@ class StepTrainer(BaseTrainer):
         for episode in tqdm(range(self.parameters["episodes"]), desc="Training Episodes"):
             agent.episode_setup()
             agent_color, first_roll, state = env.reset()
+            agent.set_color(agent_color)
             done = False
             while not done:
                 # If this is the first step, take the roll from env, else roll yourself
@@ -56,7 +57,10 @@ class StepTrainer(BaseTrainer):
 
                 # Update agent, exploration, and total step count
                 _ = agent.train(state, next_state, reward, done)
+
+                agent.set_color(env.get_opponent_agent())
                 explorer.update()
+                state = next_state
                 total_steps += 1
 
             if (episode + 1) % self.parameters["episodes_per_test"] == 0:
@@ -68,3 +72,5 @@ class StepTrainer(BaseTrainer):
             if self.parameters["save_progress"] and ((episode + 1) % self.parameters["save_every"] == 0):
                 logger.save(session_id, episode // self.parameters["save_every"])
                 agent.save(session_id, episode // self.parameters["save_every"])
+
+        env.close()
