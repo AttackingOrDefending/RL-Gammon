@@ -11,7 +11,7 @@ class RandomAgent(BaseAgent):
     """A random agent for backgammon."""
 
     def episode_setup(self) -> None:
-        """TODO."""
+        """A random agent needs no setup, therefore the function does nothing."""
 
     def choose_move(self, actions: ActionSet, env: BackgammonEnv | None = None) -> Action:
         """

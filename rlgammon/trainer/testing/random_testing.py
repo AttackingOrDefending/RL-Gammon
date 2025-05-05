@@ -6,7 +6,6 @@ from rlgammon.environment.backgammon_env import BackgammonEnv
 from rlgammon.rlgammon_types import BLACK, WHITE
 from rlgammon.trainer.testing.base_testing import BaseTesting
 
-# TODO CHECK IF CORRECT
 
 class RandomTesting(BaseTesting):
     """Testing class, where agents are tested against a random agent."""
@@ -28,8 +27,6 @@ class RandomTesting(BaseTesting):
         :param agent: agent to be tested
         :return: results of test, with win, draw, and loss rate recorded (as fractions)
         """
-        # TODO CHECK COLORS
-
         wins = 0
         draws = 0
         losses = 0

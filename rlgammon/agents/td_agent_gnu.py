@@ -1,5 +1,4 @@
-"""TODO."""
-
+"""File implementing agent trained with td-learning and capable of playing against a gnubg agent."""
 import numpy as np
 
 from rlgammon.agents.gnu_agent import GNUAgent
@@ -11,21 +10,26 @@ from rlgammon.rlgammon_types import WHITE, Action, ActionSet
 
 
 class TDAgentGnu(TDAgent, GNUAgent):
-    """TODO."""
+    """Class implementing agent trained with td-learning and capable of playing against a gnubg agent."""
 
     def __init__(self, gnubg_interface: GnubgInterface, pre_made_model_path: str | None = None, lr: float = 0.01,
                  gamma: float = 0.99, lamda: float = 0.99, seed: int = 123, color: int=WHITE,
                  layer_list: LayerList = None, activation_list: ActivationList = None) -> None:
         """
-        TODO.
+        Construct the td-gnu agent by creating a td agent with the given parameters, and
+        storing the provided the gnubg interface to use when playing against gnubg.
 
-        :param gnubg_interface:
+        :param gnubg_interface: the interface used to communicate with gnubg
         """
         super().__init__(pre_made_model_path, lr, gamma, lamda, seed, color, layer_list, activation_list)
         self.gnubg_interface = gnubg_interface
 
     def roll_dice(self) -> tuple[int, int] | gnubgState:
-        """TODO."""
+        """
+        Get dice rolls for gnubg environment.
+
+        :return: dice rolls for gnubg environment
+        """
         gnubg = self.gnubg_interface.send_command("roll")
         return self.handle_opponent_move(gnubg)
 

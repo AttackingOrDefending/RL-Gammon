@@ -1,4 +1,4 @@
-"""TODO."""
+"""File storing types associated with models."""
 import torch as th
 
 LayerList = list[th.nn.Module]

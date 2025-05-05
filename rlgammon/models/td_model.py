@@ -1,4 +1,4 @@
-"""TODO."""
+"""File implementing a model used in td training."""
 import torch as th
 
 from rlgammon.models.base_model import BaseModel
@@ -7,11 +7,22 @@ from rlgammon.models.model_types import ActivationList, LayerList
 
 
 class TDModel(BaseModel):
-    """TODO."""
+    """Class implementing a TD model used in td training."""
 
     def __init__(self, lr: float, gamma: float, lamda: float, seed: int=123,
                  layer_list: LayerList = None, activation_list: ActivationList = None) -> None:
-        """TODO."""
+        """
+        Construct a td model by first constructing a base torch model,
+        and then initializing td specific parameters.
+        Note: layers and activations are interleaved 1 by 1, with the remaining activations filled at the end.
+
+        :param lr: learning rate
+        :param gamma: future reward discount
+        :param lamda: trace decay parameters (how much to value distant states)
+        :param seed: seed for random number generator of torch and the python random package
+        :param layer_list: list of layers to use
+        :param activation_list: list of activation functions to use
+        """
         super().__init__(lr, seed, layer_list, activation_list)
         self.gamma = gamma
         self.lamda = lamda
@@ -19,18 +30,20 @@ class TDModel(BaseModel):
         self.eligibility_traces = None
 
     def init_eligibility_traces(self) -> None:
-        """TODO."""
-        self.eligibility_traces = [th.zeros(weights.shape, requires_grad=False) for weights in list(self.parameters())]
+        """Initialize the eligibility traces."""
+        self.eligibility_traces = [th.zeros(weights.shape, dtype=th.float64, requires_grad=False)
+                                    for weights in list(self.parameters())]
         self.initialized = True
 
     def update_weights(self, p: th.Tensor, p_next: th.Tensor | int) -> float:
         """
-        TODO.
+        Update weights according to the td-lambda algorithm.
 
-        :param p:
-        :param p_next:
-        :return:
+        :param p: model evaluation for the current state
+        :param p_next: model evaluation for the next state or if terminal state, the final reward
+        :return: loss encountered in the update
         """
+        # Raise an error if training is attempted without prior initialization of eligibility traces
         if not self.initialized:
             raise EligibilityTracesNotInitializedError
 

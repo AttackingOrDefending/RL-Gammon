@@ -8,6 +8,9 @@ from numpy.typing import NDArray
 WHITE = 0
 BLACK = 1
 
+MIN_DICE = 1
+MAX_DICE = 6
+
 Action = tuple[tuple[int, int], ...]
 ActionSet = set[Action]
 State = NDArray[np.float32]

@@ -4,7 +4,7 @@ from abc import abstractmethod
 import random
 
 from rlgammon.environment.backgammon_env import BackgammonEnv
-from rlgammon.rlgammon_types import BLACK, WHITE, Action, ActionSet
+from rlgammon.rlgammon_types import BLACK, MAX_DICE, MIN_DICE, WHITE, Action, ActionSet
 
 
 class BaseAgent:
@@ -12,15 +12,15 @@ class BaseAgent:
 
     def __init__(self, color: int) -> None:
         """
-        TODO.
+        Construct the base agent by assigning it to a player.
 
-        :param color:
+        :param color: 0 or 1 representing which player the agent controls
         """
         self.color = color
 
     @abstractmethod
     def episode_setup(self) -> None:
-        """TODO."""
+        """Prepare the agent for a start of an episode."""
         raise NotImplementedError
 
     def choose_move(self, actions: ActionSet, env: BackgammonEnv) -> Action:
@@ -34,15 +34,14 @@ class BaseAgent:
         raise NotImplementedError
 
     def flip_color(self) -> None:
-        """TODO."""
+        """Flip the color of the agent, i.e. make it control the opposite player."""
         self.color = WHITE if self.color == BLACK else BLACK
 
     def set_color(self, color: int) -> None:
         """
-        TODO.
+        Set a new color of the agent to indicate that it should control a different player.
 
-        :param color:
-        :return:
+        :param color: new color of the agent, i.e. new player it should control
         """
         self.color = color
 
@@ -52,7 +51,6 @@ class BaseAgent:
 
         :return: dice rolls
         """
-        # TODO FIX COLOR
         if self.color == WHITE:
-            return -random.randint(1, 6), -random.randint(1, 6)
-        return random.randint(1, 6), random.randint(1, 6)
+            return -random.randint(MIN_DICE, MAX_DICE), -random.randint(MIN_DICE, MAX_DICE)
+        return random.randint(MIN_DICE,  MAX_DICE), random.randint(MIN_DICE, MAX_DICE)

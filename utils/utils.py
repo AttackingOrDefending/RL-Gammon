@@ -1,4 +1,4 @@
-"""TODO"""
+"""File with various utility functions used in the project."""
 import pickle
 
 from rlgammon.environment.backgammon_env import BackgammonEnv

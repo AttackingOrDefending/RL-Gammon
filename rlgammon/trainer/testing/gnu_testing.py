@@ -1,4 +1,4 @@
-"""TODO."""
+"""Testing class with a gnubg agent."""
 from rlgammon.agents.gnu_agent import GNUAgent
 from rlgammon.agents.td_agent_gnu import TDAgentGnu
 from rlgammon.agents.trainable_agent import TrainableAgent
@@ -8,7 +8,7 @@ from rlgammon.trainer.testing.base_testing import BaseTesting
 
 
 class GNUTesting(BaseTesting):
-    """TODO."""
+    """Testing class, where agents are tested against a gnubg agent."""
 
     def __init__(self, episodes_in_test: int) -> None:
         """
