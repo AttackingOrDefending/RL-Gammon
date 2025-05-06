@@ -5,7 +5,6 @@ from uuid import UUID
 import torch as th
 
 from rlgammon.agents.trainable_agent import TrainableAgent
-from rlgammon.environment.backgammon_env import BackgammonEnv
 from rlgammon.models.model_types import ActivationList, LayerList
 from rlgammon.models.td_model import TDModel
 from rlgammon.rlgammon_types import WHITE, Action, ActionSet, State
@@ -40,22 +39,28 @@ class TDAgent(TrainableAgent):
         """Prepare the agent for a training episode by initializing the model's eligibility traces."""
         self.model.init_eligibility_traces()
 
-    def train(self, state: State, next_state: State, reward: int, done: bool) -> float:
+    def evaluate_position(self, state: State, decay: bool = False) -> th.Tensor:
+        """
+        Evaluate the given position using the agent model.
+
+        :param state: state to evaluate
+        :param decay: flag whether to decay the value or not
+        :return: th tensor storing the value of the provided state
+        """
+        return self.model(state) * self.gamma if decay else self.model(state)
+
+    def train(self, p: th.Tensor, p_next: th.Tensor) -> float:
         """
         Update the weights of the model according to the td algorithm.
         If the state is terminal use reward for next state value, else use the model estimation.
 
-        :param state: the current state
-        :param next_state: the next state
-        :param reward: the reward from the environment associated with the current state
-        :param done: whether the state is the last one of the round
-        :return:
+        :param p: value of current state
+        :param p_next: value of the next state or final reward if terminal state
+        :return: loss associated with update
         """
-        p = self.model(state)
-        p_next = self.model(next_state) # * self.gamma
-        return self.model.update_weights(p, reward) if done else self.model.update_weights(p, p_next)
+        return self.model.update_weights(p, p_next)
 
-    def choose_move(self, actions: ActionSet, env: BackgammonEnv) -> Action:
+    def choose_move(self, actions: ActionSet, state) -> Action:
         """
         Chooses a move to make given the current board and dice roll, which goes to the state with maximal value.
 
@@ -63,15 +68,22 @@ class TDAgent(TrainableAgent):
         :param env: the current environment (and it's associated state)
         :return: the chosen move to make.
         """
-        # TODO SPLIT
         best_action = None
-        best_value = float("-inf") if self.color == WHITE else float("inf")
+        best_value = -10000000 if self.color == WHITE else 10000000
         for action in actions:
-            env_copy = copy(env)
-            state, reward, done, info = env_copy.step(action)
-            if not done:
-                q_values = self.model(th.tensor(state, dtype=th.float32))
+            state_copy = copy(state)
+            state_copy.apply_action(action)
+            if state.is_chance_node():
+                # Always roll the dice, so that the side to move is included in the input.
+                state_copy.apply_action(7)
+            if not state_copy.is_terminal():
+                # Remove the last 2 elements, which are the dice. Always from white perspective.
+                features = state_copy.observation_tensor(WHITE)[:198]
+                q_values = self.model(th.tensor(features, dtype=th.float32))
                 reward = q_values.item()
+            else:
+                # If terminal state, use the actual reward (negative is black wins).
+                reward = state_copy.returns()[WHITE]
             if self.color == WHITE:
                 if reward > best_value:
                     best_value = reward

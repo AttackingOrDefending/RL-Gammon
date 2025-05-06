@@ -12,14 +12,23 @@ class TrainableAgent(BaseAgent):
     """Base class for all trainable agents in the backgammon game."""
 
     @abstractmethod
-    def train(self, state: State, next_state: State, reward: int, done: bool) -> float:
+    def evaluate_position(self, state: State, decay: bool = False) -> th.Tensor:
+        """
+        Evaluate the given position.
+
+        :param state: state to evaluate
+        :param decay: flag whether to decay the value or not
+        :return: th tensor storing the value of the provided state
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def train(self, p: th.Tensor, p_next: th.Tensor) -> float:
         """
         Train the agent from the given buffer.
 
-        :param state: the current state
-        :param next_state: the next state
-        :param reward: the reward from the environment associated with the current state
-        :param done: whether the state is the last one of the round
+        :param p: value of current state
+        :param p_next: value of the next state or final reward if terminal state
         :return: loss associated with update
         """
         raise NotImplementedError

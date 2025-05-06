@@ -23,6 +23,7 @@ class BaseAgent:
         """Prepare the agent for a start of an episode."""
         raise NotImplementedError
 
+    @abstractmethod
     def choose_move(self, actions: ActionSet, env: BackgammonEnv) -> Action:
         """
         Chooses a move to make given the current board and dice roll.

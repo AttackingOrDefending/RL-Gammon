@@ -41,7 +41,7 @@ class BaseModel(nn.Module):
     def forward(self, x):
         x = th.from_numpy(np.array(x, dtype=np.float64))
         x = th.relu(self.fc1(x))
-        x = th.sigmoid(self.fc3(x))
+        x = th.tanh(self.fc3(x))
         return x
 
     """

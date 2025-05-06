@@ -11,7 +11,7 @@ if __name__ == "__main__":
                                 ],
                     activation_list=[th.nn.ReLU,
                                      th.nn.ReLU,
-                                     th.nn.Sigmoid,
+                                     th.nn.Tanh,
                                      ],
                     )
     trainer = StepTrainer()

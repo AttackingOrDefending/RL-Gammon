@@ -1,8 +1,9 @@
 """Testing class with a random agent."""
+import numpy as np
+import pyspiel
 
 from rlgammon.agents.base_agent import BaseAgent
 from rlgammon.agents.random_agent import RandomAgent
-from rlgammon.environment.backgammon_env import BackgammonEnv
 from rlgammon.rlgammon_types import BLACK, WHITE
 from rlgammon.trainer.testing.base_testing import BaseTesting
 
@@ -30,33 +31,35 @@ class RandomTesting(BaseTesting):
         wins = 0
         draws = 0
         losses = 0
-        env = BackgammonEnv()
+        env = pyspiel.load_game("backgammon(scoring_type=full_scoring)")
         agent.set_color(WHITE)
         self.testing_agent.set_color(BLACK)
         for _test_game in range(self.episodes_in_test):
-            agent_color, first_roll, state = env.reset()
-            done = False
-            winner = None
-            while not done:
-                # If this is the first step, take the roll from env, else roll yourself
-                if first_roll:
-                    roll = first_roll
-                    first_roll = None
-                elif env.current_agent == agent.color:
-                    roll = agent.roll_dice()
+            state = env.new_initial_state()
+            while not state.is_terminal():
+                if state.is_chance_node():
+                    outcomes = state.chance_outcomes()
+                    action_list, prob_list = zip(*outcomes, strict=False)
+                    action = np.random.choice(action_list, p=prob_list)
+                    state.apply_action(action)
                 else:
-                    roll = self.testing_agent.roll_dice()
+                    # Get current player
+                    current_player = state.current_player()
 
-                actions = env.get_valid_actions(roll)
-                action = agent.choose_move(actions, env) \
-                    if env.current_agent == agent.color else self.testing_agent.choose_move(actions, env)
-                next_state, reward, done, winner = env.step(action)
-                state = next_state
+                    # Get legal actions
+                    legal_actions = state.legal_actions()
 
-            if winner == agent.color:
+                    if current_player == agent.color:
+                        action = agent.choose_move(legal_actions, state)
+                    else:
+                        action = self.testing_agent.choose_move(legal_actions, state)
+
+                    # Apply action
+                    state.apply_action(action)
+
+            rewards = state.returns()
+            if (agent.color == WHITE and rewards[WHITE] > 0) or (agent.color == BLACK and rewards[BLACK] > 0):
                 wins += 1
-            elif not winner:
-                draws += 1
             else:
                 losses += 1
 
