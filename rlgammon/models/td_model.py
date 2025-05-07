@@ -1,3 +1,5 @@
+#type: ignore  # noqa: PGH003
+
 """File implementing a model used in td training."""
 import torch as th
 

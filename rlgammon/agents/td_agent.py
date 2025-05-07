@@ -1,12 +1,14 @@
+#type: ignore  # noqa: PGH003
+
 """File implementing an agent trained with td-learning."""
 import pathlib
 from uuid import UUID
 
-import pyspiel
+import pyspiel  # type: ignore[import-not-found]
 import torch as th
 
 from rlgammon.agents.trainable_agent import TrainableAgent
-from rlgammon.environment import BackgammonEnv
+from rlgammon.environment import BackgammonEnv  # type: ignore[attr-defined]
 from rlgammon.models.model_types import ActivationList, LayerList
 from rlgammon.models.td_model import TDModel
 from rlgammon.rlgammon_types import WHITE, ActionGNU, ActionSetGNU, Features
@@ -63,7 +65,8 @@ class TDAgent(TrainableAgent):
         """
         return self.model.update_weights(p, p_next)
 
-    def choose_move(self, actions: list[int] | ActionSetGNU, state: pyspiel.BackgammonState | BackgammonEnv) -> int | ActionGNU:
+    def choose_move(self, actions: list[int] | ActionSetGNU,
+                    state: pyspiel.BackgammonState | BackgammonEnv) -> int | ActionGNU:
         """
         Chooses a move to make given the current board and dice roll, which goes to the state with maximal value.
 
@@ -96,7 +99,7 @@ class TDAgent(TrainableAgent):
                 best_action = action
         return best_action
 
-    def save(self, training_session_id: UUID, session_save_count: int, main_filename: str | None = None) -> None:
+    def save(self, training_session_id: UUID, session_save_count: int, main_filename: str = "td-backgammon") -> None:
         """
         Save the td model.
 
@@ -120,3 +123,11 @@ class TDAgent(TrainableAgent):
         agent_file_path = pathlib.Path(__file__).parent
         agent_file_path = agent_file_path.joinpath("saved_agents/")
         return th.load(agent_file_path.joinpath(agent_main_filename), weights_only=False)
+
+    def get_model(self) -> th.nn.Module:
+        """
+        Get the model this agent is using.
+
+        :return: the agent model if it has one
+        """
+        return self.model

@@ -15,5 +15,5 @@
   "steps_per_update": 10,
   "load_logger": false,
   "logger_name": "",
-  "save_progress": false
+  "save_progress": true
 }

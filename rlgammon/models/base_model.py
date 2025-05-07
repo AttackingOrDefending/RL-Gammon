@@ -42,7 +42,7 @@ class BaseModel(nn.Module):
         th.set_default_dtype(th.float32)
         self.float()
         if dtype == "float64":
-            self.np_type = np.float64
+            self.np_type = np.float64  # type: ignore[assignment]
             th.set_default_dtype(th.float64)
             self.double()
 

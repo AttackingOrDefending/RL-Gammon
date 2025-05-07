@@ -5,8 +5,8 @@ import random
 
 import pyspiel  # type: ignore[import-not-found]
 
-from rlgammon.environment.backgammon_env import BackgammonEnv
-from rlgammon.environment.gnubg.gnubg_backgammon import gnubgState
+from rlgammon.environment.backgammon_env import BackgammonEnv  # type: ignore[attr-defined]
+from rlgammon.environment.gnubg.gnubg_backgammon import gnubgState  # type: ignore[attr-defined]
 from rlgammon.rlgammon_types import BLACK, MAX_DICE, MIN_DICE, WHITE, ActionGNU, ActionSetGNU
 
 
@@ -27,7 +27,8 @@ class BaseAgent:
         raise NotImplementedError
 
     @abstractmethod
-    def choose_move(self, actions: list[int] | ActionSetGNU, state: pyspiel.BackgammonState | BackgammonEnv) -> int | ActionGNU:
+    def choose_move(self, actions: list[int] | ActionSetGNU,
+                    state: pyspiel.BackgammonState | BackgammonEnv) -> int | ActionGNU:
         """
         Chooses a move to make given the current board and dice roll.
 

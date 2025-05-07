@@ -4,7 +4,7 @@ import time
 import uuid
 
 import numpy as np
-import pyspiel
+import pyspiel  # type: ignore[import-not-found]
 from tqdm import tqdm
 
 from rlgammon.agents.trainable_agent import TrainableAgent

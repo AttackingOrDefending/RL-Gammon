@@ -1,6 +1,6 @@
 """Testing class with a random agent."""
 import numpy as np
-import pyspiel
+import pyspiel  # type: ignore[import-not-found]
 
 from rlgammon.agents.base_agent import BaseAgent
 from rlgammon.agents.random_agent import RandomAgent

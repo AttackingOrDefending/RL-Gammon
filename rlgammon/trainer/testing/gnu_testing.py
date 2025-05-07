@@ -1,8 +1,12 @@
 """Testing class with a gnubg agent."""
 from rlgammon.agents.gnu_agent import GNUAgent
-from rlgammon.agents.td_agent_gnu import TDAgentGnu
+from rlgammon.agents.td_agent_gnu import TDAgentGnu  # type: ignore[attr-defined]
 from rlgammon.agents.trainable_agent import TrainableAgent
-from rlgammon.environment.gnubg.gnubg_backgammon import GnubgEnv, GnubgInterface, evaluate_vs_gnubg
+from rlgammon.environment.gnubg.gnubg_backgammon import (  # type: ignore[attr-defined]
+    GnubgEnv,
+    GnubgInterface,
+    evaluate_vs_gnubg,
+)
 from rlgammon.rlgammon_types import BLACK, WHITE
 from rlgammon.trainer.testing.base_testing import BaseTesting
 
@@ -21,11 +25,19 @@ class GNUTesting(BaseTesting):
         self.episodes_in_test = episodes_in_test
         self.gnu_interface = GnubgInterface("localhost", 8001)
 
-    def configure_agent(self, agent: TrainableAgent) -> GNUAgent:
-        """TODO. MAKE GENERAL!!!!"""
+    def configure_agent(self, agent: TrainableAgent) -> GNUAgent | None:
+        """
+        Create a GNU compatible agent from the provided trainable agent.
+        NOTE: NEED MORE WORK TO MAKE GENERALIZABLE.
+
+        :param agent: agent to test against GNU
+        :return: GNU compatible agent derived from given agent
+        """
         agent_gnu = TDAgentGnu(self.gnu_interface, None, gamma=0.99, color=agent.color)
-        agent_gnu.model = agent.model
-        return agent_gnu
+        if not agent.get_model():
+            return None
+        agent_gnu.model = agent.get_model()
+        return agent_gnu  # type: ignore[no-any-return]
 
     def test(self, agent: TrainableAgent) -> dict[str, float]:
         """
@@ -36,6 +48,10 @@ class GNUTesting(BaseTesting):
         """
         # Note: only white tested
         agent_gnu = self.configure_agent(agent)
+
+        if not agent_gnu:
+            msg = "The agent needs a model to be tested against GNU!"
+            raise ValueError(msg)
 
         wins = 0
         draws = 0

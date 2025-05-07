@@ -50,7 +50,7 @@ class BaseTrainer:
             case PossibleTesting.RANDOM:
                 testing = RandomTesting(self.parameters["episodes_in_test"])
             case PossibleTesting.GNU:
-                testing = GNUTesting(self.parameters["episodes_in_test"])
+                testing = GNUTesting(self.parameters["episodes_in_test"])  # type: ignore[assignment]
             case _:
                 raise WrongTestingTypeError
         return testing

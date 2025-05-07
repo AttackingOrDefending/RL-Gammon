@@ -1,10 +1,12 @@
+#type: ignore  # noqa: PGH003
+
 """File implementing agent trained with td-learning and capable of playing against a gnubg agent."""
 import numpy as np
 
 from rlgammon.agents.gnu_agent import GNUAgent
 from rlgammon.agents.td_agent import TDAgent
-from rlgammon.environment.backgammon_env import BackgammonEnv
-from rlgammon.environment.gnubg.gnubg_backgammon import GnubgInterface, gnubgState
+from rlgammon.environment.backgammon_env import BackgammonEnv  # type: ignore[attr-defined]
+from rlgammon.environment.gnubg.gnubg_backgammon import GnubgInterface, gnubgState  # type: ignore[attr-defined]
 from rlgammon.models.model_types import ActivationList, LayerList
 from rlgammon.rlgammon_types import WHITE, ActionGNU, ActionSetGNU
 
@@ -42,7 +44,7 @@ class TDAgentGnu(TDAgent, GNUAgent):
         gnubg = self.gnubg_interface.send_command("roll")
         return self.handle_opponent_move(gnubg)
 
-    def choose_move(self, actions: ActionSetGNU, state: BackgammonEnv) -> ActionGNU:
+    def choose_move(self, actions: ActionSetGNU, state: BackgammonEnv) -> int | ActionGNU:
         """
         Chooses a move to make given the current board and dice roll,
         which goes to the state with maximal value, when playing against a GNU agent.
@@ -51,7 +53,6 @@ class TDAgentGnu(TDAgent, GNUAgent):
         :param state: the current environment (and it's associated state)
         :return: the chosen move to make.
         """
-        # TODO add optimization for keeping track of best actions
         best_action = None
         if actions:
             game = state.game
@@ -78,9 +79,9 @@ class TDAgentGnu(TDAgent, GNUAgent):
 
     def handle_opponent_move(self, gnubg: gnubgState) -> gnubgState:
         """
-        TODO.
+        React to opponent move in the GNU env.
 
-        :param gnubg:
+        :param gnubg: the interface used to communicate with gnubg
         :return:
         """
         # Once I roll the dice, 2 possible situations can happen:

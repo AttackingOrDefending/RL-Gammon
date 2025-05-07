@@ -2,8 +2,7 @@
 
 from abc import abstractmethod
 
-from rlgammon.environment import BackgammonEnv
-from rlgammon.rlgammon_types import MovePart
+from rlgammon.rlgammon_types import ActionGNU, ActionSetGNU
 
 
 class BaseExploration:
@@ -19,11 +18,11 @@ class BaseExploration:
         raise NotImplementedError
 
     @abstractmethod
-    def explore(self, valid_actions: list[tuple[BackgammonEnv, tuple[int, MovePart]]]) -> tuple[int, MovePart] | None:
+    def explore(self, actions: list[int] | ActionSetGNU) -> int | ActionGNU:
         """
         Method to conduct exploration.
 
-        :param valid_actions: all valid actions from the current state
+        :param actions: all valid actions from the current state
         :return: the final action to execute
         """
         raise NotImplementedError

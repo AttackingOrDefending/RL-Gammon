@@ -1,7 +1,6 @@
 """Implementation of no exploration."""
-from rlgammon.environment import BackgammonEnv
 from rlgammon.exploration import BaseExploration
-from rlgammon.rlgammon_types import MovePart
+from rlgammon.rlgammon_types import ActionGNU, ActionSetGNU
 
 
 class NoExploration(BaseExploration):
@@ -11,7 +10,7 @@ class NoExploration(BaseExploration):
         """Exploration should never occur so always returns False."""
         return False
 
-    def explore(self, valid_actions: list[tuple[BackgammonEnv, tuple[int, MovePart]]]) -> tuple[int, MovePart]:
+    def explore(self, actions: list[int] | ActionSetGNU) -> int | ActionGNU:
         """Exploration is not allowed, so raise an error, if it's attempted to run."""
         raise NotImplementedError
 

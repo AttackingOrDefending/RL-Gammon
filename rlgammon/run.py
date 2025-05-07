@@ -1,7 +1,7 @@
 """Run the trainer."""
 import torch as th
 
-from rlgammon.agents.td_agent import TDAgent
+from rlgammon.agents.td_agent import TDAgent  # type: ignore[attr-defined]
 from rlgammon.trainer.step_trainer import StepTrainer
 
 if __name__ == "__main__":
@@ -14,7 +14,7 @@ if __name__ == "__main__":
         activation_list=[
             th.nn.ReLU(),
             th.nn.ReLU(),
-            th.nn.Tanh()
+            th.nn.Tanh(),
         ],
         dtype="float64",
     )

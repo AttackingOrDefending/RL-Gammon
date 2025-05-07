@@ -53,3 +53,12 @@ class TrainableAgent(BaseAgent):
         :return: the loaded agent model
         """
         raise NotImplementedError
+
+    @abstractmethod
+    def get_model(self) -> th.nn.Module | None:
+        """
+        Get the model the agent is using, if it has one.
+
+        :return: the agent model if it has one, else return None
+        """
+        raise NotImplementedError
