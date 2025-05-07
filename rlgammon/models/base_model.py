@@ -31,8 +31,8 @@ class BaseModel(nn.Module):
         # Set the layers and activation functions of the model
         self.activation_list = activation_list
         self.linears = nn.ModuleList(layer_list)
-        self.num_layers = len(layer_list)
-        self.num_activations = len(activation_list)
+        self.num_layers = len(layer_list) if layer_list else 0
+        self.num_activations = len(activation_list) if activation_list else 0
 
         self.optimizer = None
         self.lr = lr
