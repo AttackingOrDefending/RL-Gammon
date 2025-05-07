@@ -75,7 +75,7 @@ class TDAgent(TrainableAgent):
         :return: the chosen move to make.
         """
         best_action = None
-        best_value = -10000000 if self.color == WHITE else 10000000
+        best_value = -10000000 if state.current_player() == WHITE else 10000000
         for action in actions:
             state_copy = copy(state)
             state_copy.apply_action(action)

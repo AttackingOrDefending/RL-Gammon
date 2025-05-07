@@ -1524,12 +1524,12 @@ class Backgammon:
 
         if perspective == WHITE:
             # features_vector += [0.0, 1.0]
-            features_vector += [self.bar[WHITE], self.off[WHITE], int(current_player == WHITE),
-                                self.bar[BLACK], self.off[BLACK], int(current_player == BLACK)]
+            features_vector += [float(self.bar[WHITE]), float(self.off[WHITE]), float(current_player == WHITE),
+                                float(self.bar[BLACK]), float(self.off[BLACK]), float(current_player == BLACK)]
         else:
             # features_vector += [1.0, 0.0]
-            features_vector += [self.bar[BLACK], self.off[BLACK], int(current_player == BLACK),
-                                self.bar[WHITE], self.off[WHITE], int(current_player == WHITE)]
+            features_vector += [float(self.bar[BLACK]), float(self.off[BLACK]), float(current_player == BLACK),
+                                float(self.bar[WHITE]), float(self.off[WHITE]), float(current_player == WHITE)]
         assert len(features_vector) == 198, print(f"Should be 198 instead of {len(features_vector)}")
         return features_vector
 
