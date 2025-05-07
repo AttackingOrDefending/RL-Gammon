@@ -1,15 +1,17 @@
 """Testing class with a random agent."""
+import numpy as np
+import pyspiel  # type: ignore[import-not-found]
 
 from rlgammon.agents.base_agent import BaseAgent
 from rlgammon.agents.random_agent import RandomAgent
-from rlgammon.environment import BackgammonEnv
+from rlgammon.rlgammon_types import BLACK, WHITE
 from rlgammon.trainer.testing.base_testing import BaseTesting
 
 
 class RandomTesting(BaseTesting):
     """Testing class, where agents are tested against a random agent."""
 
-    def __init__(self, episodes_in_test: int) -> None:
+    def __init__(self, episodes_in_test: int, color: int = WHITE) -> None:
         """
         Constructor for RandomTesting, that initializes the random agent,
         and stores the specified number of episodes in each test.
@@ -17,7 +19,7 @@ class RandomTesting(BaseTesting):
         :param episodes_in_test: test episodes to be run in each test
         """
         self.episodes_in_test = episodes_in_test
-        self.testing_agent = RandomAgent()
+        self.testing_agent = RandomAgent(color)
 
     def test(self, agent: BaseAgent) -> dict[str, float]:
         """
@@ -29,23 +31,41 @@ class RandomTesting(BaseTesting):
         wins = 0
         draws = 0
         losses = 0
-        env = BackgammonEnv()
-        agent_player = 1
+        env = pyspiel.load_game("backgammon(scoring_type=full_scoring)")
+        agent.set_color(WHITE)
+        self.testing_agent.set_color(BLACK)
         for _test_game in range(self.episodes_in_test):
-            env.reset()
-            done = False
-            trunc = False
-            reward = 0.0
-            while not done and not trunc:
-                action = agent.choose_move(env) if env.current_player == agent_player else self.testing_agent.choose_move(env)
-                reward, done, trunc, _ = env.step(action)
-            if reward == 0:
-                draws += 1
-            elif env.has_lost(agent_player):
-                losses += 1
-            else:
+            state = env.new_initial_state()
+            while not state.is_terminal():
+                if state.is_chance_node():
+                    outcomes = state.chance_outcomes()
+                    action_list, prob_list = zip(*outcomes, strict=False)
+                    action = np.random.choice(action_list, p=prob_list)
+                    state.apply_action(action)
+                else:
+                    # Get current player
+                    current_player = state.current_player()
+
+                    # Get legal actions
+                    legal_actions = state.legal_actions()
+
+                    if current_player == agent.color:
+                        action = agent.choose_move(legal_actions, state)
+                    else:
+                        action = self.testing_agent.choose_move(legal_actions, state)
+
+                    # Apply action
+                    state.apply_action(action)
+
+            rewards = state.returns()
+            if (agent.color == WHITE and rewards[WHITE] > 0) or (agent.color == BLACK and rewards[BLACK] > 0):
                 wins += 1
-            agent_player *= -1
+            else:
+                losses += 1
+
+            agent.flip_color()
+            self.testing_agent.flip_color()
+
         return {"win_rate": wins / self.episodes_in_test,
                 "draws": draws / self.episodes_in_test,
                 "losses": losses / self.episodes_in_test}

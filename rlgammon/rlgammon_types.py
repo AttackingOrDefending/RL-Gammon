@@ -5,6 +5,20 @@ from enum import Enum
 import numpy as np
 from numpy.typing import NDArray
 
+WHITE = 0
+BLACK = 1
+
+MIN_DICE = 1
+MAX_DICE = 6
+
+# GNU
+ActionGNU = tuple[tuple[int, int], ...]
+ActionSetGNU = list[int]
+StateGNU = NDArray[np.float32]
+
+# OPEN SPIEL
+Features = list[float]
+
 MovePart = tuple[int, int]
 MoveDict = dict[int, set[MovePart]]
 Move = list[MovePart]

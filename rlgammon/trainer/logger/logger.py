@@ -118,7 +118,7 @@ class Logger:
         :param training_session_id: uuid of the training session
         :param session_save_count: number of saved sessions
         """
-        logger_name = f"logger-{training_session_id}-({session_save_count}).pkl"
+        logger_name = f"backgammon-logger-{training_session_id}-({session_save_count}).pkl"
         logger_file_path = Path(__file__).parent
         logger_file_path = logger_file_path.joinpath("saved_loggers/")
         logger_file_path.mkdir(parents=True, exist_ok=True)

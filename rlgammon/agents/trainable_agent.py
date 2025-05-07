@@ -1,64 +1,64 @@
 """Base class for all trainable agents in the backgammon game."""
+from abc import abstractmethod
 from uuid import UUID
 
+import torch as th
+
 from rlgammon.agents.base_agent import BaseAgent
-from rlgammon.buffers.base_buffer import BaseBuffer
-from rlgammon.environment import BackgammonEnv
-from rlgammon.rlgammon_types import MovePart
+from rlgammon.rlgammon_types import Features
 
 
 class TrainableAgent(BaseAgent):
     """Base class for all trainable agents in the backgammon game."""
 
-    def choose_move(self, board: BackgammonEnv) -> tuple[int, MovePart] | None:
+    @abstractmethod
+    def evaluate_position(self, state: Features, decay: bool = False) -> th.Tensor:
         """
-        Chooses a move to make given the current board and dice roll.
+        Evaluate the given position.
 
-        :param board: The current board state
-        :return: The chosen move to make
-        """
-        raise NotImplementedError
-
-    def choose_move_deprecated(self, board: BackgammonEnv, dice: list[int]) -> list[tuple[int, MovePart]]:
-        """
-        Chooses a move to make given the current board and dice roll.
-
-        :param board: The current board state
-        :param dice: The current dice roll
-        :return: The chosen move to make
+        :param state: state to evaluate
+        :param decay: flag whether to decay the value or not
+        :return: th tensor storing the value of the provided state
         """
         raise NotImplementedError
 
-    def train(self, buffer: BaseBuffer) -> None:
+    @abstractmethod
+    def train(self, p: th.Tensor, p_next: th.Tensor) -> float:
         """
         Train the agent from the given buffer.
 
-        :param buffer: buffer with stored observations
+        :param p: value of current state
+        :param p_next: value of the next state or final reward if terminal state
+        :return: loss associated with update
         """
         raise NotImplementedError
 
-    def save(self, training_session_id: UUID, session_save_count: int, main_filename: str | None = None,
-             target_filename: str | None = None, optimizer_filename: str | None = None) -> None:
+    @abstractmethod
+    def save(self, training_session_id: UUID, session_save_count: int, main_filename: str | None = None) -> None:
         """
-        Save the agent.
+        Save the agent model.
 
         :param training_session_id: uuid of the training session
         :param session_save_count: number of saved sessions
-        :param main_filename: filename where the main network is to be saved
-        :param target_filename: filename where the target network is to be saved
-        :param optimizer_filename: filename where the optimizer is to be saved
+        :param main_filename: name of the file under which the agent is to be saved
         """
         raise NotImplementedError
 
-    def clear_cache(self) -> None:
-        """Clear the cache of the evaluate_position method."""
+    @abstractmethod
+    def load(self, agent_main_filename: str) -> th.nn.Module:
+        """
+        Load the agent model.
+
+        :param agent_main_filename: name of the file under which the agent is saved
+        :return: the loaded agent model
+        """
         raise NotImplementedError
 
-    def evaluate_position(self, board: BackgammonEnv) -> float:
+    @abstractmethod
+    def get_model(self) -> th.nn.Module | None:
         """
-        Evaluate the position of the current board state.
+        Get the model the agent is using, if it has one.
 
-        :param board: The current board state
-        :return: value of the current position
+        :return: the agent model if it has one, else return None
         """
         raise NotImplementedError

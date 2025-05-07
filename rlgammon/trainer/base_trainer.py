@@ -6,19 +6,15 @@ from typing import Any
 from uuid import UUID
 
 from rlgammon.agents.trainable_agent import TrainableAgent
-from rlgammon.buffers import BaseBuffer, UniformBuffer
-from rlgammon.buffers.buffer_types import PossibleBuffers
-from rlgammon.environment import BackgammonEnv
 from rlgammon.exploration import BaseExploration, EpsilonGreedyExploration
 from rlgammon.exploration.exploration_types import PossibleExploration
 from rlgammon.exploration.no_exploration import NoExploration
-from rlgammon.rlgammon_types import Input, MovePart
 from rlgammon.trainer.logger.logger import Logger
 from rlgammon.trainer.testing.base_testing import BaseTesting
+from rlgammon.trainer.testing.gnu_testing import GNUTesting
 from rlgammon.trainer.testing.random_testing import RandomTesting
 from rlgammon.trainer.testing.testing_types import PossibleTesting
 from rlgammon.trainer.trainer_errors.trainer_errors import (
-    WrongBufferTypeError,
     WrongExplorationTypeError,
     WrongTestingTypeError,
 )
@@ -31,24 +27,6 @@ class BaseTrainer:
     def __init__(self) -> None:
         """Constructor for the BaseTrainer containing the parameters for the trainer."""
         self.parameters: dict[str, Any] = {}
-
-    def finalize_data(self, episode_buffer: list[tuple[Input, Input, MovePart, bool, int, int]],
-                      losing_player: int, final_reward: float, buffer: BaseBuffer) -> None:
-        """
-        Finalize the data by updating the rewards for each time step
-        to take into account the loss of value of rewards closer to the start of the game, and
-        to set the reward negative for the losing player.
-
-        :param episode_buffer: the data from the completed episode
-        :param losing_player: the player who lost the game
-        :param final_reward: the reward given at the end of the game
-        :param buffer: buffer to which to add the data
-        """
-        for i, (state, next_state, action, done, player, player_after) in enumerate(reversed(episode_buffer)):
-            reward = final_reward * self.parameters["decay"] ** (max(0, i - 1))
-            if player == losing_player:
-                reward *= -1
-            buffer.record(state, next_state, action, reward, done, player, player_after)
 
     def create_logger_from_parameters(self, training_session_id: UUID) -> Logger:
         """
@@ -71,22 +49,11 @@ class BaseTrainer:
         match self.parameters["testing_type"]:
             case PossibleTesting.RANDOM:
                 testing = RandomTesting(self.parameters["episodes_in_test"])
+            case PossibleTesting.GNU:
+                testing = GNUTesting(self.parameters["episodes_in_test"])  # type: ignore[assignment]
             case _:
                 raise WrongTestingTypeError
         return testing
-
-    def create_buffer_from_parameters(self, env: BackgammonEnv) -> BaseBuffer:
-        """
-        Create a new buffer of the type provided in the parameters.
-
-        :return: buffer of the type provided in the parameters
-        """
-        match self.parameters["buffer"]:
-            case PossibleBuffers.UNIFORM:
-                buffer = UniformBuffer(env.observation_shape, env.action_shape, self.parameters["buffer_capacity"])
-            case _:
-                raise WrongBufferTypeError
-        return buffer
 
     def create_explorer_from_parameters(self) -> BaseExploration:
         """

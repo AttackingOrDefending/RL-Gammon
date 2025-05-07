@@ -1,5 +1,2 @@
-"""Init file for the environment module."""
-
-from rlgammon.environment.backgammon_env import BackgammonEnv
-
-__all__ = ["BackgammonEnv"]
+"""Package implementing the game of Backgammon, including a version using gnubg."""
+from rlgammon.environment.backgammon_env import BackgammonEnv # type: ignore[attr-defined]

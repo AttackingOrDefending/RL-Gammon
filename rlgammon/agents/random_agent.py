@@ -2,35 +2,26 @@
 
 import random
 
+import pyspiel  # type: ignore[import-not-found]
+
 from rlgammon.agents.base_agent import BaseAgent
-from rlgammon.environment import BackgammonEnv
-from rlgammon.rlgammon_types import MovePart
+from rlgammon.environment import BackgammonEnv  # type: ignore[attr-defined]
+from rlgammon.rlgammon_types import ActionGNU, ActionSetGNU
 
 
 class RandomAgent(BaseAgent):
     """A random agent for backgammon."""
 
-    def choose_move(self, board: BackgammonEnv) -> tuple[int, MovePart] | None:
+    def episode_setup(self) -> None:
+        """A random agent needs no setup, therefore the function does nothing."""
+
+    def choose_move(self, actions: list[int] | ActionSetGNU,
+                    state: pyspiel.BackgammonState | BackgammonEnv) -> int | ActionGNU: # noqa: ARG002
         """
         Choose a random move from the legal moves.
 
-        :param board: current state of the game
+        :param actions: set of all possible actions to choose from.
+        :param state: the current state of the game or environment with the current state if GNU
         :return: random action from the list of valid actions
         """
-        valid_actions = board.get_all_complete_moves()
-        return random.choice([move for _, move in valid_actions]) if valid_actions else None
-
-    def choose_move_deprecated(self, board: BackgammonEnv, dice: list[int]) -> list[tuple[int, MovePart]]:
-        """Choose a random move from the legal moves."""
-        board_copy = board.copy()
-        dice = dice.copy()
-        chosen_actions = []
-        while dice:
-            actions = board_copy.get_legal_moves(dice)
-            if not actions:
-                break
-            roll, action = random.choice(actions)
-            chosen_actions.append((roll, action))
-            dice.remove(roll)
-            board_copy.backgammon.make_move(action)
-        return chosen_actions
+        return random.choice(list(actions))

@@ -24,10 +24,10 @@ class BaseBuffer:
         self.update_counter = 0
         self.action_shape = action_shape
 
-        self.state_buffer = np.zeros(shape=(self.capacity, *observation_shape), dtype=np.int8)
-        self.new_state_buffer = np.zeros(shape=(self.capacity, *observation_shape), dtype=np.int8)
+        self.state_buffer = np.zeros(shape=(self.capacity, *observation_shape), dtype=np.float32)
+        self.new_state_buffer = np.zeros(shape=(self.capacity, *observation_shape), dtype=np.float32)
         self.action_buffer = np.zeros(shape=(self.capacity, action_shape), dtype=np.int8)
-        self.reward_buffer = np.zeros(shape=self.capacity, dtype=np.int8)
+        self.reward_buffer = np.zeros(shape=self.capacity, dtype=np.float32)
         self.done_buffer = np.zeros(shape=self.capacity, dtype=np.bool)
 
     @abstractmethod
