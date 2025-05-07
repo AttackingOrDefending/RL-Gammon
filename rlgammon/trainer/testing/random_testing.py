@@ -31,6 +31,8 @@ class RandomTesting(BaseTesting):
         wins = 0
         draws = 0
         losses = 0
+        points_white = 0
+        points_black = 0
         env = pyspiel.load_game("backgammon(scoring_type=full_scoring)")
         agent.set_color(WHITE)
         self.testing_agent.set_color(BLACK)
@@ -60,12 +62,17 @@ class RandomTesting(BaseTesting):
             rewards = state.returns()
             if (agent.color == WHITE and rewards[WHITE] > 0) or (agent.color == BLACK and rewards[BLACK] > 0):
                 wins += 1
+                points_white += rewards[agent.color]
             else:
                 losses += 1
+                opponent_color = WHITE if agent.color == BLACK else BLACK
+                points_black += rewards[opponent_color]
 
             agent.flip_color()
             self.testing_agent.flip_color()
 
         return {"win_rate": wins / self.episodes_in_test,
                 "draws": draws / self.episodes_in_test,
-                "losses": losses / self.episodes_in_test}
+                "losses": losses / self.episodes_in_test,
+                "points_white": points_white / self.episodes_in_test,
+                "points_black": points_black / self.episodes_in_test}

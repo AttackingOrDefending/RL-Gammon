@@ -108,14 +108,14 @@ class GnubgEnv:
 
         if self.gnubg.agent == WHITE and self.gnubg.action["action"] == "move" and self.gnubg.winner is None:
             if self.gnubg.winner != "O":
-                self.gnubg = self.gnubg_interface.send_command("accept")
-                assert self.gnubg.winner == "O", print(self.gnubg)
-                assert self.gnubg.action["action"] == "resign" and self.gnubg.agent == 1 and self.gnubg.action["player"] == "X"
-                assert self.gnubg.resigned
+                self.gnubg = self.gnubg_interface.send_command("reject")
+                # assert self.gnubg.winner == "O", print(self.gnubg)
+                # assert self.gnubg.action["action"] == "resign" and self.gnubg.agent == 1 and self.gnubg.action["player"] == "X"
+                # assert self.gnubg.resigned
 
         self.update_game_board(self.gnubg.board)
 
-        observation = self.game.get_board_features(WHITE) if self.model_type == "nn" else self.render(mode="state_pixels")
+        observation = self.game.get_board_features(self.current_agent, WHITE) if self.model_type == "nn" else self.render(mode="state_pixels")
 
         winner = self.gnubg.winner
         if winner is not None:
@@ -140,7 +140,7 @@ class GnubgEnv:
         self.game = Game()
         self.update_game_board(self.gnubg.board)
 
-        observation = self.game.get_board_features(WHITE) if self.model_type == "nn" else self.render(mode="state_pixels")
+        observation = self.game.get_board_features(self.current_agent, WHITE) if self.model_type == "nn" else self.render(mode="state_pixels")
         return observation, roll
 
     def update_game_board(self, gnu_board):
@@ -239,6 +239,7 @@ class GnubgEnv:
 
 def evaluate_vs_gnubg(agent, env, n_episodes):
     wins = {WHITE: 0, BLACK: 0}
+    points = {WHITE: 0, BLACK: 0}
 
     for episode in range(n_episodes):
         observation, first_roll = env.reset()
@@ -259,11 +260,12 @@ def evaluate_vs_gnubg(agent, env, n_episodes):
             # env.render(mode='rgb_array')
 
             if done:
-                winner = WHITE if env.gnubg.winner == "O" else BLACK
+                winner, points_won = env.game.get_winner_with_backgammons()
                 wins[winner] += 1
+                points[winner] += points_won
                 tot = wins[WHITE] + wins[BLACK]
                 break
             observation = observation_next
 
     env.gnubg_interface.send_command("new session")
-    return wins
+    return wins, points

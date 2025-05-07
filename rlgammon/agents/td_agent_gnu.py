@@ -8,7 +8,7 @@ from rlgammon.agents.td_agent import TDAgent
 from rlgammon.environment.backgammon_env import BackgammonEnv  # type: ignore[attr-defined]
 from rlgammon.environment.gnubg.gnubg_backgammon import GnubgInterface, gnubgState  # type: ignore[attr-defined]
 from rlgammon.models.model_types import ActivationList, LayerList
-from rlgammon.rlgammon_types import WHITE, ActionGNU, ActionSetGNU
+from rlgammon.rlgammon_types import WHITE, BLACK, ActionGNU, ActionSetGNU
 
 
 class TDAgentGnu(TDAgent, GNUAgent):
@@ -54,16 +54,15 @@ class TDAgentGnu(TDAgent, GNUAgent):
         :return: the chosen move to make.
         """
         best_action = None
+        opponent_color = WHITE if self.color == BLACK else BLACK
         if actions:
             game = state.game
-            values = [0.0] * len(actions)
+            values = [-10.] * len(actions)
             state = game.save_state()
 
             for i, action in enumerate(actions):
                 game.execute_play(self.color, action)
-                observation = (
-                    game.get_board_features(WHITE)
-                )
+                observation = game.get_board_features(opponent_color, WHITE)
                 values[i] = self.model(observation).detach().numpy()
                 game.restore_state(state)
 

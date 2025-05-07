@@ -43,18 +43,20 @@ class BackgammonEnv(gym.Env):
         self.game.execute_play(self.current_agent, action)
 
         # get the board representation from the opponent player perspective (the current player has already performed the move)
-        observation = self.game.get_board_features(WHITE)
+        observation = self.game.get_board_features(self.game.get_opponent(self.current_agent), WHITE)
 
         reward = 0
         done = False
 
-        winner = self.game.get_winner()
+        winner, points = self.game.get_winner_with_backgammons()
 
         if winner is not None or self.counter > self.max_length_episode:
             # practical-issues-in-temporal-difference-learning, pag.3
             # ...leading to a final reward signal z. In the simplest case, z = 1 if White wins and z = 0 if Black wins
             if winner == WHITE:
-                reward = 1
+                reward = points
+            else:
+                reward = -points
             done = True
 
         self.counter += 1
@@ -79,7 +81,7 @@ class BackgammonEnv(gym.Env):
         self.game = Game()
         self.counter = 0
 
-        return self.current_agent, roll, self.game.get_board_features(WHITE)
+        return self.current_agent, roll, self.game.get_board_features(self.current_agent, WHITE)
 
     def render(self, mode="human"):
         assert mode in ["human", "rgb_array", "state_pixels"], print(mode)

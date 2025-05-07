@@ -8,5 +8,5 @@ class LoggerData(TypedDict):
 
     episodes: list[int]
     steps: list[int]
-    win_rate: list[float]
+    results: list[dict[str, float]]
     training_time: list[float]
