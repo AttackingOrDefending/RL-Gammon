@@ -6,6 +6,7 @@ import torch as th
 from rlgammon.models.base_model import BaseModel
 from rlgammon.models.model_errors.model_errors import EligibilityTracesNotInitializedError
 from rlgammon.models.model_types import ActivationList, LayerList
+from rlgammon.rlgammon_types import Features
 
 
 class TDModel(BaseModel):
@@ -31,6 +32,17 @@ class TDModel(BaseModel):
         self.lamda = lamda
         self.initialized = False
         self.eligibility_traces = None
+
+    def forward(self, x: Features) -> th.Tensor:
+        """
+        Forward pass of the model.
+
+        :param x: input to the model
+        :return: output of the model
+        """
+        x = super().forward(x)
+        x = x[0] * -3 + x[1] * -2 + x[2] * -1 + x[3] * 1 + x[4] * 2 + x[5] * 3
+        return x
 
     def init_eligibility_traces(self) -> None:
         """Initialize the eligibility traces."""
