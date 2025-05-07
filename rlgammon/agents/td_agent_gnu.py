@@ -61,9 +61,8 @@ class TDAgentGnu(TDAgent, GNUAgent):
 
             for i, action in enumerate(actions):
                 game.execute_play(self.color, action)
-                opponent = game.get_opponent(self.color)
                 observation = (
-                    game.get_board_features(opponent)
+                    game.get_board_features(WHITE)
                 )
                 values[i] = self.model(observation).detach().numpy()
                 game.restore_state(state)

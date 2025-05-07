@@ -36,8 +36,11 @@ class TDAgent(TrainableAgent):
         :param dtype: the data type of the model
         """
         super().__init__(color)
-        self.model = self.load(pre_made_model_file_name) \
-            if pre_made_model_file_name else TDModel(lr, gamma, lamda, layer_list, activation_list, seed, dtype)
+        self.model = None
+        if pre_made_model_file_name:
+            self.model = self.load(pre_made_model_file_name)
+        elif layer_list and activation_list:
+            self.model = TDModel(lr, gamma, lamda, layer_list, activation_list, seed, dtype)
         self.gamma = gamma
 
     def episode_setup(self) -> None:
