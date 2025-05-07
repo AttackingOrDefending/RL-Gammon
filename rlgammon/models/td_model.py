@@ -41,8 +41,7 @@ class TDModel(BaseModel):
         :return: output of the model
         """
         x = super().forward(x)
-        x = x[0] * -3 + x[1] * -2 + x[2] * -1 + x[3] * 1 + x[4] * 2 + x[5] * 3
-        return x
+        return x[0] * -3 + x[1] * -2 + x[2] * -1 + x[3] * 1 + x[4] * 2 + x[5] * 3
 
     def init_eligibility_traces(self) -> None:
         """Initialize the eligibility traces."""

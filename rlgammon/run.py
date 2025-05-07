@@ -8,12 +8,10 @@ if __name__ == "__main__":
     agent = TDAgent(
         layer_list=[
             th.nn.Linear(198, 128),
-#            th.nn.Linear(128, 128),
             th.nn.Linear(128, 6),
         ],
         activation_list=[
             th.nn.ReLU(),
-#            th.nn.ReLU(),
             th.nn.Softmax(dim=-1),
         ],
         dtype="float32",
