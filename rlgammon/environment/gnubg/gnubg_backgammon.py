@@ -1,3 +1,5 @@
+#type: ignore
+
 from collections import namedtuple
 from itertools import count
 import os

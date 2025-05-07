@@ -1,3 +1,5 @@
+#type: ignore
+
 from random import randint
 
 import gym

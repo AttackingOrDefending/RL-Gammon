@@ -1,3 +1,5 @@
+#type: ignore
+
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import os

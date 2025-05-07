@@ -1,3 +1,5 @@
+#type: ignore
+
 # THIS FILE SHOULD BE RUN ON THE SAME MACHINE WHERE gnubg IS INSTALLED.
 # IT USES PYTHON 2.7
 
@@ -77,6 +79,7 @@ def run(host, server_class=HTTPServer, handler_class=Handler, port=8001):
     httpd = server_class(server_address, handler_class)
     print("Starting httpd {}:{}".format(host, port))
     httpd.serve_forever()
+
 
 
 if __name__ == "__main__":
