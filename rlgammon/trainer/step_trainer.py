@@ -57,6 +57,7 @@ class StepTrainer(BaseTrainer):
 
                 action = explorer.explore(legal_actions) \
                     if explorer.should_explore() else agent.choose_move(legal_actions, state)
+
                 state.apply_action(action)
 
                 if state.is_terminal():

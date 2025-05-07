@@ -3,8 +3,6 @@
 import random
 
 from rlgammon.agents.base_agent import BaseAgent
-from rlgammon.environment.backgammon_env import BackgammonEnv
-from rlgammon.rlgammon_types import Action, ActionSet
 
 
 class RandomAgent(BaseAgent):
@@ -13,7 +11,7 @@ class RandomAgent(BaseAgent):
     def episode_setup(self) -> None:
         """A random agent needs no setup, therefore the function does nothing."""
 
-    def choose_move(self, actions: ActionSet, env: BackgammonEnv | None = None) -> Action:
+    def choose_move(self, actions: list[int], state) -> int:
         """
         Choose a random move from the legal moves.
 

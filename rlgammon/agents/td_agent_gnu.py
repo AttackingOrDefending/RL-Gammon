@@ -6,22 +6,31 @@ from rlgammon.agents.td_agent import TDAgent
 from rlgammon.environment.backgammon_env import BackgammonEnv
 from rlgammon.environment.gnubg.gnubg_backgammon import GnubgInterface, gnubgState
 from rlgammon.models.model_types import ActivationList, LayerList
-from rlgammon.rlgammon_types import WHITE, Action, ActionSet
+from rlgammon.rlgammon_types import WHITE, ActionGNU, ActionSetGNU
 
 
 class TDAgentGnu(TDAgent, GNUAgent):
     """Class implementing agent trained with td-learning and capable of playing against a gnubg agent."""
 
-    def __init__(self, gnubg_interface: GnubgInterface, pre_made_model_path: str | None = None, lr: float = 0.01,
-                 gamma: float = 0.99, lamda: float = 0.99, seed: int = 123, color: int=WHITE,
-                 layer_list: LayerList = None, activation_list: ActivationList = None) -> None:
+    def __init__(self, gnubg_interface: GnubgInterface, pre_made_model_file_name: str | None = None, lr: float = 0.01,
+                 gamma: float = 0.99, lamda: float = 0.99, seed: int = 123, color: int = WHITE,
+                 layer_list: LayerList =  None, activation_list: ActivationList = None, dtype: str = "float32") -> None:
         """
         Construct the td-gnu agent by creating a td agent with the given parameters, and
         storing the provided the gnubg interface to use when playing against gnubg.
 
         :param gnubg_interface: the interface used to communicate with gnubg
+        :param pre_made_model_file_name: file name of a previously trained model, None if a new model is to be used
+        :param lr: learning rate
+        :param gamma: future reward discount
+        :param lamda: trace decay parameters (how much to value distant states)
+        :param seed: seed for random number generator of torch and the python random package
+        :param color: 0 or 1 representing which player the agent controls
+        :param layer_list: list of layers to use
+        :param activation_list: list of activation functions to use
+        :param dtype: the data type of the model
         """
-        super().__init__(pre_made_model_path, lr, gamma, lamda, seed, color, layer_list, activation_list)
+        super().__init__(pre_made_model_file_name, lr, gamma, lamda, seed, color, layer_list, activation_list, dtype)
         self.gnubg_interface = gnubg_interface
 
     def roll_dice(self) -> tuple[int, int] | gnubgState:
@@ -33,19 +42,19 @@ class TDAgentGnu(TDAgent, GNUAgent):
         gnubg = self.gnubg_interface.send_command("roll")
         return self.handle_opponent_move(gnubg)
 
-    def choose_best_action(self, actions: ActionSet, env: BackgammonEnv) -> Action:
+    def choose_move(self, actions: ActionSetGNU, state: BackgammonEnv) -> ActionGNU:
         """
         Chooses a move to make given the current board and dice roll,
         which goes to the state with maximal value, when playing against a GNU agent.
 
         :param actions: set of all possible actions to choose from.
-        :param env: the current environment (and it's associated state)
+        :param state: the current environment (and it's associated state)
         :return: the chosen move to make.
         """
         # TODO add optimization for keeping track of best actions
         best_action = None
         if actions:
-            game = env.game
+            game = state.game
             values = [0.0] * len(actions)
             state = game.save_state()
 
@@ -98,24 +107,3 @@ class TDAgentGnu(TDAgent, GNUAgent):
                 if gnubg.double else self.gnubg_interface.send_command("roll")
             previous_agent = gnubg.agent
         return gnubg
-
-"""
-THIS OPTIMIZATION TO BE IMPLEMENTED
-
-best_action = None
-best_value = float("-inf") if self.color == WHITE else float("inf")
-for action in actions:
-    env_copy = copy(env)
-    state, reward, done, info = env_copy.step(action)
-    if not done:
-        q_values = self.model(th.tensor(state, dtype=th.float32))
-        reward = q_values.item()
-    if self.color == WHITE:
-        if reward > best_value:
-            best_value = reward
-            best_action = action
-    elif reward < best_value:
-        best_value = reward
-        best_action = action
-return best_action
-"""

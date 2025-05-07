@@ -6,18 +6,15 @@ from typing import Any
 from uuid import UUID
 
 from rlgammon.agents.trainable_agent import TrainableAgent
-from rlgammon.environment.backgammon_env import BackgammonEnv
 from rlgammon.exploration import BaseExploration, EpsilonGreedyExploration
 from rlgammon.exploration.exploration_types import PossibleExploration
 from rlgammon.exploration.no_exploration import NoExploration
-from rlgammon.rlgammon_types import Input, MovePart
 from rlgammon.trainer.logger.logger import Logger
 from rlgammon.trainer.testing.base_testing import BaseTesting
 from rlgammon.trainer.testing.gnu_testing import GNUTesting
 from rlgammon.trainer.testing.random_testing import RandomTesting
 from rlgammon.trainer.testing.testing_types import PossibleTesting
 from rlgammon.trainer.trainer_errors.trainer_errors import (
-    WrongBufferTypeError,
     WrongExplorationTypeError,
     WrongTestingTypeError,
 )

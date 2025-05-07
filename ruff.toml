@@ -34,7 +34,8 @@ exclude = [
     "venv",
     "__pycache__",
     "build",
-    "dist"
+    "dist",
+    "rlgammon/environment"
 ]
 
 # Allow fix for all rules

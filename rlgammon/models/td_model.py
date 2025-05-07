@@ -9,8 +9,8 @@ from rlgammon.models.model_types import ActivationList, LayerList
 class TDModel(BaseModel):
     """Class implementing a TD model used in td training."""
 
-    def __init__(self, lr: float, gamma: float, lamda: float, seed: int=123,
-                 layer_list: LayerList = None, activation_list: ActivationList = None) -> None:
+    def __init__(self, lr: float, gamma: float, lamda: float, layer_list: LayerList, activation_list: ActivationList,
+                 seed: int=123, dtype: str = "float32") -> None:
         """
         Construct a td model by first constructing a base torch model,
         and then initializing td specific parameters.
@@ -19,11 +19,12 @@ class TDModel(BaseModel):
         :param lr: learning rate
         :param gamma: future reward discount
         :param lamda: trace decay parameters (how much to value distant states)
-        :param seed: seed for random number generator of torch and the python random package
         :param layer_list: list of layers to use
         :param activation_list: list of activation functions to use
+        :param seed: seed for random number generator of torch and the python random package
+        :param dtype: the data type of the model
         """
-        super().__init__(lr, seed, layer_list, activation_list)
+        super().__init__(lr, layer_list, activation_list, seed, dtype)
         self.gamma = gamma
         self.lamda = lamda
         self.initialized = False

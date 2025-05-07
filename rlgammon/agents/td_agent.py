@@ -2,12 +2,14 @@
 import pathlib
 from uuid import UUID
 
+import pyspiel
 import torch as th
 
 from rlgammon.agents.trainable_agent import TrainableAgent
+from rlgammon.environment import BackgammonEnv
 from rlgammon.models.model_types import ActivationList, LayerList
 from rlgammon.models.td_model import TDModel
-from rlgammon.rlgammon_types import WHITE, Action, ActionSet, State
+from rlgammon.rlgammon_types import WHITE, ActionGNU, ActionSetGNU, Features
 from utils.utils import copy
 
 
@@ -15,8 +17,8 @@ class TDAgent(TrainableAgent):
     """Class implementing an agent trained with td."""
 
     def __init__(self, pre_made_model_file_name: str | None = None, lr: float = 0.01,
-                 gamma: float = 0.99, lamda: float = 0.99, seed: int = 123, color: int=WHITE,
-                 layer_list: LayerList = None, activation_list: ActivationList = None) -> None:
+                 gamma: float = 0.99, lamda: float = 0.99, seed: int = 123, color: int = WHITE,
+                 layer_list: LayerList = None, activation_list: ActivationList = None, dtype: str = "float32") -> None:
         """
         Construct a td-agent by first loading a model or creating a new one with the given layers and activations,
         and the initializing various parameters used in td learning.
@@ -29,17 +31,18 @@ class TDAgent(TrainableAgent):
         :param color: 0 or 1 representing which player the agent controls
         :param layer_list: list of layers to use
         :param activation_list: list of activation functions to use
+        :param dtype: the data type of the model
         """
         super().__init__(color)
         self.model = self.load(pre_made_model_file_name) \
-            if pre_made_model_file_name else TDModel(lr, gamma, lamda, seed, layer_list, activation_list)
+            if pre_made_model_file_name else TDModel(lr, gamma, lamda, layer_list, activation_list, seed, dtype)
         self.gamma = gamma
 
     def episode_setup(self) -> None:
         """Prepare the agent for a training episode by initializing the model's eligibility traces."""
         self.model.init_eligibility_traces()
 
-    def evaluate_position(self, state: State, decay: bool = False) -> th.Tensor:
+    def evaluate_position(self, state: Features, decay: bool = False) -> th.Tensor:
         """
         Evaluate the given position using the agent model.
 
@@ -60,12 +63,12 @@ class TDAgent(TrainableAgent):
         """
         return self.model.update_weights(p, p_next)
 
-    def choose_move(self, actions: ActionSet, state) -> Action:
+    def choose_move(self, actions: list[int] | ActionSetGNU, state: pyspiel.BackgammonState | BackgammonEnv) -> int | ActionGNU:
         """
         Chooses a move to make given the current board and dice roll, which goes to the state with maximal value.
 
         :param actions: set of all possible actions to choose from.
-        :param env: the current environment (and it's associated state)
+        :param state: the current state of the game.
         :return: the chosen move to make.
         """
         best_action = None

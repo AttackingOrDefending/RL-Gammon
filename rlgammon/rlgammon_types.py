@@ -11,9 +11,13 @@ BLACK = 1
 MIN_DICE = 1
 MAX_DICE = 6
 
-Action = tuple[tuple[int, int], ...]
-ActionSet = set[Action]
-State = NDArray[np.float32]
+# GNU
+ActionGNU = tuple[tuple[int, int], ...]
+ActionSetGNU = list[int]
+StateGNU = NDArray[np.float32]
+
+# OPEN SPIEL
+Features = list[float]
 
 MovePart = tuple[int, int]
 MoveDict = dict[int, set[MovePart]]

@@ -113,7 +113,7 @@ class GnubgEnv:
 
         self.update_game_board(self.gnubg.board)
 
-        observation = self.game.get_board_features(self.current_agent) if self.model_type == "nn" else self.render(mode="state_pixels")
+        observation = self.game.get_board_features(WHITE) if self.model_type == "nn" else self.render(mode="state_pixels")
 
         winner = self.gnubg.winner
         if winner is not None:
@@ -138,7 +138,7 @@ class GnubgEnv:
         self.game = Game()
         self.update_game_board(self.gnubg.board)
 
-        observation = self.game.get_board_features(self.current_agent) if self.model_type == "nn" else self.render(mode="state_pixels")
+        observation = self.game.get_board_features(WHITE) if self.model_type == "nn" else self.render(mode="state_pixels")
         return observation, roll
 
     def update_game_board(self, gnu_board):
@@ -251,7 +251,7 @@ def evaluate_vs_gnubg(agent, env, n_episodes):
                 roll = env.gnubg.roll
 
             actions = env.get_valid_actions(roll)
-            action = agent.choose_best_action(actions, env)
+            action = agent.choose_move(actions, env)
 
             observation_next, reward, done, info = env.step(action)
             # env.render(mode='rgb_array')
