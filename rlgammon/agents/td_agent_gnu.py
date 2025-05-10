@@ -55,7 +55,7 @@ class TDAgentGnu(TDAgent, GNUAgent):
         """
         best_action = None
         opponent_color = WHITE if self.color == BLACK else BLACK
-        obs = state.game.get_board_features(self.color, WHITE)
+        obs = state.game.get_board_features(self.color, BLACK)
         if actions:
             game = state.game
             values = [-10.] * len(actions)
@@ -63,7 +63,7 @@ class TDAgentGnu(TDAgent, GNUAgent):
 
             for i, action in enumerate(actions):
                 game.execute_play(self.color, action)
-                observation = game.get_board_features(opponent_color, WHITE)
+                observation = game.get_board_features(opponent_color, BLACK)
                 print(obs)
                 print(observation)
                 None * 2

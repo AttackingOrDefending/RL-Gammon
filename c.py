@@ -18,7 +18,7 @@ for action in state.legal_actions():
         print(f"Action: {action} Rolling: {state.action_to_string(state.current_player(), action)}")
         #state.apply_action(action)
         #break
-state.apply_action(0)
+state.apply_action(15)
 print("Start After Rolling")
 print(obs)
 print(state.observation_tensor(0)[:198])
@@ -29,7 +29,7 @@ for action in state.legal_actions():
     print(f"{action}: {desc}")
 state.apply_action(1188)
 print(env.get_valid_actions((1, 2)))
-env.step(((5, 3), (3, 2)))
+obs, _, _, _ = env.step(((5, 3), (3, 2)))
 print("After Moving")
 print(obs)
 print(state.observation_tensor(0)[:198])

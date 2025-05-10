@@ -115,7 +115,7 @@ class GnubgEnv:
 
         self.update_game_board(self.gnubg.board)
 
-        observation = self.game.get_board_features(self.current_agent, WHITE) if self.model_type == "nn" else self.render(mode="state_pixels")
+        observation = self.game.get_board_features(self.current_agent, BLACK) if self.model_type == "nn" else self.render(mode="state_pixels")
 
         winner = self.gnubg.winner
         if winner is not None:
@@ -140,7 +140,7 @@ class GnubgEnv:
         self.game = Game()
         self.update_game_board(self.gnubg.board)
 
-        observation = self.game.get_board_features(self.current_agent, WHITE) if self.model_type == "nn" else self.render(mode="state_pixels")
+        observation = self.game.get_board_features(self.current_agent, BLACK) if self.model_type == "nn" else self.render(mode="state_pixels")
         return observation, roll
 
     def update_game_board(self, gnu_board):
