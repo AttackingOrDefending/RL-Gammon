@@ -115,6 +115,9 @@ class BackgammonEnv(gym.Env):
         self.current_agent = self.game.get_opponent(self.current_agent)
         return self.current_agent
 
+    def current_player(self):
+        return self.current_agent
+
 
 class BackgammonEnvPixel(BackgammonEnv):
 

@@ -236,6 +236,9 @@ class GnubgEnv:
 
         return self.viewer.render(board=self.game.board, bar=self.game.bar, off=self.game.off, state_w=width, state_h=height)
 
+    def current_player(self):
+        return self.current_agent
+
 
 def evaluate_vs_gnubg(agent, env, n_episodes):
     wins = {WHITE: 0, BLACK: 0}
@@ -248,7 +251,7 @@ def evaluate_vs_gnubg(agent, env, n_episodes):
             if first_roll:
                 roll = first_roll
                 first_roll = None
-            if env.current_agent == BLACK:
+            else:
                 env.gnubg = agent.roll_dice()
                 env.update_game_board(env.gnubg.board)
                 roll = env.gnubg.roll

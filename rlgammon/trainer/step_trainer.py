@@ -51,11 +51,9 @@ class StepTrainer(BaseTrainer):
             while not state.is_terminal():
                 # Remove the last 2 elements, which are the dice. Always from white perspective.
                 features = state.observation_tensor(WHITE)[:198]
-                print(features)
 
                 p = agent.evaluate_position(features)
                 legal_actions = state.legal_actions()
-                print(legal_actions)
 
                 action = (explorer.explore(legal_actions)
                     if explorer.should_explore() else agent.choose_move(legal_actions, state))

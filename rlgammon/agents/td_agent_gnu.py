@@ -54,25 +54,22 @@ class TDAgentGnu(TDAgent, GNUAgent):
         :return: the chosen move to make.
         """
         best_action = None
-        opponent_color = WHITE if self.color == BLACK else BLACK
-        obs = state.game.get_board_features(self.color, BLACK)
+        color = state.current_player()
+        opponent_color = WHITE if color == BLACK else BLACK
         if actions:
             game = state.game
-            values = [-10.] * len(actions)
+            values = [-10.] * len(actions) if color == WHITE else [10.] * len(actions)
             state = game.save_state()
 
             for i, action in enumerate(actions):
-                game.execute_play(self.color, action)
+                game.execute_play(color, action)
                 observation = game.get_board_features(opponent_color, BLACK)
-                print(obs)
-                print(observation)
-                None * 2
                 values[i] = self.model(observation).detach().numpy()
                 game.restore_state(state)
 
             best_action_index = (
                 int(np.argmax(values))
-                if self.color == WHITE
+                if color == WHITE
                 else int(np.argmin(values))
             )
             best_action = list(actions)[best_action_index]
