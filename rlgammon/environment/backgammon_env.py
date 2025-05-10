@@ -43,7 +43,7 @@ class BackgammonEnv(gym.Env):
         self.game.execute_play(self.current_agent, action)
 
         # get the board representation from the opponent player perspective (the current player has already performed the move)
-        observation = self.game.get_board_features(self.game.get_opponent(self.current_agent), WHITE)
+        observation = self.game.get_board_features(self.game.get_opponent(self.current_agent), BLACK)
 
         reward = 0
         done = False
@@ -81,7 +81,7 @@ class BackgammonEnv(gym.Env):
         self.game = Game()
         self.counter = 0
 
-        return self.current_agent, roll, self.game.get_board_features(self.current_agent, WHITE)
+        return self.current_agent, roll, self.game.get_board_features(self.current_agent, BLACK)
 
     def render(self, mode="human"):
         assert mode in ["human", "rgb_array", "state_pixels"], print(mode)
