@@ -1,4 +1,4 @@
-"""Sequential trainer with training at each step."""
+"""Trainer where training is performed at each step."""
 
 import time
 import uuid
@@ -12,9 +12,10 @@ from rlgammon.rlgammon_types import WHITE
 from rlgammon.trainer.base_trainer import BaseTrainer
 from rlgammon.trainer.trainer_errors.trainer_errors import NoParametersError
 
+"""TODO: Move load and save from td-agent to trainable agent"""
 
 class StepTrainer(BaseTrainer):
-    """Sequential trainer with training at each step."""
+    """Implementation of trainer where training is performed at each step."""
 
     def __init__(self) -> None:
         """Construct the trainer by initializing its parameters in the BaseTrainer class."""
