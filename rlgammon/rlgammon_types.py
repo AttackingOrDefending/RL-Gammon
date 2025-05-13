@@ -16,8 +16,11 @@ ActionGNU = tuple[tuple[int, int], ...]
 ActionSetGNU = list[int]
 StateGNU = NDArray[np.float32]
 
-# OPEN SPIEL
+# Open Spiel
 Features = list[float]
+
+# Iteration trainer types
+EpisodeObservation = list[tuple[Features, Features, int, bool, int]]
 
 MovePart = tuple[int, int]
 MoveDict = dict[int, set[MovePart]]

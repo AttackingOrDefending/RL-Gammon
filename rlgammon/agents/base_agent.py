@@ -3,7 +3,9 @@
 from abc import abstractmethod
 import random
 
+import numpy as np
 import pyspiel  # type: ignore[import-not-found]
+from pyspiel import BackgammonState
 
 from rlgammon.environment.backgammon_env import BackgammonEnv  # type: ignore[attr-defined]
 from rlgammon.environment.gnubg.gnubg_backgammon import gnubgState  # type: ignore[attr-defined]
@@ -50,7 +52,15 @@ class BaseAgent:
         """
         self.color = color
 
-    def roll_dice(self) -> tuple[int, int] | gnubgState:
+    @staticmethod
+    def roll_dice(state: BackgammonState) -> None:
+        """TODO."""
+        outcomes = state.chance_outcomes()
+        action_list, prob_list = zip(*outcomes, strict=False)
+        action = np.random.choice(action_list, p=prob_list)
+        state.apply_action(action)
+
+    def roll_dice_gnu(self) -> tuple[int, int] | gnubgState:
         """
         Get dice rolls.
 

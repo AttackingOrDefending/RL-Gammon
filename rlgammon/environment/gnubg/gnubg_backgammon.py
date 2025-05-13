@@ -248,7 +248,7 @@ def evaluate_vs_gnubg(agent, env, n_episodes):
                 roll = first_roll
                 first_roll = None
             else:
-                env.gnubg = agent.roll_dice()
+                env.gnubg = agent.roll_dice_gnu()
                 env.update_game_board(env.gnubg.board)
                 roll = env.gnubg.roll
 

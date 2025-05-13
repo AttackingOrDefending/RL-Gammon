@@ -35,7 +35,7 @@ class TDAgentGnu(TDAgent, GNUAgent):
         super().__init__(pre_made_model_file_name, lr, gamma, lamda, seed, color, layer_list, activation_list, dtype)
         self.gnubg_interface = gnubg_interface
 
-    def roll_dice(self) -> tuple[int, int] | gnubgState:
+    def roll_dice_gnu(self) -> tuple[int, int] | gnubgState:
         """
         Get dice rolls for gnubg environment.
 

@@ -5,7 +5,13 @@ from pathlib import Path
 from typing import Any
 from uuid import UUID
 
+import numpy as np
+import pyspiel  # type: ignore[import-not-found]
+from pyspiel import BackgammonState
+
 from rlgammon.agents.trainable_agent import TrainableAgent
+from rlgammon.buffers import BaseBuffer, UniformBuffer
+from rlgammon.buffers.buffer_types import PossibleBuffers
 from rlgammon.exploration import BaseExploration, EpsilonGreedyExploration
 from rlgammon.exploration.exploration_types import PossibleExploration
 from rlgammon.exploration.no_exploration import NoExploration
@@ -15,6 +21,7 @@ from rlgammon.trainer.testing.gnu_testing import GNUTesting
 from rlgammon.trainer.testing.random_testing import RandomTesting
 from rlgammon.trainer.testing.testing_types import PossibleTesting
 from rlgammon.trainer.trainer_errors.trainer_errors import (
+    WrongBufferTypeError,
     WrongExplorationTypeError,
     WrongTestingTypeError,
 )
@@ -27,6 +34,20 @@ class BaseTrainer:
     def __init__(self) -> None:
         """Constructor for the BaseTrainer containing the parameters for the trainer."""
         self.parameters: dict[str, Any] = {}
+
+    def create_buffer_from_parameters(self, env: pyspiel.Game) -> BaseBuffer:
+        """
+        Create a new buffer of the type provided in the parameters.
+
+        :param env: TODO
+        :return: buffer of the type provided in the parameters
+        """
+        match self.parameters["buffer"]:
+            case PossibleBuffers.UNIFORM:
+                buffer = UniformBuffer(env.observation_tensor_shape(), env.num_distinct_actions(), self.parameters["buffer_capacity"])
+            case _:
+                raise WrongBufferTypeError
+        return buffer
 
     def create_logger_from_parameters(self, training_session_id: UUID) -> Logger:
         """

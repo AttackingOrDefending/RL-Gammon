@@ -121,7 +121,7 @@ class GUI:
                     roll = self.server.first_roll
                     self.server.first_roll = None
                 else:
-                    roll = opponent.roll_dice()
+                    roll = opponent.roll_dice_gnu()
 
                 actions = self.server.env.get_valid_actions(roll)
                 action = opponent.choose_best_action(actions, self.server.env)
@@ -155,7 +155,7 @@ class GUI:
             commands.append("start")
 
         else:
-            self.server.roll = self.server.agent.roll_dice()
+            self.server.roll = self.server.agent.roll_dice_gnu()
             message += f"{COLORS[self.server.agent.color]} | Roll={(abs(self.server.roll[0]), abs(self.server.roll[1]))} | Run 'move (src/target)'\n"
             actions = self.server.env.get_valid_actions(self.server.roll)
             commands.extend(list(actions))
@@ -166,7 +166,7 @@ class GUI:
                 agent_color = self.server.env.get_opponent_agent()
                 opponent = self.server.agents[agent_color]
 
-                roll = opponent.roll_dice()
+                roll = opponent.roll_dice_gnu()
 
                 actions = self.server.env.get_valid_actions(roll)
                 action = opponent.choose_best_action(actions, self.server.env)
@@ -244,7 +244,7 @@ class GUI:
                         agent_color = self.server.env.get_opponent_agent()
                         opponent = self.server.agents[agent_color]
 
-                        roll = opponent.roll_dice()
+                        roll = opponent.roll_dice_gnu()
                         actions = self.server.env.get_valid_actions(roll)
                         action = opponent.choose_best_action(actions, self.server.env)
 

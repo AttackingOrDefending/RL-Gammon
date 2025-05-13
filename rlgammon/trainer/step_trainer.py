@@ -44,10 +44,7 @@ class StepTrainer(BaseTrainer):
             agent.episode_setup()
 
             state = env.new_initial_state()
-            outcomes = state.chance_outcomes()
-            action_list, prob_list = zip(*outcomes)  # noqa: B905
-            action = np.random.choice(action_list, p=prob_list)
-            state.apply_action(action)
+            agent.roll_dice(state)
 
             while not state.is_terminal():
                 # Remove the last 2 elements, which are the dice. Always from white perspective.
@@ -67,11 +64,7 @@ class StepTrainer(BaseTrainer):
                     _ = agent.train(p, reward)
                 else:
                     if not state.is_terminal() and state.is_chance_node():
-                        # Always roll the dice, so that the side to move is included in the input.
-                        outcomes = state.chance_outcomes()
-                        action_list, prob_list = zip(*outcomes, strict=False)
-                        action = np.random.choice(action_list, p=prob_list)
-                        state.apply_action(action)
+                        agent.roll_dice(state)
 
                     # Remove the last 2 elements, which are the dice. Always from white perspective.
                     next_features = state.observation_tensor(WHITE)[:198]
