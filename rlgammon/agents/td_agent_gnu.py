@@ -69,7 +69,7 @@ class TDAgentGnu(TDAgent, GNUAgent):
 
             best_action_index = (
                 int(np.argmax(values))
-                if color == WHITE
+                if color == BLACK
                 else int(np.argmin(values))
             )
             best_action = list(actions)[best_action_index]
