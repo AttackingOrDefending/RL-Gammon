@@ -262,7 +262,8 @@ def evaluate_vs_gnubg(agent, env, n_episodes):
             observation_next, reward, done, info = env.step(action)
 
             if done:
-                winner, points_won = env.game.get_winner_with_backgammons(env.gnubg)
+                _, points_won = env.game.get_winner_with_backgammons()
+                winner = WHITE if env.gnubg.winner == 'O' else BLACK
                 wins[winner] += 1
                 points[winner] += points_won
                 break
