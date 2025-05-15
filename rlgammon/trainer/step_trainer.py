@@ -57,10 +57,6 @@ class StepTrainer(BaseTrainer):
 
                 action = (explorer.explore(legal_actions)
                     if explorer.should_explore() else agent.choose_move(legal_actions, state))
-
-                # if episode == 100:
-                #     print(state)
-                #     print(state.action_to_string(state.current_player(), action))
                 state.apply_action(action)
 
                 if state.is_terminal():
