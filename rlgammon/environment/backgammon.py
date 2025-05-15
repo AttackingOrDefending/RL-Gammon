@@ -1466,7 +1466,7 @@ class Backgammon:
     def get_winner_with_backgammons(self, gnubg = None):
         if gnubg is None:
             winner = WHITE if self.off[WHITE] == 15 else None
-            winner = BLACK if self.off[BLACK] == 15 else None
+            winner = BLACK if self.off[BLACK] == 15 else winner
         else:
             winner = gnubg.winner
 
@@ -1484,7 +1484,7 @@ class Backgammon:
                 if self.board[i][1] == opponent:
                     enemy_at_home = True
                     break
-            if self.bar[BLACK] > 0 or enemy_at_home:
+            if self.bar[opponent] > 0 or enemy_at_home:
                 return winner, 3
             else:
                 return winner, 2
