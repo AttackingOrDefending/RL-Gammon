@@ -256,23 +256,16 @@ def evaluate_vs_gnubg(agent, env, n_episodes):
                 env.update_game_board(env.gnubg.board)
                 roll = env.gnubg.roll
 
-            # print(env.game.render())
-
             actions = env.get_valid_actions(roll)
             action = agent.choose_move(actions, env)
-            # print(f"Action: {action}")
 
             observation_next, reward, done, info = env.step(action)
-            # env.render(mode='rgb_array')
 
             if done:
-                _, points_won = env.game.get_winner_with_backgammons()
-                winner = WHITE if env.gnubg.winner == 'O' else BLACK
+                winner, points_won = env.game.get_winner_with_backgammons(env.gnubg)
                 wins[winner] += 1
                 points[winner] += points_won
-                tot = wins[WHITE] + wins[BLACK]
                 break
-            observation = observation_next
 
     env.gnubg_interface.send_command("new session")
     return wins, points
