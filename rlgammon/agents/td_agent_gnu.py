@@ -8,7 +8,7 @@ from rlgammon.agents.td_agent import TDAgent
 from rlgammon.environment.backgammon_env import BackgammonEnv  # type: ignore[attr-defined]
 from rlgammon.environment.gnubg.gnubg_backgammon import GnubgInterface, gnubgState  # type: ignore[attr-defined]
 from rlgammon.models.model_types import ActivationList, LayerList
-from rlgammon.rlgammon_types import WHITE, BLACK, ActionGNU, ActionSetGNU
+from rlgammon.rlgammon_types import BLACK, WHITE, ActionGNU, ActionSetGNU
 
 
 class TDAgentGnu(TDAgent, GNUAgent):
@@ -58,7 +58,7 @@ class TDAgentGnu(TDAgent, GNUAgent):
         opponent_color = WHITE if color == BLACK else BLACK
         if actions:
             game = state.game
-            values = [-10.] * len(actions) if color == WHITE else [10.] * len(actions)
+            values = [-10.] * len(actions) if color == BLACK else [10.] * len(actions)
             state = game.save_state()
 
             for i, action in enumerate(actions):

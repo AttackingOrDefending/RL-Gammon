@@ -67,7 +67,7 @@ class Logger:
 
         :return: list of string win rates represented as percentages
         """
-        return [f"{round(win_rate * 100, 2)}%" for win_rate in self.info["win_rate"]]
+        return [f"{round(win_rate['win_rate'] * 100, 2)}%" for win_rate in self.info["results"]]
 
     def graph_log(self, logging_choice: str = "episode") -> None:
         """
@@ -131,5 +131,5 @@ class Logger:
 
     def clear(self) -> None:
         """Clear all data from the logger."""
-        self.info = {"episodes": [0], "steps": [0], "win_rate": [0.0], "training_time": [0]}
+        self.info = {"episodes": [0], "steps": [0], "results": [{}], "training_time": [0]}
         self.num_items, self.load_episode, self.load_step = 0, 0, 0

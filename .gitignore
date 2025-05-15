@@ -174,3 +174,5 @@ cython_debug/
 /rlgammon/agents/saved_agents/
 /rlgammon/trainer/logger/saved_loggers/
 /rlgammon/buffers/saved_buffers/
+
+old/
