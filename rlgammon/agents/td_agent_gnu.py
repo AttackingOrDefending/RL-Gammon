@@ -56,16 +56,19 @@ class TDAgentGnu(TDAgent, GNUAgent):
         best_action = None
         color = state.current_player()
         opponent_color = WHITE if color == BLACK else BLACK
+        # m = "maxing" if color == BLACK else "mining"
         if actions:
             game = state.game
             values = [-10.] * len(actions) if color == BLACK else [10.] * len(actions)
             state = game.save_state()
+            # print(game.render())
 
             for i, action in enumerate(actions):
                 game.execute_play(color, action)
                 observation = game.get_board_features(opponent_color, BLACK)
                 values[i] = self.model(observation).detach().numpy()
                 game.restore_state(state)
+                # print(f"{m} {action}: {values[i]}")
 
             best_action_index = (
                 int(np.argmax(values))

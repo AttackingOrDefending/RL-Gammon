@@ -256,8 +256,11 @@ def evaluate_vs_gnubg(agent, env, n_episodes):
                 env.update_game_board(env.gnubg.board)
                 roll = env.gnubg.roll
 
+            # print(env.game.render())
+
             actions = env.get_valid_actions(roll)
             action = agent.choose_move(actions, env)
+            # print(f"Action: {action}")
 
             observation_next, reward, done, info = env.step(action)
             # env.render(mode='rgb_array')

@@ -3,7 +3,7 @@
   "save_every": 1000,
   "testing_type": "GNU",
   "episodes_in_test": 100,
-  "episodes_per_test": 500,
+  "episodes_per_test": 1000,
   "batch_size": 64,
   "buffer": "U",
   "buffer_capacity": 50000,

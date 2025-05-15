@@ -62,6 +62,7 @@ class GNUTesting(BaseTesting):
         for _ in range(self.episodes_in_test):
             gnu_env = GnubgEnv(self.gnu_interface)
             results, points = evaluate_vs_gnubg(agent_gnu, gnu_env, 1)
+            # print(results, points)
             wins += results[WHITE]
             losses += results[BLACK]
             points_white += points[WHITE]
