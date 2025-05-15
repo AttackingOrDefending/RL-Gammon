@@ -1463,33 +1463,34 @@ class Backgammon:
             return BLACK
         return None
 
-    def get_winner_with_backgammons(self, gnubg = None):
-        if gnubg is None:
-            winner = WHITE if self.off[WHITE] == 15 else None
-            winner = BLACK if self.off[BLACK] == 15 else winner
-        else:
-            winner = gnubg.winner
-
-        if winner is not None:
-            winner = WHITE if winner == "O" else BLACK
-            opponent = BLACK if winner == WHITE else WHITE
-        else:
-            return None, None
-
-        if self.off[opponent] == 0:
-            enemy_at_home = False
-            start_search = 0 if winner == WHITE else 18
-            end_search = 6 if winner == WHITE else 24
-            for i in range(start_search, end_search):
-                if self.board[i][1] == opponent:
-                    enemy_at_home = True
-                    break
-            if self.bar[opponent] > 0 or enemy_at_home:
-                return winner, 3
+    def get_winner_with_backgammons(self):
+        if self.off[WHITE] == 15:
+            if self.off[BLACK] == 0:
+                black_at_home = False
+                for i in range(6):
+                    if self.board[i][1] == BLACK:
+                        black_at_home = True
+                        break
+                if self.bar[BLACK] > 0 or black_at_home:
+                    return WHITE, 3
+                else:
+                    return WHITE, 2
             else:
-                return winner, 2
-        else:
-            return winner, 1
+                return WHITE, 1
+        elif self.off[BLACK] == 15:
+            if self.off[WHITE] == 0:
+                white_at_home = False
+                for i in range(18, 24):
+                    if self.board[i][1] == WHITE:
+                        white_at_home = True
+                        break
+                if self.bar[WHITE] > 0 or white_at_home:
+                    return BLACK, 3
+                else:
+                    return BLACK, 2
+            else:
+                return BLACK, 1
+        return None, None
 
     def get_opponent(self, player):
         return BLACK if player == WHITE else WHITE

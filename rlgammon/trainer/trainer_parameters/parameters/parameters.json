@@ -1,5 +1,5 @@
 {
-  "episodes": 20000,
+  "episodes": 200000,
   "save_every": 1000,
   "testing_type": "GNU",
   "episodes_in_test": 100,
