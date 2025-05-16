@@ -1,4 +1,6 @@
 """Testing class with a gnubg agent."""
+import concurrent.futures
+
 from rlgammon.agents.gnu_agent import GNUAgent
 from rlgammon.agents.td_agent_gnu import TDAgentGnu  # type: ignore[attr-defined]
 from rlgammon.agents.trainable_agent import TrainableAgent
@@ -61,11 +63,19 @@ class GNUTesting(BaseTesting):
         agent_gnu.set_color(WHITE)
         for _ in range(self.episodes_in_test):
             gnu_env = GnubgEnv(self.gnu_interface)
-            results, points = evaluate_vs_gnubg(agent_gnu, gnu_env, 1)
-            wins += results[WHITE]
-            losses += results[BLACK]
-            points_white += points[WHITE]
-            points_black += points[BLACK]
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(evaluate_vs_gnubg, agent_gnu, gnu_env, 1)
+                try:
+                    results, points = future.result(timeout=60)
+                    # Only update statistics if evaluation completes successfully
+                    wins += results[WHITE]
+                    losses += results[BLACK]
+                    points_white += points[WHITE]
+                    points_black += points[BLACK]
+                except concurrent.futures.TimeoutError:
+                    print("Evaluation timed out after 1 minute")
+                    # Don't update statistics, move to next iteration
+                    continue
 
         return {"win_rate": wins / self.episodes_in_test,
                 "draws": draws / self.episodes_in_test,
