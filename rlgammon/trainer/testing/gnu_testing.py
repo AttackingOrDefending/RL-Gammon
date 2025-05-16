@@ -1,4 +1,6 @@
 """Testing class with a gnubg agent."""
+import concurrent.futures
+
 from rlgammon.agents.gnu_agent import GNUAgent
 from rlgammon.agents.td_agent_gnu import TDAgentGnu  # type: ignore[attr-defined]
 from rlgammon.agents.trainable_agent import TrainableAgent
@@ -9,7 +11,6 @@ from rlgammon.environment.gnubg.gnubg_backgammon import (  # type: ignore[attr-d
 )
 from rlgammon.rlgammon_types import BLACK, WHITE
 from rlgammon.trainer.testing.base_testing import BaseTesting
-import concurrent.futures
 
 
 class GNUTesting(BaseTesting):
@@ -72,7 +73,7 @@ class GNUTesting(BaseTesting):
                     points_white += points[WHITE]
                     points_black += points[BLACK]
                 except concurrent.futures.TimeoutError:
-                    print(f"Evaluation timed out after 1 minute")
+                    print("Evaluation timed out after 1 minute")
                     # Don't update statistics, move to next iteration
                     continue
 
