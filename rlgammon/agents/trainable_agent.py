@@ -5,14 +5,14 @@ from uuid import UUID
 import torch as th
 
 from rlgammon.agents.base_agent import BaseAgent
-from rlgammon.rlgammon_types import Features
+from rlgammon.rlgammon_types import Feature
 
 
 class TrainableAgent(BaseAgent):
     """Base class for all trainable agents in the backgammon game."""
 
     @abstractmethod
-    def evaluate_position(self, state: Features, decay: bool = False) -> th.Tensor:
+    def evaluate_position(self, state: Feature, decay: bool = False) -> th.Tensor:
         """
         Evaluate the given position.
 

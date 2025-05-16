@@ -4,6 +4,8 @@ import torch as th
 from rlgammon.agents.td_agent import TDAgent  # type: ignore[attr-defined]
 from rlgammon.trainer.step_trainer import StepTrainer
 
+# TODO Adjust MCTS float data types based on the accuracy used in the model (float32 / float64)
+
 if __name__ == "__main__":
     agent = TDAgent(
         layer_list=[

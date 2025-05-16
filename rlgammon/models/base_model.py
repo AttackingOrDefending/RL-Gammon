@@ -6,8 +6,8 @@ import numpy as np
 import torch as th
 from torch import nn
 
-from rlgammon.models.model_types import ActivationList, LayerList
-from rlgammon.rlgammon_types import Features
+from rlgammon.models.model_types import ActivationList, BaseOutput, LayerList
+from rlgammon.rlgammon_types import Feature
 
 
 class BaseModel(nn.Module):
@@ -56,7 +56,7 @@ class BaseModel(nn.Module):
         th.manual_seed(seed)
         random.seed(seed)
 
-    def forward(self, x: Features) -> th.Tensor:
+    def forward(self, x: Feature) -> BaseOutput:
         """
         Make a forward pass through the model with the given data as input.
 

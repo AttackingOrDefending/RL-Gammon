@@ -6,7 +6,7 @@ import torch as th
 from rlgammon.models.base_model import BaseModel
 from rlgammon.models.model_errors.model_errors import EligibilityTracesNotInitializedError
 from rlgammon.models.model_types import ActivationList, LayerList
-from rlgammon.rlgammon_types import Features
+from rlgammon.rlgammon_types import Feature
 
 
 class TDModel(BaseModel):
@@ -33,7 +33,7 @@ class TDModel(BaseModel):
         self.initialized = False
         self.eligibility_traces = None
 
-    def forward(self, x: Features) -> th.Tensor:
+    def forward(self, x: Feature) -> th.Tensor:
         """
         Forward pass of the model.
 

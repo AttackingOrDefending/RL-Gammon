@@ -15,12 +15,13 @@ MAX_DICE = 6
 ActionGNU = tuple[tuple[int, int], ...]
 ActionSetGNU = list[int]
 StateGNU = NDArray[np.float32]
+ActionPolicyList = list[tuple[int, float]]
 
 # Open Spiel
-Features = list[float]
+Feature = list[float]
 
 # Iteration trainer types
-EpisodeObservation = list[tuple[Features, Features, int, bool, int]]
+EpisodeObservation = list[tuple[Feature, Feature, int, bool, int]]
 
 MovePart = tuple[int, int]
 MoveDict = dict[int, set[MovePart]]

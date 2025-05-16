@@ -11,7 +11,7 @@ from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.environment import BackgammonEnv  # type: ignore[attr-defined]
 from rlgammon.models.model_types import ActivationList, LayerList
 from rlgammon.models.td_model import TDModel
-from rlgammon.rlgammon_types import WHITE, ActionGNU, ActionSetGNU, Features
+from rlgammon.rlgammon_types import WHITE, ActionGNU, ActionSetGNU, Feature
 from utils.utils import copy
 
 
@@ -44,7 +44,7 @@ class TDAgent(TrainableAgent):
         """Prepare the agent for a training episode by initializing the model's eligibility traces."""
         self.model.init_eligibility_traces()
 
-    def evaluate_position(self, state: Features, decay: bool = False) -> th.Tensor:
+    def evaluate_position(self, state: Feature, decay: bool = False) -> th.Tensor:
         """
         Evaluate the given position using the agent model.
 
