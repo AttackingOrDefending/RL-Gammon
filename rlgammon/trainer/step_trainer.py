@@ -39,7 +39,7 @@ class StepTrainer(BaseTrainer):
 
         total_steps = 0
         training_time_start = time.time()
-        for episode in tqdm(range(self.parameters["episodes"]), desc="Training Episodes"):
+        for episode in tqdm(range(1, self.parameters["episodes"] + 1), desc="Training Episodes"):
 
             agent.episode_setup()
 
@@ -53,9 +53,8 @@ class StepTrainer(BaseTrainer):
                 p = agent.evaluate_position(features)
                 legal_actions = state.legal_actions()
 
-                action = explorer.explore(legal_actions) \
-                    if explorer.should_explore() else agent.choose_move(legal_actions, state)
-
+                action = (explorer.explore(legal_actions)
+                    if explorer.should_explore() else agent.choose_move(legal_actions, state))
                 state.apply_action(action)
 
                 if state.is_terminal():
@@ -70,11 +69,12 @@ class StepTrainer(BaseTrainer):
                     next_features = state.observation_tensor(WHITE)[:198]
                     p_next = agent.evaluate_position(next_features, decay=True)
                     _ = agent.train(p, p_next)
+                total_steps += 1
 
-            if (episode + 1) % self.parameters["episodes_per_test"] == 0:
+            if episode % self.parameters["episodes_per_test"] == 0:
                 results = testing.test(agent)
                 training_time = time.time() - training_time_start
-                logger.update_log(episode, total_steps, results["win_rate"], training_time)
+                logger.update_log(episode, total_steps, results, training_time)
                 logger.print_log()
 
             if self.parameters["save_progress"] and ((episode + 1) % self.parameters["save_every"] == 0):

@@ -20,21 +20,21 @@ class Logger:
         self.logger = logging.getLogger("rl-training-logger")
         self.training_session_id = training_session_id
         self.num_items, self.load_episode, self.load_step = 0, 0, 0
-        self.info: LoggerData = {"episodes": [0], "steps": [0], "win_rate": [0.0], "training_time": [0.0]}
+        self.info: LoggerData = {"episodes": [0], "steps": [0], "results": [{}], "training_time": [0.0]}
 
-    def update_log(self, episode: int, steps: int, win_rate: float, training_time: float) -> None:
+    def update_log(self, episode: int, steps: int, results: dict[str, float], training_time: float) -> None:
         """
         Add data to the log .
 
         :param episode: current episode of the training process
         :param steps: current steps of the training process
-        :param win_rate: current win rate achieved during tests
+        :param results: current win rate achieved during tests
         :param training_time: current training time since the start of the session
         """
         self.num_items += 1
         self.info["episodes"].append(episode)
         self.info["steps"].append(steps)
-        self.info["win_rate"].append(win_rate)
+        self.info["results"].append(results)
         self.info["training_time"].append(training_time)
 
     def print_log(self) -> None:
@@ -43,9 +43,11 @@ class Logger:
         performance_msg = ("\nBeen training for:\n"
                            f"Episodes: {self.info['episodes'][-1]}\n"
                            f"Steps: {self.info['steps'][-1]}\n"
-                           f"Time: {self.info['training_time'][-1]}s\n"
+                           f"Time: {round(self.info['training_time'][-1], 2)}s\n"
                            "Current performance:\n"
-                           f"Win rate: {self.convert_win_rate_to_percent(self.info['win_rate'][-1])}\n")
+                           f"Win rate: {self.convert_win_rate_to_percent(self.info['results'][-1]['win_rate'])}\n"
+                           f"Points per game (agent): {self.info['results'][-1]['points_white']}\n"
+                           f"Points per game (opponent): {self.info['results'][-1]['points_black']}\n")
         logging_message = performance_msg + break_line
         self.logger.info(logging_message)
 
@@ -65,7 +67,7 @@ class Logger:
 
         :return: list of string win rates represented as percentages
         """
-        return [f"{round(win_rate * 100, 2)}%" for win_rate in self.info["win_rate"]]
+        return [f"{round(win_rate['win_rate'] * 100, 2)}%" for win_rate in self.info["results"]]
 
     def graph_log(self, logging_choice: str = "episode") -> None:
         """
@@ -129,5 +131,5 @@ class Logger:
 
     def clear(self) -> None:
         """Clear all data from the logger."""
-        self.info = {"episodes": [0], "steps": [0], "win_rate": [0.0], "training_time": [0]}
+        self.info = {"episodes": [0], "steps": [0], "results": [{}], "training_time": [0]}
         self.num_items, self.load_episode, self.load_step = 0, 0, 0

@@ -1463,11 +1463,42 @@ class Backgammon:
             return BLACK
         return None
 
+    def get_winner_with_backgammons(self):
+        if self.off[WHITE] == 15:
+            if self.off[BLACK] == 0:
+                black_at_home = False
+                for i in range(6):
+                    if self.board[i][1] == BLACK:
+                        black_at_home = True
+                        break
+                if self.bar[BLACK] > 0 or black_at_home:
+                    return WHITE, 3
+                else:
+                    return WHITE, 2
+            else:
+                return WHITE, 1
+        elif self.off[BLACK] == 15:
+            if self.off[WHITE] == 0:
+                white_at_home = False
+                for i in range(18, 24):
+                    if self.board[i][1] == WHITE:
+                        white_at_home = True
+                        break
+                if self.bar[WHITE] > 0 or white_at_home:
+                    return BLACK, 3
+                else:
+                    return BLACK, 2
+            else:
+                return BLACK, 1
+        return None, None
+
     def get_opponent(self, player):
         return BLACK if player == WHITE else WHITE
 
-    def get_board_features(self, current_player):
+    def get_board_features(self, current_player, perspective):
         """
+        NOW USING THE OPEN-SPIEL FORMAT.
+
         - encode each point (24) with 4 units => 4 * 24 = 96
         - for each player => 96 * 2 = 192
         - 2 units indicating who is the current player
@@ -1476,27 +1507,29 @@ class Backgammon:
         - tot = 192 + 2 + 2 + 2 = 198
         """
         features_vector = []
-        for p in [WHITE, BLACK]:
+        for p in ([WHITE, BLACK] if perspective == WHITE else [BLACK, WHITE]):
             for point in range(NUM_POINTS):
                 checkers, player = self.board[point]
                 if player == p and checkers > 0:
                     if checkers == 1:
                         features_vector += [1.0, 0.0, 0.0, 0.0]
                     elif checkers == 2:
-                        features_vector += [1.0, 1.0, 0.0, 0.0]
-                    elif checkers >= 3:
-                        features_vector += [1.0, 1.0, 1.0, (checkers - 3.0) / 2.0]
+                        features_vector += [0.0, 1.0, 0.0, 0.0]
+                    elif checkers == 3:
+                        features_vector += [0.0, 0.0, 1.0, 0.0]
+                    elif checkers > 3:
+                        features_vector += [0.0, 0.0, 0.0, checkers - 3.0]
                 else:
                     features_vector += [0.0, 0.0, 0.0, 0.0]
 
-            features_vector += [self.bar[p] / 2.0, self.off[p] / 15.0]
-
-        if current_player == WHITE:
+        if perspective == WHITE:
             # features_vector += [0.0, 1.0]
-            features_vector += [1.0, 0.0]
+            features_vector += [float(self.bar[WHITE]), float(self.off[WHITE]), float(current_player == WHITE),
+                                float(self.bar[BLACK]), float(self.off[BLACK]), float(current_player == BLACK)]
         else:
             # features_vector += [1.0, 0.0]
-            features_vector += [0.0, 1.0]
+            features_vector += [float(self.bar[BLACK]), float(self.off[BLACK]), float(current_player == BLACK),
+                                float(self.bar[WHITE]), float(self.off[WHITE]), float(current_player == WHITE)]
         assert len(features_vector) == 198, print(f"Should be 198 instead of {len(features_vector)}")
         return features_vector
 

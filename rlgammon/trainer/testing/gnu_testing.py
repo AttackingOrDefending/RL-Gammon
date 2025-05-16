@@ -56,13 +56,19 @@ class GNUTesting(BaseTesting):
         wins = 0
         draws = 0
         losses = 0
+        points_white = 0
+        points_black = 0
         agent_gnu.set_color(WHITE)
         for _ in range(self.episodes_in_test):
             gnu_env = GnubgEnv(self.gnu_interface)
-            results = evaluate_vs_gnubg(agent_gnu, gnu_env, 1)
+            results, points = evaluate_vs_gnubg(agent_gnu, gnu_env, 1)
             wins += results[WHITE]
             losses += results[BLACK]
+            points_white += points[WHITE]
+            points_black += points[BLACK]
 
         return {"win_rate": wins / self.episodes_in_test,
                 "draws": draws / self.episodes_in_test,
-                "losses": losses / self.episodes_in_test}
+                "losses": losses / self.episodes_in_test,
+                "points_white": points_white / self.episodes_in_test,
+                "points_black": points_black / self.episodes_in_test}
