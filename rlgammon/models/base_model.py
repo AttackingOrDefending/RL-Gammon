@@ -34,8 +34,14 @@ class BaseModel(nn.Module):
         self.num_layers = len(layer_list) if layer_list else 0
         self.num_activations = len(activation_list) if activation_list else 0
 
-        self.optimizer = None
         self.lr = lr
+        self.lr_step_count = 100
+        self.lr_step_current_counter = 0
+        self.decay_rate = 0.96
+
+        self.optimizer = th.optim.Adam(params=list(self.parameters()), lr=self.lr) if self.num_layers != 0 else None
+        self.lr_scheduler = th.optim.lr_scheduler.ExponentialLR(
+            optimizer=self.optimizer, gamma=self.decay_rate) if self.num_layers != 0 else None  # type: ignore[arg-type]
 
         # Set the data type of the models
         self.np_type = np.float32
