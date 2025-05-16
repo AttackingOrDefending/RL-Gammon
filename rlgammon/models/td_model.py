@@ -78,4 +78,8 @@ class TDModel(BaseModel):
                 # w <- w + alpha * td_error * z
                 new_weights = weights + self.lr * td_error * self.eligibility_traces[i]
                 weights.copy_(new_weights)
+
+        if (self.lr_step_current_counter + 1) % self.lr_step_count == 0:
+            self.lr_scheduler.step()
+        self.lr_step_current_counter += 1
         return td_error
