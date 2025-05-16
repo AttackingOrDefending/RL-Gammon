@@ -9,6 +9,7 @@ from rlgammon.environment.gnubg.gnubg_backgammon import (  # type: ignore[attr-d
 )
 from rlgammon.rlgammon_types import BLACK, WHITE
 from rlgammon.trainer.testing.base_testing import BaseTesting
+import concurrent.futures
 
 
 class GNUTesting(BaseTesting):
@@ -61,11 +62,19 @@ class GNUTesting(BaseTesting):
         agent_gnu.set_color(WHITE)
         for _ in range(self.episodes_in_test):
             gnu_env = GnubgEnv(self.gnu_interface)
-            results, points = evaluate_vs_gnubg(agent_gnu, gnu_env, 1)
-            wins += results[WHITE]
-            losses += results[BLACK]
-            points_white += points[WHITE]
-            points_black += points[BLACK]
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(evaluate_vs_gnubg, agent_gnu, gnu_env, 1)
+                try:
+                    results, points = future.result(timeout=60)
+                    # Only update statistics if evaluation completes successfully
+                    wins += results[WHITE]
+                    losses += results[BLACK]
+                    points_white += points[WHITE]
+                    points_black += points[BLACK]
+                except concurrent.futures.TimeoutError:
+                    print(f"Evaluation timed out after 1 minute")
+                    # Don't update statistics, move to next iteration
+                    continue
 
         return {"win_rate": wins / self.episodes_in_test,
                 "draws": draws / self.episodes_in_test,
