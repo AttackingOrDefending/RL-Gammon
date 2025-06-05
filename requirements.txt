@@ -1,6 +1,6 @@
 numpy==2.2.4
 pygame==2.6.1
-torch==2.7.0
+torch==2.7.1
 matplotlib==3.10.1
 tqdm==4.67.1
 gym==0.26.2
