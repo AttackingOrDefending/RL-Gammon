@@ -4,7 +4,7 @@ torch==2.7.1
 matplotlib==3.10.1
 tqdm==4.67.1
 gym==0.26.2
-pytest~=8.4.0
+pytest~=8.4.1
 requests~=2.32.4
 pyglet~=2.1.6
 open_spiel==1.5
