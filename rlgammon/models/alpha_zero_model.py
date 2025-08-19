@@ -1,6 +1,7 @@
 """TODO."""
 import numpy as np
 from numpy.typing import NDArray
+import torch as th
 
 from rlgammon.models.mcts_model import MCTSModel
 from rlgammon.models.model_types import ActivationList, LayerList
@@ -18,9 +19,13 @@ class AlphaZeroModel(MCTSModel):
     def inference(self, state: Feature, mask: NDArray[np.bool]) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
         """TODO."""
         value, policy = self.forward(state)
-        value = value.detach().numpy()
-        policy = policy.detach().numpy()
+        value_np = value.detach().numpy()
+        policy_np = policy.detach().numpy()
 
-        policy[mask == 0] = 0
-        policy /= np.sum(policy)
-        return value, policy
+        policy_np[mask == 0] = 0
+        policy_np /= np.sum(policy)
+        return value_np, policy_np
+
+    def update_weights(self, p: th.Tensor, p_next: th.Tensor | int) -> float:
+        """TODO."""
+        pass
