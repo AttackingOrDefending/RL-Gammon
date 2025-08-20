@@ -5,6 +5,9 @@ from enum import Enum
 import numpy as np
 from numpy.typing import NDArray
 
+INF = float('inf')
+NEG_INF = float('-inf')
+
 WHITE = 0
 BLACK = 1
 

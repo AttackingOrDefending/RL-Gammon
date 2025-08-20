@@ -28,4 +28,18 @@ class AlphaZeroModel(MCTSModel):
 
     def update_weights(self, p: th.Tensor, p_next: th.Tensor | int) -> float:
         """TODO."""
-        pass
+        # reset the gradients
+        self.zero_grad()
+        # compute the derivative of p w.r.t. the parameters
+        p.backward()
+
+        with th.no_grad():
+            actor_loss = th.nn.CrossEntropyLoss(action_probs_batch, actor_probs)
+            critic_loss = th.nn.MSELoss(reward_batch, critic_value)
+            loss = actor_loss + critic_loss
+            loss.backward()
+            self.optimizer.step()
+
+        if (self.lr_step_current_counter + 1) % self.lr_step_count == 0:
+            self.lr_scheduler.step()
+        self.lr_step_current_counter += 1

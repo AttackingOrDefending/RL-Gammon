@@ -11,6 +11,7 @@ from rlgammon.agents.agent_errors.agent_errors import AlphaZeroNotSetupError
 from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.environment import BackgammonEnv
 from rlgammon.evaluators.alpha_zero_evaluator import AlphaZeroEvaluator
+from rlgammon.models.alpha_zero_model import AlphaZeroModel
 from rlgammon.models.model_types import ActivationList, LayerList
 from rlgammon.rlgammon_types import WHITE, ActionGNU, ActionSetGNU, Feature
 
@@ -31,11 +32,14 @@ class AlphaZeroAgent(TrainableAgent):
         self.temperature = temperature
         self.mcts_bot = None
         self.setup = False
-
-        self.model = self.load(pre_made_model_file_name) if pre_made_model_file_name else None # TODO
+        self.gamma = gamma
+        self.model = self.load(pre_made_model_file_name) if pre_made_model_file_name else AlphaZeroModel()
 
     def evaluate_position(self, state: Feature, decay: bool = False) -> th.Tensor:
         """TODO."""
+        policy, value = self.model(state)
+        return value * self.gamma if decay else self.model(state)
+
 
     def train(self, p: th.Tensor, p_next: th.Tensor) -> float:
         """TODO."""

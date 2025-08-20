@@ -7,11 +7,12 @@ from uuid import UUID
 import pyspiel  # type: ignore[import-not-found]
 import torch as th
 
+from rlgammon.agents.agent_errors.agent_errors import EligibilityTracesNotInitializedError
 from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.environment import BackgammonEnv  # type: ignore[attr-defined]
 from rlgammon.models.model_types import ActivationList, LayerList
 from rlgammon.models.td_model import TDModel
-from rlgammon.rlgammon_types import WHITE, ActionGNU, ActionSetGNU, Feature
+from rlgammon.rlgammon_types import INF, NEG_INF, WHITE, ActionGNU, ActionSetGNU, Feature
 from utils.utils import copy
 
 
@@ -38,10 +39,12 @@ class TDAgent(TrainableAgent):
         super().__init__(color)
         self.model =  self.load(pre_made_model_file_name) \
             if pre_made_model_file_name else TDModel(lr, gamma, lamda, layer_list, activation_list, seed, dtype)
+        self.setup = False
         self.gamma = gamma
 
     def episode_setup(self) -> None:
         """Prepare the agent for a training episode by initializing the model's eligibility traces."""
+        self.setup = True
         self.model.init_eligibility_traces()
 
     def evaluate_position(self, state: Feature, decay: bool = False) -> th.Tensor:
@@ -63,6 +66,10 @@ class TDAgent(TrainableAgent):
         :param p_next: value of the next state or final reward if terminal state
         :return: loss associated with update
         """
+        # Raise an error if training is attempted without prior initialization of eligibility traces
+        if not self.setup:
+            raise EligibilityTracesNotInitializedError
+
         return self.model.update_weights(p, p_next)
 
     def choose_move(self, actions: list[int] | ActionSetGNU,
@@ -76,7 +83,7 @@ class TDAgent(TrainableAgent):
         """
         best_action = None
         color = state.current_player()
-        best_value = -10000000 if color == WHITE else 10000000
+        best_value = NEG_INF if color == WHITE else INF
         for action in actions:
             state_copy = copy(state)
             state_copy.apply_action(action)

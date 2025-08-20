@@ -4,7 +4,6 @@
 import torch as th
 
 from rlgammon.models.base_model import BaseModel
-from rlgammon.models.model_errors.model_errors import EligibilityTracesNotInitializedError
 from rlgammon.models.model_types import ActivationList, LayerList
 from rlgammon.rlgammon_types import Feature
 
@@ -30,7 +29,6 @@ class TDModel(BaseModel):
         super().__init__(lr, layer_list, activation_list, seed, dtype)
         self.gamma = gamma
         self.lamda = lamda
-        self.initialized = False
         self.eligibility_traces = None
 
     def forward(self, x: Feature) -> th.Tensor:
@@ -47,7 +45,6 @@ class TDModel(BaseModel):
         """Initialize the eligibility traces."""
         self.eligibility_traces = [th.zeros(weights.shape, dtype=th.float64, requires_grad=False)
                                     for weights in list(self.parameters())]
-        self.initialized = True
 
     def update_weights(self, p: th.Tensor, p_next: th.Tensor | int) -> float:
         """
@@ -57,10 +54,6 @@ class TDModel(BaseModel):
         :param p_next: model evaluation for the next state or if terminal state, the final reward
         :return: loss encountered in the update
         """
-        # Raise an error if training is attempted without prior initialization of eligibility traces
-        if not self.initialized:
-            raise EligibilityTracesNotInitializedError
-
         # reset the gradients
         self.zero_grad()
         # compute the derivative of p w.r.t. the parameters
@@ -81,5 +74,6 @@ class TDModel(BaseModel):
 
         if (self.lr_step_current_counter + 1) % self.lr_step_count == 0:
             self.lr_scheduler.step()
+            self.lr = self.lr_scheduler.get_lr()[0]
         self.lr_step_current_counter += 1
         return td_error
