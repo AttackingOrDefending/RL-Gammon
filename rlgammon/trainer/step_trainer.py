@@ -21,6 +21,8 @@ class StepTrainer(BaseTrainer):
         """Construct the trainer by initializing its parameters in the BaseTrainer class."""
         super().__init__()
 
+    # def generate_step_data(self, game: pyspiel.Game, agent: TrainableAgent) -> StepObservation:
+
     def train(self, agent: TrainableAgent) -> None:
         """
         Train the provided agent with the parameters provided at the Trainer constructor.
@@ -53,7 +55,7 @@ class StepTrainer(BaseTrainer):
                 p = agent.evaluate_position(features)
                 legal_actions = state.legal_actions()
 
-                action = (explorer.explore(legal_actions)
+                action, action_info = (explorer.explore(legal_actions)
                     if explorer.should_explore() else agent.choose_move(legal_actions, state))
                 state.apply_action(action)
 

@@ -2,7 +2,7 @@
 
 from abc import abstractmethod
 
-from rlgammon.rlgammon_types import ActionGNU, ActionSetGNU
+from rlgammon.rlgammon_types import ActionInfoTuple, ActionSetGNU
 
 
 class BaseExploration:
@@ -18,7 +18,7 @@ class BaseExploration:
         raise NotImplementedError
 
     @abstractmethod
-    def explore(self, actions: list[int] | ActionSetGNU) -> int | ActionGNU:
+    def explore(self, actions: list[int] | ActionSetGNU) -> ActionInfoTuple:
         """
         Method to conduct exploration.
 

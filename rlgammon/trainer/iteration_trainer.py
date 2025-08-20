@@ -1,5 +1,6 @@
 """Construct the trainer by initializing its parameters in the BaseTrainer class."""
 import uuid
+from pyexpat import features
 
 import numpy as np
 import pyspiel
@@ -42,7 +43,7 @@ class IterationTrainer(BaseTrainer):
             features = state.observation_tensor(WHITE)[:198]
             legal_actions = state.legal_actions()
 
-            action = explorer.explore(legal_actions) \
+            action, action_info = explorer.explore(legal_actions) \
                 if explorer.should_explore() else agent.choose_move(legal_actions, state)
 
             state.apply_action(action)
@@ -57,7 +58,7 @@ class IterationTrainer(BaseTrainer):
 
                 # Remove the last 2 elements, which are the dice. Always from white perspective.
                 next_features = state.observation_tensor(WHITE)[:198]
-            episode_data.append((features, next_features, reward, state.is_terminal(), action))
+            episode_data.append((features, next_features, reward, state.is_terminal(), action, action_info))
         return episode_data
 
     def train(self, agent: TrainableAgent) -> None:
@@ -73,6 +74,14 @@ class IterationTrainer(BaseTrainer):
         testing = self.create_testing_from_parameters()
         logger = self.create_logger_from_parameters(session_id)
 
-
         for iteration in range(self.parameters["iterations"]):
             episode_data = self.generate_episode_data(agent)
+            features = [episode_data[i][0] for i in range(len(episode_data))]
+            reward = [episode_data[i][2] for i in range(len(episode_data))]
+            action_info = [episode_data[i][5] for i in range(len(episode_data))]
+
+            out = [agent.evaluate_position(feature) for feature in features]
+            actor_pred_probs = [out[i][0] for i in range(len(out))]
+            critic_pred_values = [out[i][1] for i in range(len(out))]
+
+            _ = agent.train(action_info, actor_pred_probs, reward, critic_pred_values)

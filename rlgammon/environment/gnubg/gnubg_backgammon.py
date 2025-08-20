@@ -257,7 +257,7 @@ def evaluate_vs_gnubg(agent, env, n_episodes):
                 roll = env.gnubg.roll
 
             actions = env.get_valid_actions(roll)
-            action = agent.choose_move(actions, env)
+            action, action_info = agent.choose_move(actions, env)
 
             observation_next, reward, done, info = env.step(action)
 

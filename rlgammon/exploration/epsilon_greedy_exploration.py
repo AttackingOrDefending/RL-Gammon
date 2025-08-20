@@ -3,7 +3,7 @@
 import random
 
 from rlgammon.exploration.base_exploration import BaseExploration
-from rlgammon.rlgammon_types import ActionGNU, ActionSetGNU
+from rlgammon.rlgammon_types import ActionInfoTuple, ActionSetGNU
 
 
 class EpsilonGreedyExploration(BaseExploration):
@@ -36,14 +36,14 @@ class EpsilonGreedyExploration(BaseExploration):
         """
         return random.random() > self.current_epsilon
 
-    def explore(self, actions: list[int] | ActionSetGNU) -> int | ActionGNU:
+    def explore(self, actions: list[int] | ActionSetGNU) -> ActionInfoTuple:
         """
         Explore the environment by choosing a random action with a probability equal to the current value of epsilon.
 
         :param actions: all valid actions from the current state
-        :return: the final action to execute
+        :return: the final action to execute. No action info
         """
-        return random.choice(actions)
+        return random.choice(actions), None
 
     def update(self) -> None:
         """

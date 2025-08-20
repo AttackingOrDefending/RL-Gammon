@@ -12,7 +12,7 @@ from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.environment import BackgammonEnv  # type: ignore[attr-defined]
 from rlgammon.models.model_types import ActivationList, LayerList
 from rlgammon.models.td_model import TDModel
-from rlgammon.rlgammon_types import INF, NEG_INF, WHITE, ActionGNU, ActionSetGNU, Feature
+from rlgammon.rlgammon_types import INF, NEG_INF, WHITE, ActionInfoTuple, ActionSetGNU, Feature
 from utils.utils import copy
 
 
@@ -73,13 +73,13 @@ class TDAgent(TrainableAgent):
         return self.model.update_weights(p, p_next)
 
     def choose_move(self, actions: list[int] | ActionSetGNU,
-                    state: pyspiel.BackgammonState | BackgammonEnv) -> int | ActionGNU:
+                    state: pyspiel.BackgammonState | BackgammonEnv) -> ActionInfoTuple:
         """
         Chooses a move to make given the current board and dice roll, which goes to the state with maximal value.
 
         :param actions: set of all possible actions to choose from.
         :param state: the current state of the game.
-        :return: the chosen move to make.
+        :return: the chosen move to make. No action info
         """
         best_action = None
         color = state.current_player()
@@ -105,7 +105,7 @@ class TDAgent(TrainableAgent):
             elif reward < best_value:
                 best_value = reward
                 best_action = action
-        return best_action
+        return best_action, None
 
     def save(self, training_session_id: UUID, session_save_count: int, main_filename: str = "td-backgammon") -> None:
         """

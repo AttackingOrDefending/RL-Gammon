@@ -1,5 +1,6 @@
 """TODO."""
 import pathlib
+from typing import Any
 from uuid import UUID
 
 import numpy as np
@@ -38,11 +39,18 @@ class AlphaZeroAgent(TrainableAgent):
     def evaluate_position(self, state: Feature, decay: bool = False) -> th.Tensor:
         """TODO."""
         policy, value = self.model(state)
-        return value * self.gamma if decay else self.model(state)
+        # TODO CHANGE the ", policy"!!!
+        return value * self.gamma if decay else self.model(state), policy
 
-
-    def train(self, p: th.Tensor, p_next: th.Tensor) -> float:
+    def position_policy(self, state: Feature) -> th.Tensor:
         """TODO."""
+        policy, _ = self.model(state)
+        return policy
+
+    def train(self, mcts_probs: [th.Tensor], actor_pred_probs: [th.Tensor],
+                       reward_batch: [th.Tensor], critic_pred_values: [th.Tensor]) -> float:
+        """TODO."""
+        self.model.update_weights(mcts_probs, actor_pred_probs, reward_batch, critic_pred_values)
 
     def save(self, training_session_id: UUID, session_save_count: int, main_filename: str = "alpha-zero-backgammon") -> None:
         """
@@ -84,7 +92,7 @@ class AlphaZeroAgent(TrainableAgent):
         self.setup = True
 
     def choose_move(self, actions: list[int] | ActionSetGNU,
-                    state: pyspiel.BackgammonState | BackgammonEnv) -> int | ActionGNU:
+                    state: pyspiel.BackgammonState | BackgammonEnv) -> tuple[int | ActionGNU, Any]:
         """TODO."""
         if not self.setup:
             raise AlphaZeroNotSetupError
@@ -96,4 +104,4 @@ class AlphaZeroAgent(TrainableAgent):
         policy = policy ** (1 / self.temperature)
         policy /= policy.sum()
 
-        return np.random.choice(self.game.num_distinct_actions(), p=policy)
+        return np.random.choice(self.game.num_distinct_actions(), p=policy), policy

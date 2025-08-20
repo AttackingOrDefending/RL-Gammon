@@ -4,21 +4,21 @@ from abc import abstractmethod
 import numpy as np
 from numpy.typing import NDArray
 
-from rlgammon.models.base_model import BaseModel
-from rlgammon.models.model_types import ActivationList, LayerList, MCTSOutput
+from rlgammon.models.actor_critic_model import ActorCriticModel
+from rlgammon.models.model_types import ActivationList, ActorCriticOutput, LayerList
 from rlgammon.rlgammon_types import Feature
 
 
-class MCTSModel(BaseModel):
+class MCTSModel(ActorCriticModel):
     """TODO."""
 
-    def __init__(self, lr: float, layer_list: LayerList, activation_list: ActivationList,
+    def __init__(self, lr: float, base_layer_list: LayerList, base_activation_list: ActivationList,
+                 policy_layer_list: LayerList, policy_activation_list: ActivationList,
+                 value_layer_list: LayerList, value_activation_list: ActivationList,
                  seed: int=123, dtype: str = "float32") -> None:
         """TODO."""
-        super().__init__(lr, layer_list, activation_list, seed, dtype)
-
-    def forward(self, x: Feature) -> MCTSOutput:
-        pass
+        super().__init__(lr, base_layer_list, base_activation_list, policy_layer_list, policy_activation_list,
+                         value_layer_list, value_activation_list, seed, dtype)
 
     @abstractmethod
     def inference(self, state: Feature, mask: NDArray[np.bool]) -> tuple[NDArray[np.float32], NDArray[np.float32]]:

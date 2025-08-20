@@ -7,14 +7,18 @@ from rlgammon.models.mcts_model import MCTSModel
 from rlgammon.models.model_types import ActivationList, LayerList
 from rlgammon.rlgammon_types import Feature
 
+# TODO FIX INPUT TO TRAINING BETWEEN ALPHA ZERO AND TD AGENTS!!!
 
 class AlphaZeroModel(MCTSModel):
     """TODO."""
 
-    def __init__(self, lr: float, layer_list: LayerList, activation_list: ActivationList,
+    def __init__(self, lr: float, base_layer_list: LayerList, base_activation_list: ActivationList,
+                 policy_layer_list: LayerList, policy_activation_list: ActivationList,
+                 value_layer_list: LayerList, value_activation_list: ActivationList,
                  seed: int=123, dtype: str = "float32") -> None:
         """TODO."""
-        super().__init__(lr, layer_list, activation_list, seed, dtype)
+        super().__init__(lr, base_layer_list, base_activation_list, policy_layer_list, policy_activation_list,
+                         value_layer_list, value_activation_list, seed, dtype)
 
     def inference(self, state: Feature, mask: NDArray[np.bool]) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
         """TODO."""
@@ -26,16 +30,15 @@ class AlphaZeroModel(MCTSModel):
         policy_np /= np.sum(policy)
         return value_np, policy_np
 
-    def update_weights(self, p: th.Tensor, p_next: th.Tensor | int) -> float:
+    def update_weights(self, mcts_probs: [th.Tensor], actor_pred_probs: [th.Tensor],
+                       reward_batch: [th.Tensor], critic_pred_values: [th.Tensor]) -> float:
         """TODO."""
         # reset the gradients
         self.zero_grad()
-        # compute the derivative of p w.r.t. the parameters
-        p.backward()
 
         with th.no_grad():
-            actor_loss = th.nn.CrossEntropyLoss(action_probs_batch, actor_probs)
-            critic_loss = th.nn.MSELoss(reward_batch, critic_value)
+            actor_loss = th.nn.CrossEntropyLoss(mcts_probs, actor_pred_probs)
+            critic_loss = th.nn.MSELoss(reward_batch, critic_pred_values)
             loss = actor_loss + critic_loss
             loss.backward()
             self.optimizer.step()

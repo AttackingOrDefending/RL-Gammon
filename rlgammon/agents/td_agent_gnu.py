@@ -8,7 +8,7 @@ from rlgammon.agents.td_agent import TDAgent
 from rlgammon.environment.backgammon_env import BackgammonEnv  # type: ignore[attr-defined]
 from rlgammon.environment.gnubg.gnubg_backgammon import GnubgInterface, gnubgState  # type: ignore[attr-defined]
 from rlgammon.models.model_types import ActivationList, LayerList
-from rlgammon.rlgammon_types import BLACK, WHITE, ActionGNU, ActionSetGNU
+from rlgammon.rlgammon_types import BLACK, WHITE, ActionInfoTuple, ActionSetGNU
 
 
 class TDAgentGnu(TDAgent, GNUAgent):
@@ -44,14 +44,14 @@ class TDAgentGnu(TDAgent, GNUAgent):
         gnubg = self.gnubg_interface.send_command("roll")
         return self.handle_opponent_move(gnubg)
 
-    def choose_move(self, actions: ActionSetGNU, state: BackgammonEnv) -> int | ActionGNU:
+    def choose_move(self, actions: ActionSetGNU, state: BackgammonEnv) -> ActionInfoTuple:
         """
         Chooses a move to make given the current board and dice roll,
         which goes to the state with maximal value, when playing against a GNU agent.
 
         :param actions: set of all possible actions to choose from.
         :param state: the current environment (and it's associated state)
-        :return: the chosen move to make.
+        :return: the chosen move to make. No action info
         """
         best_action = None
         color = state.current_player()
@@ -74,7 +74,7 @@ class TDAgentGnu(TDAgent, GNUAgent):
             )
             best_action = list(actions)[best_action_index]
 
-        return best_action
+        return best_action, None
 
     def handle_opponent_move(self, gnubg: gnubgState) -> gnubgState:
         """

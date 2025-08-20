@@ -2,6 +2,7 @@
 
 from abc import abstractmethod
 import random
+from typing import Any
 
 import numpy as np
 import pyspiel  # type: ignore[import-not-found]
@@ -9,7 +10,7 @@ from pyspiel import BackgammonState
 
 from rlgammon.environment.backgammon_env import BackgammonEnv  # type: ignore[attr-defined]
 from rlgammon.environment.gnubg.gnubg_backgammon import gnubgState  # type: ignore[attr-defined]
-from rlgammon.rlgammon_types import BLACK, MAX_DICE, MIN_DICE, WHITE, ActionGNU, ActionSetGNU
+from rlgammon.rlgammon_types import BLACK, MAX_DICE, MIN_DICE, WHITE, ActionGNU, ActionSetGNU, ActionInfoTuple
 
 
 class BaseAgent:
@@ -30,13 +31,13 @@ class BaseAgent:
 
     @abstractmethod
     def choose_move(self, actions: list[int] | ActionSetGNU,
-                    state: pyspiel.BackgammonState | BackgammonEnv) -> int | ActionGNU:
+                    state: pyspiel.BackgammonState | BackgammonEnv) -> ActionInfoTuple:
         """
         Chooses a move to make given the current board and dice roll.
 
         :param actions: set of all possible actions to choose from.
         :param state: the current state of the game or environment with the current state if GNU
-        :return: the chosen move to make.
+        :return: the chosen move to make and optionally extra info about the move choice.
         """
         raise NotImplementedError
 

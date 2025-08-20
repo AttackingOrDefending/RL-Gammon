@@ -1,6 +1,7 @@
 """Type aliases for rl-gammon package."""
 
 from enum import Enum
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -19,6 +20,8 @@ ActionGNU = tuple[tuple[int, int], ...]
 ActionSetGNU = list[int]
 StateGNU = NDArray[np.float32]
 ActionPolicyList = list[tuple[int, float]]
+
+ActionInfoTuple = tuple[int | ActionGNU, Any]
 
 # Open Spiel
 Feature = list[float]

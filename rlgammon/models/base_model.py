@@ -9,6 +9,7 @@ from torch import nn
 from rlgammon.models.model_types import ActivationList, BaseOutput, LayerList
 from rlgammon.rlgammon_types import Feature
 
+# TODO FIND A WAY TO INCORPORATE VALUE AND POLICY HEAD INTO THIS MODEL
 
 class BaseModel(nn.Module):
     """Class defining the interface of all models or implementing their common functionalities."""
@@ -72,7 +73,8 @@ class BaseModel(nn.Module):
             x = self.activation_list[i](x)
         return x  # type: ignore[return-value]
 
-    @abstractmethod
+    """TODO CHECK WHETHER TO REMOVE"""
+    # @abstractmethod
     def update_weights(self, p: th.Tensor, p_next: th.Tensor | int) -> float:
         """
         Update the weights of the model from the provided state-values.
