@@ -8,6 +8,7 @@ from rlgammon.models.model_types import ActivationList, LayerList
 from rlgammon.rlgammon_types import Feature
 
 # TODO FIX INPUT TO TRAINING BETWEEN ALPHA ZERO AND TD AGENTS!!!
+# TODO FIX LIST NO TENSOR PASSED TO MODELS ... -> CHANGE HINTS !!!
 
 class AlphaZeroModel(MCTSModel):
     """TODO."""
@@ -30,19 +31,22 @@ class AlphaZeroModel(MCTSModel):
         policy_np /= np.sum(policy)
         return value_np, policy_np
 
-    def update_weights(self, mcts_probs: [th.Tensor], actor_pred_probs: [th.Tensor],
-                       reward_batch: [th.Tensor], critic_pred_values: [th.Tensor]) -> float:
+    def update_weights(self, mcts_probs: list[th.Tensor], actor_pred_probs: list[th.Tensor],
+                       reward_batch: list[th.Tensor], critic_pred_values: list[th.Tensor]) -> float:
         """TODO."""
         # reset the gradients
         self.zero_grad()
 
         with th.no_grad():
-            actor_loss = th.nn.CrossEntropyLoss(mcts_probs, actor_pred_probs)
-            critic_loss = th.nn.MSELoss(reward_batch, critic_pred_values)
+            actor_loss = th.nn.CrossEntropyLoss()(mcts_probs, actor_pred_probs)
+            critic_loss = th.nn.MSELoss()(reward_batch, critic_pred_values)
             loss = actor_loss + critic_loss
             loss.backward()
+
             self.optimizer.step()
+            self.optimizer.zero_grad()
 
         if (self.lr_step_current_counter + 1) % self.lr_step_count == 0:
             self.lr_scheduler.step()
         self.lr_step_current_counter += 1
+        return loss.item()

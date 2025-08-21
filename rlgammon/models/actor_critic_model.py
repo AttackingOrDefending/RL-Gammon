@@ -1,8 +1,9 @@
 """TODO."""
 import torch as th
 
-from rlgammon.models.base_model import BaseModel
 from rlgammon.models.model_types import ActivationList, ActorCriticOutput, LayerList
+from rlgammon.models.raw_model import RawModel
+from rlgammon.rlgammon_types import Feature
 
 
 class ActorCriticModel(th.nn.Module):
@@ -14,11 +15,19 @@ class ActorCriticModel(th.nn.Module):
                  seed: int=123, dtype: str = "float32") -> None:
         """TODO."""
         super().__init__()
-        self.base = BaseModel(lr, base_layer_list, base_activation_list, seed, dtype)
-        self.policy_head = BaseModel(lr, policy_layer_list, policy_activation_list, seed, dtype)
-        self.value_head = BaseModel(lr, value_layer_list, value_activation_list, seed, dtype)
+        self.base = RawModel(base_layer_list, base_activation_list)
+        self.policy_head = RawModel(policy_layer_list, policy_activation_list)
+        self.value_head = RawModel(value_layer_list, value_activation_list)
 
-    def forward(self, state: th.Tensor) -> ActorCriticOutput:
+        self.lr = lr
+        self.lr_step_count = 100
+        self.lr_step_current_counter = 0
+        self.decay_rate = 0.96
+
+        self.optimizer = th.optim.Adam(params=list(self.parameters()), lr=self.lr)
+        self.lr_scheduler = th.optim.lr_scheduler.ExponentialLR(optimizer=self.optimizer, gamma=self.decay_rate)
+
+    def forward(self, state: Feature | th.Tensor) -> ActorCriticOutput:
         """TODO."""
         x = self.base(state)
         p = self.policy_head(x)

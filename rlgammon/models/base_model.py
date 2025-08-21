@@ -7,6 +7,7 @@ import torch as th
 from torch import nn
 
 from rlgammon.models.model_types import ActivationList, BaseOutput, LayerList
+from rlgammon.models.raw_model import RawModel
 from rlgammon.rlgammon_types import Feature
 
 # TODO FIND A WAY TO INCORPORATE VALUE AND POLICY HEAD INTO THIS MODEL
@@ -30,19 +31,15 @@ class BaseModel(nn.Module):
         super().__init__()
 
         # Set the layers and activation functions of the model
-        self.activation_list = activation_list
-        self.linears = nn.ModuleList(layer_list)
-        self.num_layers = len(layer_list) if layer_list else 0
-        self.num_activations = len(activation_list) if activation_list else 0
+        self.model = RawModel(layer_list, activation_list)
 
         self.lr = lr
         self.lr_step_count = 100
         self.lr_step_current_counter = 0
         self.decay_rate = 0.96
 
-        self.optimizer = th.optim.Adam(params=list(self.parameters()), lr=self.lr) if self.num_layers != 0 else None
-        self.lr_scheduler = th.optim.lr_scheduler.ExponentialLR(
-            optimizer=self.optimizer, gamma=self.decay_rate) if self.num_layers != 0 else None  # type: ignore[arg-type]
+        self.optimizer = th.optim.Adam(params=list(self.parameters()), lr=self.lr)
+        self.lr_scheduler = th.optim.lr_scheduler.ExponentialLR(optimizer=self.optimizer, gamma=self.decay_rate)
 
         # Set the data type of the models
         self.np_type = np.float32
@@ -57,24 +54,17 @@ class BaseModel(nn.Module):
         th.manual_seed(seed)
         random.seed(seed)
 
-    def forward(self, x: Feature) -> BaseOutput:
+    def forward(self, x: Feature | th.Tensor) -> BaseOutput:
         """
         Make a forward pass through the model with the given data as input.
 
         :param x: input to the model
         :return: model output
         """
-        x = th.from_numpy(np.array(x, dtype=self.np_type))  # type: ignore[assignment]
-        for i, layer in enumerate(self.linears):
-            x = layer(x)
-            if i < self.num_activations:
-                x = self.activation_list[i](x)
-        for i in range(self.num_layers, self.num_activations):
-            x = self.activation_list[i](x)
-        return x  # type: ignore[return-value]
+        x = th.FloatTensor(x)
+        return self.model(x)  # type: ignore[no-any-return]
 
-    """TODO CHECK WHETHER TO REMOVE"""
-    # @abstractmethod
+    @abstractmethod
     def update_weights(self, p: th.Tensor, p_next: th.Tensor | int) -> float:
         """
         Update the weights of the model from the provided state-values.

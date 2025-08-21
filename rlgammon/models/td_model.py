@@ -66,14 +66,20 @@ class TDModel(BaseModel):
             parameters = list(self.parameters())
 
             for i, weights in enumerate(parameters):
+                print(weights.grad)
+
                 # z <- gamma * lambda * z + (grad w w.r.t P_t)
+
                 self.eligibility_traces[i] = self.gamma * self.lamda * self.eligibility_traces[i] + weights.grad
                 # w <- w + alpha * td_error * z
                 new_weights = weights + self.lr * td_error * self.eligibility_traces[i]
                 weights.copy_(new_weights)
 
+        self.optimizer.step()
+        self.optimizer.zero_grad()
+
         if (self.lr_step_current_counter + 1) % self.lr_step_count == 0:
             self.lr_scheduler.step()
-            self.lr = self.lr_scheduler.get_lr()[0]
+            self.lr = self.lr_scheduler.get_last_lr()[0]
         self.lr_step_current_counter += 1
         return td_error
