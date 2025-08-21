@@ -11,8 +11,7 @@ class ActorCriticModel(th.nn.Module):
 
     def __init__(self, lr: float, base_layer_list: LayerList, base_activation_list: ActivationList,
                  policy_layer_list: LayerList, policy_activation_list: ActivationList,
-                 value_layer_list: LayerList, value_activation_list: ActivationList,
-                 seed: int=123, dtype: str = "float32") -> None:
+                 value_layer_list: LayerList, value_activation_list: ActivationList) -> None:
         """TODO."""
         super().__init__()
         self.base = RawModel(base_layer_list, base_activation_list)

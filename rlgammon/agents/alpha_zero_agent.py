@@ -47,8 +47,8 @@ class AlphaZeroAgent(TrainableAgent):
         policy, _ = self.model(state)
         return policy
 
-    def train(self, mcts_probs: [th.Tensor], actor_pred_probs: [th.Tensor],
-                       reward_batch: [th.Tensor], critic_pred_values: [th.Tensor]) -> float:
+    def train(self, mcts_probs: list[th.Tensor], actor_pred_probs: list[th.Tensor],
+                       reward_batch: list[th.Tensor], critic_pred_values: list[th.Tensor]) -> float:
         """TODO."""
         self.model.update_weights(mcts_probs, actor_pred_probs, reward_batch, critic_pred_values)
 

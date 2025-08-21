@@ -15,8 +15,8 @@ class TDAgentGnu(TDAgent, GNUAgent):
     """Class implementing agent trained with td-learning and capable of playing against a gnubg agent."""
 
     def __init__(self, gnubg_interface: GnubgInterface, pre_made_model_file_name: str | None = None, lr: float = 0.01,
-                 gamma: float = 0.99, lamda: float = 0.99, seed: int = 123, color: int = WHITE,
-                 layer_list: LayerList =  None, activation_list: ActivationList = None, dtype: str = "float32") -> None:
+                 gamma: float = 0.99, lamda: float = 0.99, color: int = WHITE,
+                 layer_list: LayerList =  None, activation_list: ActivationList = None) -> None:
         """
         Construct the td-gnu agent by creating a td agent with the given parameters, and
         storing the provided the gnubg interface to use when playing against gnubg.
@@ -26,13 +26,11 @@ class TDAgentGnu(TDAgent, GNUAgent):
         :param lr: learning rate
         :param gamma: future reward discount
         :param lamda: trace decay parameters (how much to value distant states)
-        :param seed: seed for random number generator of torch and the python random package
         :param color: 0 or 1 representing which player the agent controls
         :param layer_list: list of layers to use
         :param activation_list: list of activation functions to use
-        :param dtype: the data type of the model
         """
-        super().__init__(pre_made_model_file_name, lr, gamma, lamda, seed, color, layer_list, activation_list, dtype)
+        super().__init__(pre_made_model_file_name, lr, gamma, lamda, color, layer_list, activation_list)
         self.gnubg_interface = gnubg_interface
 
     def roll_dice_gnu(self) -> tuple[int, int] | gnubgState:

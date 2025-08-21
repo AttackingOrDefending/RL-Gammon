@@ -6,6 +6,22 @@ from rlgammon.trainer.step_trainer import StepTrainer
 
 # TODO Adjust MCTS float data types based on the accuracy used in the model (float32 / float64)
 
+"""
+        # Set the data type of the models
+        self.np_type = np.float32
+        th.set_default_dtype(th.float32)
+        self.float()
+        if dtype == "float64":
+            self.np_type = np.float64  # type: ignore[assignment]
+            th.set_default_dtype(th.float64)
+            self.double()
+
+        # Set seed of the random number generators
+        th.manual_seed(seed)
+        random.seed(seed)
+
+"""
+
 if __name__ == "__main__":
     agent = TDAgent(
         layer_list=[

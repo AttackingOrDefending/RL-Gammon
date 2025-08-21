@@ -15,8 +15,7 @@ from rlgammon.rlgammon_types import Feature
 class BaseModel(nn.Module):
     """Class defining the interface of all models or implementing their common functionalities."""
 
-    def __init__(self, lr: float, layer_list: LayerList, activation_list: ActivationList,
-                 seed: int=123, dtype: str = "float32") -> None:
+    def __init__(self, lr: float, layer_list: LayerList, activation_list: ActivationList) -> None:
         """
         Construct a base torch model with the provided set of layers and activation functions, and
         parameters.
@@ -25,8 +24,6 @@ class BaseModel(nn.Module):
         :param lr: learning rate of a model
         :param layer_list: list of layers to use
         :param activation_list: list of activation functions to use
-        :param seed: seed for random number generator of torch and the python random package
-        :param dtype: the data type of the model
         """
         super().__init__()
 
@@ -40,19 +37,6 @@ class BaseModel(nn.Module):
 
         self.optimizer = th.optim.Adam(params=list(self.parameters()), lr=self.lr)
         self.lr_scheduler = th.optim.lr_scheduler.ExponentialLR(optimizer=self.optimizer, gamma=self.decay_rate)
-
-        # Set the data type of the models
-        self.np_type = np.float32
-        th.set_default_dtype(th.float32)
-        self.float()
-        if dtype == "float64":
-            self.np_type = np.float64  # type: ignore[assignment]
-            th.set_default_dtype(th.float64)
-            self.double()
-
-        # Set seed of the random number generators
-        th.manual_seed(seed)
-        random.seed(seed)
 
     def forward(self, x: Feature | th.Tensor) -> BaseOutput:
         """

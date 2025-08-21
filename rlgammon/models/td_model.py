@@ -11,8 +11,7 @@ from rlgammon.rlgammon_types import Feature
 class TDModel(BaseModel):
     """Class implementing a TD model used in td training."""
 
-    def __init__(self, lr: float, gamma: float, lamda: float, layer_list: LayerList, activation_list: ActivationList,
-                 seed: int=123, dtype: str = "float32") -> None:
+    def __init__(self, lr: float, gamma: float, lamda: float, layer_list: LayerList, activation_list: ActivationList) -> None:
         """
         Construct a td model by first constructing a base torch model,
         and then initializing td specific parameters.
@@ -23,10 +22,8 @@ class TDModel(BaseModel):
         :param lamda: trace decay parameters (how much to value distant states)
         :param layer_list: list of layers to use
         :param activation_list: list of activation functions to use
-        :param seed: seed for random number generator of torch and the python random package
-        :param dtype: the data type of the model
         """
-        super().__init__(lr, layer_list, activation_list, seed, dtype)
+        super().__init__(lr, layer_list, activation_list)
         self.gamma = gamma
         self.lamda = lamda
         self.eligibility_traces = None
@@ -69,7 +66,6 @@ class TDModel(BaseModel):
                 print(weights.grad)
 
                 # z <- gamma * lambda * z + (grad w w.r.t P_t)
-
                 self.eligibility_traces[i] = self.gamma * self.lamda * self.eligibility_traces[i] + weights.grad
                 # w <- w + alpha * td_error * z
                 new_weights = weights + self.lr * td_error * self.eligibility_traces[i]

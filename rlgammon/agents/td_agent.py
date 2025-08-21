@@ -20,8 +20,8 @@ class TDAgent(TrainableAgent):
     """Class implementing an agent trained with td."""
 
     def __init__(self, pre_made_model_file_name: str | None = None, lr: float = 0.01,
-                 gamma: float = 0.99, lamda: float = 0.99, seed: int = 123, color: int = WHITE,
-                 layer_list: LayerList = None, activation_list: ActivationList = None, dtype: str = "float32") -> None:
+                 gamma: float = 0.99, lamda: float = 0.99, color: int = WHITE,
+                 layer_list: LayerList = None, activation_list: ActivationList = None) -> None:
         """
         Construct a td-agent by first loading a model or creating a new one with the given layers and activations,
         and the initializing various parameters used in td learning.
@@ -30,15 +30,13 @@ class TDAgent(TrainableAgent):
         :param lr: learning rate
         :param gamma: future reward discount
         :param lamda: trace decay parameters (how much to value distant states)
-        :param seed: seed for random number generator of torch and the python random package
         :param color: 0 or 1 representing which player the agent controls
         :param layer_list: list of layers to use
         :param activation_list: list of activation functions to use
-        :param dtype: the data type of the model
         """
         super().__init__(color)
         self.model =  self.load(pre_made_model_file_name) \
-            if pre_made_model_file_name else TDModel(lr, gamma, lamda, layer_list, activation_list, seed, dtype)
+            if pre_made_model_file_name else TDModel(lr, gamma, lamda, layer_list, activation_list)
         self.setup = False
         self.gamma = gamma
 

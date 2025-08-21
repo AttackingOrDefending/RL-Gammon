@@ -2,7 +2,6 @@
 
 from abc import abstractmethod
 import random
-from typing import Any
 
 import numpy as np
 import pyspiel  # type: ignore[import-not-found]
@@ -10,7 +9,7 @@ from pyspiel import BackgammonState
 
 from rlgammon.environment.backgammon_env import BackgammonEnv  # type: ignore[attr-defined]
 from rlgammon.environment.gnubg.gnubg_backgammon import gnubgState  # type: ignore[attr-defined]
-from rlgammon.rlgammon_types import BLACK, MAX_DICE, MIN_DICE, WHITE, ActionGNU, ActionSetGNU, ActionInfoTuple
+from rlgammon.rlgammon_types import BLACK, MAX_DICE, MIN_DICE, WHITE, ActionInfoTuple, ActionSetGNU
 
 
 class BaseAgent:
