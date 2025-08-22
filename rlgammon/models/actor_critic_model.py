@@ -26,9 +26,11 @@ class ActorCriticModel(th.nn.Module):
         self.optimizer = th.optim.Adam(params=list(self.parameters()), lr=self.lr)
         self.lr_scheduler = th.optim.lr_scheduler.ExponentialLR(optimizer=self.optimizer, gamma=self.decay_rate)
 
-    def forward(self, state: Feature | th.Tensor) -> ActorCriticOutput:
+    def forward(self, x: Feature | th.Tensor) -> ActorCriticOutput:
         """TODO."""
-        x = self.base(state)
-        p = self.policy_head(x)
-        v = self.value_head(x)
-        return p, v
+        # Process state - mcts gives one element list of raw observations (len = 200) from environment
+        # Need the observation of len = 198 -> no dice
+        base = self.base(x)
+        p = self.policy_head(base)
+        v = self.value_head(base)
+        return v, p

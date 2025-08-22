@@ -25,9 +25,8 @@ class AlphaZeroModel(MCTSModel):
         value, policy = self.forward(state)
         value_np = value.detach().numpy()
         policy_np = policy.detach().numpy()
-
-        policy_np[mask == 0] = 0
-        policy_np /= np.sum(policy)
+        policy_np[mask == 0] = 0  # need to get first element, as 2d array is provided as mask
+        policy_np /= np.sum(policy_np)
         return value_np, policy_np
 
     def update_weights(self, mcts_probs: list[th.Tensor], actor_pred_probs: list[th.Tensor],

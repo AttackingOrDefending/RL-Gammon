@@ -4,6 +4,7 @@ from pyexpat import features
 
 import numpy as np
 import pyspiel
+from tqdm import tqdm
 
 from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.rlgammon_types import WHITE, EpisodeObservation
@@ -45,7 +46,6 @@ class IterationTrainer(BaseTrainer):
 
             action, action_info = explorer.explore(legal_actions) \
                 if explorer.should_explore() else agent.choose_move(legal_actions, state)
-
             state.apply_action(action)
 
             if state.is_terminal():
@@ -74,7 +74,7 @@ class IterationTrainer(BaseTrainer):
         testing = self.create_testing_from_parameters()
         logger = self.create_logger_from_parameters(session_id)
 
-        for iteration in range(self.parameters["iterations"]):
+        for iteration in tqdm(range(self.parameters["iterations"]), desc="Training Iterations"):
             episode_data = self.generate_episode_data(agent)
             features = [episode_data[i][0] for i in range(len(episode_data))]
             reward = [episode_data[i][2] for i in range(len(episode_data))]

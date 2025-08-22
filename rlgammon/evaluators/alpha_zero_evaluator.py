@@ -5,22 +5,29 @@ from open_spiel.python.algorithms import mcts
 import pyspiel
 
 from rlgammon.models.alpha_zero_model import AlphaZeroModel
-from rlgammon.rlgammon_types import ActionPolicyList, Feature
+from rlgammon.models.model_errors.model_errors import ModelNotProvidedToEvaluatorError
+from rlgammon.rlgammon_types import WHITE, ActionPolicyList
 
 
 class AlphaZeroEvaluator(mcts.Evaluator):  # type: ignore[misc]
     """TODO."""
 
-    def __init__(self, game: pyspiel.Game, model: AlphaZeroModel) -> None:
+    def __init__(self, model: AlphaZeroModel | None = None) -> None:
         """TODO."""
+        self.model = model
+
+    def provide_model(self, model: AlphaZeroModel) -> None:
         self.model = model
 
     def inference(self, state: pyspiel.BackgammonState):
         """TODO."""
-        obs = np.expand_dims(state.observation_tensor(), 0)
-        mask = np.expand_dims(state.legal_actions_mask(), 0)
+        if self.model is None:
+            raise ModelNotProvidedToEvaluatorError
+
+        obs = state.observation_tensor(WHITE)[:198]
+        mask = state.legal_actions_mask()
         value, policy = self.model.inference(obs, mask)
-        return value[0, 0], policy[0]  # Unpack batch
+        return value, policy # Unpack batch
 
     def evaluate(self, state: pyspiel.BackgammonState) -> NDArray[np.float32]:
         """TODO."""

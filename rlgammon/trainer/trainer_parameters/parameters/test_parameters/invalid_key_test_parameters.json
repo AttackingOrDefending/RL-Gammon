@@ -16,5 +16,6 @@
   "load_logger": false,
   "logger_name": "",
   "invalid_key": false,
-  "save_progress": false
+  "save_progress": false,
+  "iterations": 10
 }

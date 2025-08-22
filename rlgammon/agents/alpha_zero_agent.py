@@ -22,8 +22,10 @@ class AlphaZeroAgent(TrainableAgent):
 
     def __init__(self, mcts_evaluator: AlphaZeroEvaluator, game: pyspiel.Game, uct_c: float,
                  max_simulations: int, temperature: float, pre_made_model_file_name: str | None = None,
-                 lr: float = 0.01, gamma: float = 0.99, lamda: float = 0.99, seed: int = 123, color: int = WHITE,
-                 layer_list: LayerList = None, activation_list: ActivationList = None, dtype: str = "float32") -> None:
+                 lr: float = 0.01, gamma: float = 0.99, color: int = WHITE,
+                 base_layer_list: LayerList = None, base_activation_list: ActivationList = None,
+                 policy_layer_list: LayerList = None, policy_activation_list: ActivationList = None,
+                 value_layer_list: LayerList = None, value_activation_list: ActivationList = None) -> None:
         """TODO."""
         super().__init__(color)
         self.mcts_evaluator = mcts_evaluator
@@ -34,7 +36,10 @@ class AlphaZeroAgent(TrainableAgent):
         self.mcts_bot = None
         self.setup = False
         self.gamma = gamma
-        self.model = self.load(pre_made_model_file_name) if pre_made_model_file_name else AlphaZeroModel()
+        self.model = self.load(pre_made_model_file_name) \
+            if pre_made_model_file_name else AlphaZeroModel(lr, base_layer_list, base_activation_list,
+                                                            policy_layer_list, policy_activation_list,
+                                                            value_layer_list, value_activation_list)
 
     def evaluate_position(self, state: Feature, decay: bool = False) -> th.Tensor:
         """TODO."""
@@ -48,7 +53,7 @@ class AlphaZeroAgent(TrainableAgent):
         return policy
 
     def train(self, mcts_probs: list[th.Tensor], actor_pred_probs: list[th.Tensor],
-                       reward_batch: list[th.Tensor], critic_pred_values: list[th.Tensor]) -> float:
+              reward_batch: list[th.Tensor], critic_pred_values: list[th.Tensor]) -> float:
         """TODO."""
         self.model.update_weights(mcts_probs, actor_pred_probs, reward_batch, critic_pred_values)
 
@@ -75,7 +80,7 @@ class AlphaZeroAgent(TrainableAgent):
         """
         agent_file_path = pathlib.Path(__file__).parent
         agent_file_path = agent_file_path.joinpath("saved_agents/")
-        return th.load(agent_file_path.joinpath(agent_main_filename), weights_only=False)
+        return th.load(agent_file_path.joinpath(agent_main_filename), weights_only=False)  # type: ignore[no-any-return]
 
     def get_model(self) -> th.nn.Module | None:
         """"

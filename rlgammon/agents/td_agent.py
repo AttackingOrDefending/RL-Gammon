@@ -91,7 +91,7 @@ class TDAgent(TrainableAgent):
             if not state_copy.is_terminal():
                 # Remove the last 2 elements, which are the dice. Always from white perspective.
                 features = state_copy.observation_tensor(WHITE)[:198]
-                q_values = self.model(th.tensor(features, dtype=th.float32))
+                q_values = self.model(features)
                 reward = q_values.item()
             else:
                 # If terminal state, use the actual reward (negative is black wins).

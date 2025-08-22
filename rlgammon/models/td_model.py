@@ -35,6 +35,7 @@ class TDModel(BaseModel):
         :param x: input to the model
         :return: output of the model
         """
+        print(len(x))
         x = super().forward(x)
         return x[0] * -3 + x[1] * -2 + x[2] * -1 + x[3] * 1 + x[4] * 2 + x[5] * 3
 
@@ -63,8 +64,6 @@ class TDModel(BaseModel):
             parameters = list(self.parameters())
 
             for i, weights in enumerate(parameters):
-                print(weights.grad)
-
                 # z <- gamma * lambda * z + (grad w w.r.t P_t)
                 self.eligibility_traces[i] = self.gamma * self.lamda * self.eligibility_traces[i] + weights.grad
                 # w <- w + alpha * td_error * z
