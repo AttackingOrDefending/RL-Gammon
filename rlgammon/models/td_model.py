@@ -59,8 +59,6 @@ class TDModel(BaseModel):
         with th.no_grad():
             td_error = p_next - p
 
-            print(p)
-
             # get the parameters of the model
             parameters = list(self.parameters())
 
