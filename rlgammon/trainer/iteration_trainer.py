@@ -1,13 +1,13 @@
 """Construct the trainer by initializing its parameters in the BaseTrainer class."""
 import uuid
-from pyexpat import features
 
 import numpy as np
 import pyspiel
 from tqdm import tqdm
 
 from rlgammon.agents.trainable_agent import TrainableAgent
-from rlgammon.rlgammon_types import WHITE, EpisodeObservation
+from rlgammon.buffers import BaseBuffer
+from rlgammon.rlgammon_types import WHITE
 from rlgammon.trainer.base_trainer import BaseTrainer
 
 
@@ -18,15 +18,12 @@ class IterationTrainer(BaseTrainer):
         """Construct the trainer by initializing its parameters in the BaseTrainer class."""
         super().__init__()
 
-    def generate_episode_data(self, agent: TrainableAgent) -> EpisodeObservation:
+    def generate_episode_data(self, buffer: BaseBuffer, agent: TrainableAgent) -> None:
         """
         TODO.
 
         :param agent:
-        :return:
         """
-        episode_data = []
-
         env = pyspiel.load_game("backgammon(scoring_type=full_scoring)")
         explorer = self.create_explorer_from_parameters()
 
@@ -41,12 +38,14 @@ class IterationTrainer(BaseTrainer):
         reward = 0
         while not state.is_terminal():
             # Remove the last 2 elements, which are the dice. Always from white perspective.
-            features = state.observation_tensor(WHITE)[:198]
+            features = np.array(state.observation_tensor(WHITE)[:198])
             legal_actions = state.legal_actions()
+            player = state.current_player()
 
             action, action_info = explorer.explore(legal_actions) \
                 if explorer.should_explore() else agent.choose_move(legal_actions, state)
             state.apply_action(action)
+            player_after = state.current_player()
 
             if state.is_terminal():
                 # Terminal state, use actual reward (negative is black wins).
@@ -57,9 +56,9 @@ class IterationTrainer(BaseTrainer):
                     agent.roll_dice(state)
 
                 # Remove the last 2 elements, which are the dice. Always from white perspective.
-                next_features = state.observation_tensor(WHITE)[:198]
-            episode_data.append((features, next_features, reward, state.is_terminal(), action, action_info))
-        return episode_data
+                next_features = np.array(state.observation_tensor(WHITE)[:198])
+
+            buffer.record(features, next_features, action, reward, state.is_terminal(), player, player_after, action_info)
 
     def train(self, agent: TrainableAgent) -> None:
         """
@@ -75,7 +74,14 @@ class IterationTrainer(BaseTrainer):
         logger = self.create_logger_from_parameters(session_id)
 
         for iteration in tqdm(range(self.parameters["iterations"]), desc="Training Iterations"):
-            episode_data = self.generate_episode_data(agent)
-            for feature, _, reward, _, action, action_info in episode_data:
-                v, p = agent.evaluate_position(feature)
-                _ = agent.train(action_info, p, reward, v)
+            self.generate_episode_data(buffer, agent)
+
+            batch = buffer.get_batch(batch_size=self.parameters["batch_size"])
+            for i in range(self.parameters["batch_size"]):
+                state = batch["state"][i]
+                reward = batch["reward"][i]
+                action_info = batch["action_info"][i]
+
+                v, p = agent.evaluate_position(state)
+                loss = agent.train(action_info, p, reward, v)
+                print("loss", loss)

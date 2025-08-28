@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import pickle
+from typing import Any
 from uuid import UUID
 
 import numpy as np
@@ -23,11 +24,9 @@ class UniformBuffer(BaseBuffer):
         :param capacity: the number of samples that can maximally be stored in the buffer
         """
         super().__init__(observation_shape, action_shape, capacity)
-        self.player_buffer = np.zeros(capacity, dtype=np.int8)
-        self.player_after_buffer = np.zeros(capacity, dtype=np.int8)
 
     def record(self, state: Input, next_state: Input, action: MovePart,
-               reward: float, done: bool, player: int, player_after: int) -> None:
+               reward: float, done: bool, player: int, player_after: int, action_info: Any) -> None:  # noqa: ANN401
         """
         Store the environment observation into the buffer.
 
@@ -38,6 +37,7 @@ class UniformBuffer(BaseBuffer):
         :param done: boolean indicating if the episode ended at the recorded step
         :param player: the player who made the action
         :param player_after: the player who is to player after the action
+        :param action_info: information about the action, e.g. for a0 mcts probabilities from search
         """
         current_index = self.update_counter % self.capacity
         self.state_buffer[current_index] = state
@@ -47,6 +47,7 @@ class UniformBuffer(BaseBuffer):
         self.done_buffer[current_index] = done
         self.player_buffer[current_index] = player
         self.player_after_buffer[current_index] = player_after
+        self.action_info_buffer[current_index] = action_info
 
         self.update_counter += 1
 
@@ -76,6 +77,7 @@ class UniformBuffer(BaseBuffer):
         batch_done = self.done_buffer[index_map]
         batch_player = self.player_buffer[index_map]
         batch_player_after = self.player_after_buffer[index_map]
+        batch_action_info = [self.action_info_buffer[i] for i in index_map]
 
         return {
             "state": batch_state,
@@ -85,6 +87,7 @@ class UniformBuffer(BaseBuffer):
             "done": batch_done,
             "player": batch_player,
             "player_after": batch_player_after,
+            "action_info": batch_action_info
         }
 
     def clear(self) -> None:
@@ -94,6 +97,7 @@ class UniformBuffer(BaseBuffer):
         self.action_buffer.fill(0)
         self.reward_buffer.fill(0)
         self.done_buffer.fill(0)
+        self.action_info_buffer = [None] * self.capacity
 
         self.update_counter = 0
 
@@ -115,6 +119,7 @@ class UniformBuffer(BaseBuffer):
         self.action_buffer = buffer.action_buffer
         self.reward_buffer = buffer.reward_buffer
         self.done_buffer = buffer.done_buffer
+        self.action_info_buffer = buffer.action_info_buffer
 
     def save(self, training_session_id: UUID, session_save_count: int) -> None:
         """

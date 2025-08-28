@@ -58,7 +58,7 @@ class AlphaZeroAgent(TrainableAgent):
     def train(self, mcts_probs: list[th.Tensor], actor_pred_probs: list[th.Tensor],
               reward_batch: list[th.Tensor], critic_pred_values: list[th.Tensor]) -> float:
         """TODO."""
-        self.model.update_weights(mcts_probs, actor_pred_probs, reward_batch, critic_pred_values)
+        return self.model.update_weights(mcts_probs, actor_pred_probs, reward_batch, critic_pred_values)
 
     def save(self, training_session_id: UUID, session_save_count: int, main_filename: str = "alpha-zero-backgammon") -> None:
         """

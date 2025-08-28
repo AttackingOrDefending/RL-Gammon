@@ -1,6 +1,7 @@
 """Base class for all buffers used in RL-training."""
 
 from abc import abstractmethod
+from typing import Any
 from uuid import UUID
 
 import numpy as np
@@ -24,15 +25,18 @@ class BaseBuffer:
         self.update_counter = 0
         self.action_shape = action_shape
 
-        self.state_buffer = np.zeros(shape=(self.capacity, *observation_shape), dtype=np.float32)
-        self.new_state_buffer = np.zeros(shape=(self.capacity, *observation_shape), dtype=np.float32)
-        self.action_buffer = np.zeros(shape=(self.capacity, action_shape), dtype=np.int8)
+        self.state_buffer = np.zeros(shape=(self.capacity, 198), dtype=np.float32)  # TODO NOT HARDCODE
+        self.new_state_buffer = np.zeros(shape=(self.capacity, 198), dtype=np.float32)
+        self.action_buffer = np.zeros(shape=(self.capacity, action_shape), dtype=np.int32)
         self.reward_buffer = np.zeros(shape=self.capacity, dtype=np.float32)
         self.done_buffer = np.zeros(shape=self.capacity, dtype=np.bool)
+        self.player_buffer = np.zeros(capacity, dtype=np.int8)
+        self.player_after_buffer = np.zeros(capacity, dtype=np.int8)
+        self.action_info_buffer: list[Any] = [None] * capacity # list to store any input
 
     @abstractmethod
     def record(self, state: Input, next_state: Input, action: MovePart,
-               reward: float, done: bool, player: int, player_after: int) -> None:
+               reward: float, done: bool, player: int, player_after: int, action_info: Any) -> None:
         """
         Store the environment observation into the buffer.
 
@@ -43,6 +47,7 @@ class BaseBuffer:
         :param done: boolean indicating if the episode ended at the recorded step
         :param player: the player who made the action
         :param player_after: the player who is to player after the action
+        :param action_info: information about the action, e.g. for a0 mcts probabilities from search
         """
         raise NotImplementedError
 

@@ -26,9 +26,6 @@ ActionInfoTuple = tuple[int | ActionGNU, Any]
 # Open Spiel
 Feature = list[float]
 
-# Iteration trainer types
-EpisodeObservation = list[tuple[Feature, Feature, int, bool, int]]
-
 MovePart = tuple[int, int]
 MoveDict = dict[int, set[MovePart]]
 Move = list[MovePart]
