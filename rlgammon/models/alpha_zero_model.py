@@ -35,9 +35,13 @@ class AlphaZeroModel(MCTSModel):
         # reset the gradients
         self.zero_grad()
 
-        with th.no_grad():
-            actor_loss = th.nn.CrossEntropyLoss()(mcts_probs, actor_pred_probs)
-            critic_loss = th.nn.MSELoss()(reward_batch, critic_pred_values)
+        with th.set_grad_enabled(True):
+            mcts_probs = th.tensor(mcts_probs)
+            reward_batch = th.tensor(reward_batch, dtype=th.float32)
+
+            actor_loss = th.nn.CrossEntropyLoss()(actor_pred_probs, mcts_probs)
+            critic_loss = th.nn.MSELoss()(critic_pred_values, reward_batch)
+
             loss = actor_loss + critic_loss
             loss.backward()
 

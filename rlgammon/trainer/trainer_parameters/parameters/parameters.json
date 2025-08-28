@@ -7,7 +7,7 @@
   "batch_size": 64,
   "buffer": "U",
   "buffer_capacity": 50000,
-  "exploration": "EG",
+  "exploration": "NO",
   "decay": 0.99,
   "start_epsilon": 0.95,
   "end_epsilon": 0.8,

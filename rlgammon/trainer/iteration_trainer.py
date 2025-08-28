@@ -76,12 +76,6 @@ class IterationTrainer(BaseTrainer):
 
         for iteration in tqdm(range(self.parameters["iterations"]), desc="Training Iterations"):
             episode_data = self.generate_episode_data(agent)
-            features = [episode_data[i][0] for i in range(len(episode_data))]
-            reward = [episode_data[i][2] for i in range(len(episode_data))]
-            action_info = [episode_data[i][5] for i in range(len(episode_data))]
-
-            out = [agent.evaluate_position(feature) for feature in features]
-            actor_pred_probs = [out[i][0] for i in range(len(out))]
-            critic_pred_values = [out[i][1] for i in range(len(out))]
-
-            _ = agent.train(action_info, actor_pred_probs, reward, critic_pred_values)
+            for feature, _, reward, _, action, action_info in episode_data:
+                v, p = agent.evaluate_position(feature)
+                _ = agent.train(action_info, p, reward, v)

@@ -43,13 +43,16 @@ class AlphaZeroAgent(TrainableAgent):
 
     def evaluate_position(self, state: Feature, decay: bool = False) -> th.Tensor:
         """TODO."""
-        policy, value = self.model(state)
+        value, policy = self.model(state)
+        # value = value.detach().numpy()
+        # policy = policy.detach().numpy()
         # TODO CHANGE the ", policy"!!!
-        return value * self.gamma if decay else self.model(state), policy
+        # return value * self.gamma if decay else value, policy
+        return value, policy
 
     def position_policy(self, state: Feature) -> th.Tensor:
         """TODO."""
-        policy, _ = self.model(state)
+        _, policy = self.model(state)
         return policy
 
     def train(self, mcts_probs: list[th.Tensor], actor_pred_probs: list[th.Tensor],

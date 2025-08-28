@@ -69,7 +69,7 @@ if __name__ == "__main__":
                            ],
                            value_activation_list=[
                                th.nn.ReLU(),
-                               th.nn.ReLU(),
+                               th.nn.LeakyReLU(),
                            ])
     agent.mcts_evaluator.provide_model(agent.model)
 

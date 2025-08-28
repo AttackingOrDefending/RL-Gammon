@@ -35,7 +35,6 @@ class TDModel(BaseModel):
         :param x: input to the model
         :return: output of the model
         """
-        print(len(x))
         x = super().forward(x)
         return x[0] * -3 + x[1] * -2 + x[2] * -1 + x[3] * 1 + x[4] * 2 + x[5] * 3
 
@@ -59,6 +58,8 @@ class TDModel(BaseModel):
 
         with th.no_grad():
             td_error = p_next - p
+
+            print(p)
 
             # get the parameters of the model
             parameters = list(self.parameters())
