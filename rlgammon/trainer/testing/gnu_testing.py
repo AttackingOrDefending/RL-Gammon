@@ -1,6 +1,8 @@
 """Testing class with a gnubg agent."""
 import concurrent.futures
 
+import torch as th
+
 from rlgammon.agents.gnu_agent import GNUAgent
 from rlgammon.agents.td_agent_gnu import TDAgentGnu  # type: ignore[attr-defined]
 from rlgammon.agents.trainable_agent import TrainableAgent
@@ -35,7 +37,8 @@ class GNUTesting(BaseTesting):
         :param agent: agent to test against GNU
         :return: GNU compatible agent derived from given agent
         """
-        agent_gnu = TDAgentGnu(self.gnu_interface, None, gamma=0.99, color=agent.color)
+        agent_gnu = TDAgentGnu(self.gnu_interface, None, gamma=0.99, color=agent.color,
+                               layer_list=[th.nn.Linear(1, 1)], activation_list=[th.nn.ReLU()])
         if not agent.get_model():
             return None
         agent_gnu.model = agent.get_model()
