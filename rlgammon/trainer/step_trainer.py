@@ -11,6 +11,7 @@ from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.rlgammon_types import WHITE
 from rlgammon.trainer.base_trainer import BaseTrainer
 from rlgammon.trainer.trainer_errors.trainer_errors import NoParametersError
+from rlgammon.trainer.trainer_types import TrainerType
 
 """TODO: Move load and save from td-agent to trainable agent"""
 
@@ -37,7 +38,7 @@ class StepTrainer(BaseTrainer):
 
         explorer = self.create_explorer_from_parameters()
         testing = self.create_testing_from_parameters()
-        logger = self.create_logger_from_parameters(session_id)
+        logger = self.create_logger_from_parameters(session_id, TrainerType.STEP_TRAINER)
 
         total_steps = 0
         training_time_start = time.time()

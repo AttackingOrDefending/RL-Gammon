@@ -26,6 +26,7 @@ from rlgammon.trainer.trainer_errors.trainer_errors import (
     WrongTestingTypeError,
 )
 from rlgammon.trainer.trainer_parameters.parameter_verification import are_parameters_valid
+from rlgammon.trainer.trainer_types import TrainerType
 
 
 class BaseTrainer:
@@ -49,14 +50,14 @@ class BaseTrainer:
                 raise WrongBufferTypeError
         return buffer
 
-    def create_logger_from_parameters(self, training_session_id: UUID) -> Logger:
+    def create_logger_from_parameters(self, training_session_id: UUID, trainer_type: TrainerType) -> Logger:
         """
         Create a new logger, either an empty one just initialized
         or one loaded with the logger name provided in the parameters.
 
         :return: new logger
         """
-        logger = Logger(training_session_id)
+        logger = Logger(training_session_id, trainer_type)
         if self.parameters["load_logger"]:
             logger.load(self.parameters["logger_name"])
         return logger

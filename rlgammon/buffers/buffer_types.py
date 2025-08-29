@@ -6,7 +6,7 @@ from typing import Any
 from numpy.typing import NDArray
 
 BufferBatch = dict[str, NDArray[Any] | list[Any]]
-
+BufferData = dict[str, NDArray[Any] | list[Any]]
 
 class PossibleBuffers(Enum):
     """Enumeration of possible buffer types."""
@@ -27,4 +27,5 @@ class PossibleBuffers(Enum):
             case "U":
                 return PossibleBuffers.UNIFORM
             case _:
-                return None # type: ignore[return-value]
+                msg = f"'{string_to_convert}' is not a valid buffer type string. Try 'U'."
+                raise ValueError(msg)

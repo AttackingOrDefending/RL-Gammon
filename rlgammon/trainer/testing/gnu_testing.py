@@ -37,6 +37,7 @@ class GNUTesting(BaseTesting):
         :param agent: agent to test against GNU
         :return: GNU compatible agent derived from given agent
         """
+        # create gnu td-agent with a dummy network (it will be replaced with the trained one)
         agent_gnu = TDAgentGnu(self.gnu_interface, None, gamma=0.99, color=agent.color,
                                layer_list=[th.nn.Linear(1, 1)], activation_list=[th.nn.ReLU()])
         if not agent.get_model():

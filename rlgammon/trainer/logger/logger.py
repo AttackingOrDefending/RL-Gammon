@@ -8,6 +8,7 @@ from uuid import UUID
 import matplotlib.pyplot as plt
 
 from rlgammon.trainer.logger.logger_types import LoggerData
+from rlgammon.trainer.trainer_types import TrainerType
 
 logging.basicConfig(level=logging.INFO)
 
@@ -15,24 +16,33 @@ logging.basicConfig(level=logging.INFO)
 class Logger:
     """Create a logger for storing data about the training process."""
 
-    def __init__(self, training_session_id: UUID) -> None:
-        """Construct a logger by composing it with the python logging library, and initializing an empty data list."""
-        self.logger = logging.getLogger("rl-training-logger")
-        self.training_session_id = training_session_id
-        self.num_items, self.load_episode, self.load_step = 0, 0, 0
-        self.info: LoggerData = {"episodes": [0], "steps": [0], "results": [{}], "training_time": [0.0]}
+    def __init__(self, training_session_id: UUID, trainer_type: TrainerType) -> None:
+        """
+        Construct a logger by composing it with the python logging library, and initializing an empty data list.
 
-    def update_log(self, episode: int, steps: int, results: dict[str, float], training_time: float) -> None:
+        :param training_session_id: UUID of the training session
+        :param trainer_type: type of the training session being logged e.g. step or iteration training
+        """
+        self.logger = logging.getLogger("rl-training-logger")
+
+        self.trainer_type = trainer_type
+        self.training_session_id = training_session_id
+        self.num_items, self.load_interval, self.load_step = 0, 0, 0
+
+        self.interval = self.get_interval_from_trainer()
+        self.info: LoggerData = {"episodes": [0], "iterations": [0], "steps": [0], "results": [{}], "training_time": [0.0]}
+
+    def update_log(self, interval: int, steps: int, results: dict[str, float], training_time: float) -> None:
         """
         Add data to the log .
 
-        :param episode: current episode of the training process
+        :param interval: current time interval of the training process
         :param steps: current steps of the training process
         :param results: current win rate achieved during tests
         :param training_time: current training time since the start of the session
         """
         self.num_items += 1
-        self.info["episodes"].append(episode)
+        self.info[self.interval].append(interval)  # type: ignore[literal-required]
         self.info["steps"].append(steps)
         self.info["results"].append(results)
         self.info["training_time"].append(training_time)
@@ -40,14 +50,16 @@ class Logger:
     def print_log(self) -> None:
         """Print the most recent logger data to the termial using the python logging library."""
         break_line = "=" * 10 + "\n"
-        performance_msg = ("\nBeen training for:\n"
-                           f"Episodes: {self.info['episodes'][-1]}\n"
-                           f"Steps: {self.info['steps'][-1]}\n"
-                           f"Time: {round(self.info['training_time'][-1], 2)}s\n"
-                           "Current performance:\n"
-                           f"Win rate: {self.convert_win_rate_to_percent(self.info['results'][-1]['win_rate'])}\n"
-                           f"Points per game (agent): {self.info['results'][-1]['points_white']}\n"
-                           f"Points per game (opponent): {self.info['results'][-1]['points_black']}\n")
+        performance_msg = (
+            "\nBeen training for:\n"
+            f"{self.interval.capitalize()}: {self.info['episodes'][-1]}\n"
+            f"Steps: {self.info['steps'][-1]}\n"
+            f"Time: {round(self.info['training_time'][-1], 2)}s\n"
+            "Current performance:\n"
+            f"Win rate: {self.convert_win_rate_to_percent(self.info['results'][-1]['win_rate'])}\n"
+            f"Points per game (agent): {self.info['results'][-1]['points_white']}\n"
+            f"Points per game (opponent): {self.info['results'][-1]['points_black']}\n"
+        )
         logging_message = performance_msg + break_line
         self.logger.info(logging_message)
 
@@ -110,7 +122,7 @@ class Logger:
             logger = pickle.load(f)
 
         self.logger = logger.logger
-        self.num_items, self.load_episode, self.load_step = logger.num_items, logger.load_episode, logger.load_step
+        self.num_items, self.load_interval, self.load_step = logger.num_items, logger.load_interval, logger.load_step
         self.info = logger.info
 
     def save(self, training_session_id: UUID, session_save_count: int) -> None:
@@ -131,5 +143,11 @@ class Logger:
 
     def clear(self) -> None:
         """Clear all data from the logger."""
-        self.info = {"episodes": [0], "steps": [0], "results": [{}], "training_time": [0]}
-        self.num_items, self.load_episode, self.load_step = 0, 0, 0
+        self.info = {"episodes": [0], "iterations": [0], "steps": [0], "results": [{}], "training_time": [0.0]}
+        self.num_items, self.load_interval, self.load_step = 0, 0, 0
+
+    def get_interval_from_trainer(self) -> str:
+        """TODO."""
+        if self.trainer_type == TrainerType.ITERATION_TRAINER:
+            return "iterations"
+        return "episodes"

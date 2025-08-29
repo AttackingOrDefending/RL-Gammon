@@ -6,7 +6,7 @@ from uuid import UUID
 
 import numpy as np
 
-from rlgammon.buffers.buffer_types import BufferBatch
+from rlgammon.buffers.buffer_types import BufferBatch, BufferData
 from rlgammon.rlgammon_types import Input, MovePart
 
 
@@ -71,23 +71,15 @@ class BaseBuffer:
         """
         raise NotImplementedError
 
-    def contains_state(self, state: Input) -> bool:
-        """
-        Check if the provided state is stored in the buffer's state-array.
+    @abstractmethod
+    def get_all_elements(self) -> BufferData:
+        """TODO."""
+        raise NotImplementedError
 
-        :param state: state to be searched
-        :return: true, if state is in the buffer, else false
-        """
-        return any(np.array_equal(state, self.state_buffer[i]) for i in range(self.state_buffer.shape[0]))
-
-    def contains_next_state(self, new_state: Input) -> bool:
-        """
-        Check if the provided state is stored in the buffer's new-state-array.
-
-        :param new_state: state to be searched
-        :return: true, if state is in the buffer, else false
-        """
-        return any(np.array_equal(new_state, self.new_state_buffer[i]) for i in range(self.new_state_buffer.shape[0]))
+    @abstractmethod
+    def create_dataset(self):
+        """TODO."""
+        raise NotImplementedError
 
     @abstractmethod
     def clear(self) -> None:
@@ -112,3 +104,25 @@ class BaseBuffer:
         :param session_save_count: number of saved sessions
         """
         raise NotImplementedError
+
+    def get_num_elements(self) -> int:
+        """TODO."""
+        return min(self.update_counter, self.capacity)
+
+    def contains_state(self, state: Input) -> bool:
+        """
+        Check if the provided state is stored in the buffer's state-array.
+
+        :param state: state to be searched
+        :return: true, if state is in the buffer, else false
+        """
+        return any(np.array_equal(state, self.state_buffer[i]) for i in range(self.state_buffer.shape[0]))
+
+    def contains_next_state(self, new_state: Input) -> bool:
+        """
+        Check if the provided state is stored in the buffer's new-state-array.
+
+        :param new_state: state to be searched
+        :return: true, if state is in the buffer, else false
+        """
+        return any(np.array_equal(new_state, self.new_state_buffer[i]) for i in range(self.new_state_buffer.shape[0]))

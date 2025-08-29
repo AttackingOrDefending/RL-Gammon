@@ -1,4 +1,5 @@
 """Construct the trainer by initializing its parameters in the BaseTrainer class."""
+import time
 import uuid
 
 import numpy as np
@@ -9,6 +10,7 @@ from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.buffers import BaseBuffer
 from rlgammon.rlgammon_types import WHITE
 from rlgammon.trainer.base_trainer import BaseTrainer
+from rlgammon.trainer.trainer_types import TrainerType
 
 
 class IterationTrainer(BaseTrainer):
@@ -36,6 +38,7 @@ class IterationTrainer(BaseTrainer):
         state.apply_action(action)
 
         reward = 0
+        total_steps = 0
         while not state.is_terminal():
             # Remove the last 2 elements, which are the dice. Always from white perspective.
             features = np.array(state.observation_tensor(WHITE)[:198])
@@ -59,6 +62,8 @@ class IterationTrainer(BaseTrainer):
                 next_features = np.array(state.observation_tensor(WHITE)[:198])
 
             buffer.record(features, next_features, action, reward, state.is_terminal(), player, player_after, action_info)
+            total_steps += 1
+        return total_steps
 
     def train(self, agent: TrainableAgent) -> None:
         """
@@ -68,16 +73,20 @@ class IterationTrainer(BaseTrainer):
         :return:
         """
         session_id = uuid.uuid4()
-        env = pyspiel.load_game("backgammon(scoring_type=full_scoring)")
-        buffer = self.create_buffer_from_parameters(env)
+
+        buffer = self.create_buffer_from_parameters(pyspiel.load_game("backgammon(scoring_type=full_scoring)"))
         testing = self.create_testing_from_parameters()
-        logger = self.create_logger_from_parameters(session_id)
+        logger = self.create_logger_from_parameters(session_id, TrainerType.ITERATION_TRAINER)
 
+        total_steps = 0
+        training_time_start = time.time()
         for iteration in tqdm(range(self.parameters["iterations"]), desc="Training Iterations"):
-            self.generate_episode_data(buffer, agent)
+            for _ in range(self.parameters["episodes_per_iteration"]):
+                total_steps += self.generate_episode_data(buffer, agent)
 
-            batch = buffer.get_batch(batch_size=self.parameters["batch_size"])
-            for i in range(self.parameters["batch_size"]):
+            # Train on the entire dataset -> TODO
+            batch = buffer.get_all_elements()
+            for i in range(buffer.get_num_elements()):
                 state = batch["state"][i]
                 reward = batch["reward"][i]
                 action_info = batch["action_info"][i]
@@ -85,3 +94,8 @@ class IterationTrainer(BaseTrainer):
                 v, p = agent.evaluate_position(state)
                 loss = agent.train(action_info, p, reward, v)
                 print("loss", loss)
+
+            results = testing.test(agent)
+            training_time = time.time() - training_time_start
+            logger.update_log(iteration, total_steps, results, training_time)
+            logger.print_log()

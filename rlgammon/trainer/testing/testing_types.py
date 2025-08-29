@@ -25,4 +25,5 @@ class PossibleTesting(Enum):
             case "GNU":
                 return PossibleTesting.GNU
             case _:
-                return None  # type: ignore[return-value]
+                msg = f"'{string_to_convert}' is not a valid testing type string. Try 'RND' or 'GNU'."
+                raise ValueError(msg)

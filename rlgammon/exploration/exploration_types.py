@@ -22,4 +22,5 @@ class PossibleExploration(Enum):
             case "NO":
                 return PossibleExploration.NO_EXPLORATION
             case _:
-                return None # type: ignore[return-value]
+                msg = f"'{string_to_convert}' is not a valid exploration type string. Try 'EG' or 'NO'."
+                raise ValueError(msg)

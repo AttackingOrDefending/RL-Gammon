@@ -8,7 +8,7 @@ from uuid import UUID
 import numpy as np
 
 from rlgammon.buffers.base_buffer import BaseBuffer
-from rlgammon.buffers.buffer_types import BufferBatch
+from rlgammon.buffers.buffer_types import BufferBatch, BufferData
 from rlgammon.rlgammon_types import Input, MovePart
 
 
@@ -89,6 +89,22 @@ class UniformBuffer(BaseBuffer):
             "player_after": batch_player_after,
             "action_info": batch_action_info
         }
+
+    def get_all_elements(self) -> BufferData:
+        """TODO."""
+        return {
+            "state": self.state_buffer,
+            "next_state": self.new_state_buffer,
+            "action": self.action_buffer,
+            "reward": self.reward_buffer,
+            "done": self.done_buffer,
+            "player": self.player_buffer,
+            "player_after": self.player_after_buffer,
+            "action_info": self.action_info_buffer
+        }
+
+    def create_dataset(self):
+        pass
 
     def clear(self) -> None:
         """Clear the contents of the buffer by filling all numpy arrays with zeros and resetting the update counter."""
