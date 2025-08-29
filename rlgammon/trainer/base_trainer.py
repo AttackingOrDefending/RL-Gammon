@@ -17,7 +17,7 @@ from rlgammon.exploration.exploration_types import PossibleExploration
 from rlgammon.exploration.no_exploration import NoExploration
 from rlgammon.trainer.logger.logger import Logger
 from rlgammon.trainer.testing.base_testing import BaseTesting
-from rlgammon.trainer.testing.gnu_testing import GNUTesting
+from rlgammon.trainer.testing.gnu_testing import TDGNUTesting
 from rlgammon.trainer.testing.random_testing import RandomTesting
 from rlgammon.trainer.testing.testing_types import PossibleTesting
 from rlgammon.trainer.trainer_errors.trainer_errors import (
@@ -71,8 +71,8 @@ class BaseTrainer:
         match self.parameters["testing_type"]:
             case PossibleTesting.RANDOM:
                 testing = RandomTesting(self.parameters["episodes_in_test"])
-            case PossibleTesting.GNU:
-                testing = GNUTesting(self.parameters["episodes_in_test"])  # type: ignore[assignment]
+            case PossibleTesting.TD_GNU:
+                testing = TDGNUTesting(self.parameters["episodes_in_test"])  # type: ignore[assignment]
             case _:
                 raise WrongTestingTypeError
         return testing

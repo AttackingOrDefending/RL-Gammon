@@ -15,7 +15,7 @@ from rlgammon.rlgammon_types import BLACK, WHITE
 from rlgammon.trainer.testing.base_testing import BaseTesting
 
 
-class GNUTesting(BaseTesting):
+class TDGNUTesting(BaseTesting):
     """Testing class, where agents are tested against a gnubg agent."""
 
     def __init__(self, episodes_in_test: int) -> None:

@@ -7,7 +7,7 @@ class PossibleTesting(Enum):
     """Enumeration of possible testing types."""
 
     RANDOM = "RND"
-    GNU = "GNU"
+    TD_GNU = "TD-GNU"
 
     @staticmethod
     def get_enum_from_string(string_to_convert: str) -> "PossibleTesting":
@@ -22,8 +22,8 @@ class PossibleTesting(Enum):
         match string_to_convert:
             case "RND":
                 return PossibleTesting.RANDOM
-            case "GNU":
-                return PossibleTesting.GNU
+            case "TD-GNU":
+                return PossibleTesting.TD_GNU
             case _:
                 msg = f"'{string_to_convert}' is not a valid testing type string. Try 'RND' or 'GNU'."
                 raise ValueError(msg)

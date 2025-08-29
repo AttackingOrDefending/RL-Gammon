@@ -52,9 +52,9 @@ class RandomTesting(BaseTesting):
                     legal_actions = state.legal_actions()
 
                     if current_player == agent.color:
-                        action = agent.choose_move(legal_actions, state)
+                        action, _ = agent.choose_move(legal_actions, state)
                     else:
-                        action = self.testing_agent.choose_move(legal_actions, state)
+                        action, _ = self.testing_agent.choose_move(legal_actions, state)
 
                     # Apply action
                     state.apply_action(action)

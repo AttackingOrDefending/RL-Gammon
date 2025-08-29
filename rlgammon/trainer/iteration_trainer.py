@@ -93,7 +93,6 @@ class IterationTrainer(BaseTrainer):
 
                 v, p = agent.evaluate_position(state)
                 loss = agent.train(action_info, p, reward, v)
-                print("loss", loss)
 
             results = testing.test(agent)
             training_time = time.time() - training_time_start
