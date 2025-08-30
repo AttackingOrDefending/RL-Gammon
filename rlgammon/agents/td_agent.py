@@ -2,6 +2,7 @@
 
 """File implementing an agent trained with td-learning."""
 import pathlib
+from typing import Any
 from uuid import UUID
 
 import pyspiel  # type: ignore[import-not-found]
@@ -55,20 +56,23 @@ class TDAgent(TrainableAgent):
         """
         return self.model(state) * self.gamma if decay else self.model(state)
 
-    def train(self, p: th.Tensor, p_next: th.Tensor) -> float:
+
+    def train(self, _: Any, reward: int, state: Feature, next_state: Feature, done: bool) -> float:
         """
         Update the weights of the model according to the td algorithm.
-        If the state is terminal use reward for next state value, else use the model estimation.
+        If the state is terminal use reward for next state value, else use the model estimation. TODO.
 
-        :param p: value of current state
-        :param p_next: value of the next state or final reward if terminal state
-        :return: loss associated with update
+        :param action_info:
+        :param reward:
+        :param state:
+        :param next_state:
+        :param done:
+        :return: loss associated with the update
         """
         # Raise an error if training is attempted without prior initialization of eligibility traces
         if not self.setup:
             raise EligibilityTracesNotInitializedError
-
-        return self.model.update_weights(p, p_next)
+        return self.model.update_weights(_, th.tensor(reward), state, next_state, done)
 
     def choose_move(self, actions: list[int] | ActionSetGNU,
                     state: pyspiel.BackgammonState | BackgammonEnv) -> ActionInfoTuple:

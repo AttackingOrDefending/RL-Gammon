@@ -3,7 +3,6 @@
 import time
 import uuid
 
-import numpy as np
 import pyspiel  # type: ignore[import-not-found]
 from tqdm import tqdm
 
@@ -43,7 +42,7 @@ class StepTrainer(BaseTrainer):
         total_steps = 0
         training_time_start = time.time()
         for episode in tqdm(range(1, self.parameters["episodes"] + 1), desc="Training Episodes"):
-
+            reward = 0
             agent.episode_setup()
 
             state = env.new_initial_state()
@@ -52,10 +51,7 @@ class StepTrainer(BaseTrainer):
             while not state.is_terminal():
                 # Remove the last 2 elements, which are the dice. Always from white perspective.
                 features = state.observation_tensor(WHITE)[:198]
-
-                p = agent.evaluate_position(features)
                 legal_actions = state.legal_actions()
-
                 action, action_info = (explorer.explore(legal_actions)
                     if explorer.should_explore() else agent.choose_move(legal_actions, state))
                 state.apply_action(action)
@@ -63,15 +59,12 @@ class StepTrainer(BaseTrainer):
                 if state.is_terminal():
                     # Terminal state, use actual reward (negative is black wins).
                     reward = state.returns()[WHITE]
-                    _ = agent.train(p, reward)
                 else:
                     if not state.is_terminal() and state.is_chance_node():
                         agent.roll_dice(state)
-
                     # Remove the last 2 elements, which are the dice. Always from white perspective.
                     next_features = state.observation_tensor(WHITE)[:198]
-                    p_next = agent.evaluate_position(next_features, decay=True)
-                    _ = agent.train(p, p_next)
+                    _ = agent.train(action_info, reward, features, next_features, state.is_terminal())
                 total_steps += 1
 
             if episode % self.parameters["episodes_per_test"] == 0:

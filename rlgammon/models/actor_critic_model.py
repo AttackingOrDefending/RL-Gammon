@@ -32,5 +32,5 @@ class ActorCriticModel(th.nn.Module):
         # Need the observation of len = 198 -> no dice
         base = self.base(x)
         p = self.policy_head(base)
-        v = self.value_head(base)
+        v = self.value_head(base) * 3
         return v, p

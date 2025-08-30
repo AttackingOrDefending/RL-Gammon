@@ -4,6 +4,7 @@ from typing import Any
 from uuid import UUID
 
 import numpy as np
+from numpy._typing import NDArray
 from open_spiel.python.algorithms import mcts
 import pyspiel
 import torch as th
@@ -44,21 +45,27 @@ class AlphaZeroAgent(TrainableAgent):
     def evaluate_position(self, state: Feature, decay: bool = False) -> th.Tensor:
         """TODO."""
         value, policy = self.model(state)
-        # value = value.detach().numpy()
-        # policy = policy.detach().numpy()
-        # TODO CHANGE the ", policy"!!!
-        # return value * self.gamma if decay else value, policy
-        return value, policy
+        return value * self.gamma if decay else value, policy
 
     def position_policy(self, state: Feature) -> th.Tensor:
         """TODO."""
         _, policy = self.model(state)
         return policy
 
-    def train(self, mcts_probs: list[th.Tensor], actor_pred_probs: list[th.Tensor],
-              reward_batch: list[th.Tensor], critic_pred_values: list[th.Tensor]) -> float:
-        """TODO."""
-        return self.model.update_weights(mcts_probs, actor_pred_probs, reward_batch, critic_pred_values)
+    def train(self, action_info: Any, reward: int, state: Feature, next_state: Feature, _: bool) -> float:
+        """
+        TODO.
+
+        :param action_info:
+        :param reward:
+        :param state:
+        :param next_state:
+        :param _:
+        :return:
+        """
+        mcts_probs = th.tensor(action_info)
+        reward = th.tensor(reward, dtype=th.float32)
+        return self.model.update_weights(mcts_probs, reward, state, next_state)
 
     def save(self, training_session_id: UUID, session_save_count: int, main_filename: str = "alpha-zero-backgammon") -> None:
         """
@@ -109,7 +116,15 @@ class AlphaZeroAgent(TrainableAgent):
         policy = np.zeros(self.game.num_distinct_actions())
         for c in root.children:
             policy[c.action] = c.explore_count
-        policy = policy ** (1 / self.temperature)
-        policy /= policy.sum()
 
-        return np.random.choice(self.game.num_distinct_actions(), p=policy), policy
+        match self.temperature:
+            case 0:
+                policy /= policy.sum()
+                return np.argmax(policy), policy
+            case float("inf"):
+                policy /= policy.sum()
+                return np.random.choice(self.game.num_distinct_actions()), policy
+            case _:
+                policy = policy ** (1 / self.temperature)
+                policy /= policy.sum()
+                return np.random.choice(self.game.num_distinct_actions(), p=policy), policy

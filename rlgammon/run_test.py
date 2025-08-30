@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
     evaluator = AlphaZeroEvaluator()
     agent = AlphaZeroAgent(evaluator, pyspiel.load_game("backgammon(scoring_type=full_scoring)"),
-                           1.3, 200, 3.2,
+                           4, 500, 0,
                            base_layer_list=[
                                 th.nn.Linear(198, 512),
                                 th.nn.Linear(512, 256),
@@ -69,9 +69,9 @@ if __name__ == "__main__":
                            ],
                            value_activation_list=[
                                th.nn.ReLU(),
-                               th.nn.LeakyReLU(),
+                               th.nn.Tanh(),
                            ])
-    agent.mcts_evaluator.provide_model(agent.model)
+    agent.mcts_evaluator.provide_model(agent.model)  # type: ignore[arg-type]
 
     trainer = IterationTrainer()
     trainer.load_parameters("parameters.json")

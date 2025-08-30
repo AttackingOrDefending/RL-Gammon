@@ -17,5 +17,5 @@
   "logger_name": "",
   "save_progress": false,
   "iterations": 10,
-  "episodes_per_iteration": 100
+  "episodes_per_iteration": 1
 }

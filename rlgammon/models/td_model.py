@@ -1,6 +1,8 @@
 #type: ignore  # noqa: PGH003
 
 """File implementing a model used in td training."""
+from typing import Any
+
 import torch as th
 
 from rlgammon.models.base_model import BaseModel
@@ -43,14 +45,25 @@ class TDModel(BaseModel):
         self.eligibility_traces = [th.zeros(weights.shape, dtype=th.float64, requires_grad=False)
                                     for weights in list(self.parameters())]
 
-    def update_weights(self, p: th.Tensor, p_next: th.Tensor | int) -> float:
-        """
-        Update weights according to the td-lambda algorithm.
+    # def update_weights(self, p: th.Tensor, p_next: th.Tensor | int) -> float:
+    # def update_weights(self, action_info: th.Tensor, p_next: th.Tensor | int) -> float:
 
-        :param p: model evaluation for the current state
-        :param p_next: model evaluation for the next state or if terminal state, the final reward
+    def update_weights(self, _: Any, reward: th.Tensor, state: Feature, next_state: Feature, done: bool) -> float:
+        """
+        Update the weights of the model from the provided state-values.TODO.
+
+        :param action_info:
+        :param reward:
+        :param state:
+        :param next_state:
+        :param done:
         :return: loss encountered in the update
         """
+        p = self.forward(state)
+        p_next = self.forward(next_state) * self.gamma
+        if done:
+            p_next = reward
+
         # reset the gradients
         self.zero_grad()
         # compute the derivative of p w.r.t. the parameters

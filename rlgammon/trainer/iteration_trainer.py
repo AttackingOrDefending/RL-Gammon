@@ -88,11 +88,12 @@ class IterationTrainer(BaseTrainer):
             batch = buffer.get_all_elements()
             for i in range(buffer.get_num_elements()):
                 state = batch["state"][i]
+                next_state = batch["next_state"][i]
                 reward = batch["reward"][i]
+                done = batch["done"][i]
                 action_info = batch["action_info"][i]
 
-                v, p = agent.evaluate_position(state)
-                loss = agent.train(action_info, p, reward, v)
+                _ = agent.train(action_info, reward, state, next_state, done)
 
             results = testing.test(agent)
             training_time = time.time() - training_time_start

@@ -1,6 +1,7 @@
 """Base class for all models used in agents."""
 from abc import abstractmethod
 import random
+from typing import Any
 
 import numpy as np
 import torch as th
@@ -49,12 +50,16 @@ class BaseModel(nn.Module):
         return self.model(x)  # type: ignore[no-any-return]
 
     @abstractmethod
-    def update_weights(self, p: th.Tensor, p_next: th.Tensor | int) -> float:
+    # def update_weights(self, p: th.Tensor, p_next: th.Tensor | int) -> float:
+    def update_weights(self, action_info: Any, reward: th.Tensor, state: Feature, next_state: Feature, done: bool) -> float:
         """
-        Update the weights of the model from the provided state-values.
+        Update the weights of the model from the provided state-values.TODO.
 
-        :param p: model evaluation for the current state
-        :param p_next: model evaluation for the next state or if terminal state, the final reward
+        :param action_info:
+        :param reward:
+        :param state:
+        :param next_state:
+        :param done:
         :return: loss encountered in the update
         """
         raise NotImplementedError

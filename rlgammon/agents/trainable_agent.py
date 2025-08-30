@@ -1,5 +1,6 @@
 """Base class for all trainable agents in the backgammon game."""
 from abc import abstractmethod
+from typing import Any
 from uuid import UUID
 
 import torch as th
@@ -23,13 +24,16 @@ class TrainableAgent(BaseAgent):
         raise NotImplementedError
 
     @abstractmethod
-    def train(self, p: th.Tensor, p_next: th.Tensor) -> float:
+    def train(self, action_info: Any, reward: int, state: Feature, next_state: Feature, done: bool) -> float:
         """
-        Train the agent from the given buffer.
+        Train the agent from the given buffer. TODO.
 
-        :param p: value of current state
-        :param p_next: value of the next state or final reward if terminal state
-        :return: loss associated with update
+        :param action_info:
+        :param reward:
+        :param state:
+        :param next_state:
+        :param done:
+        :return: loss associated with the update
         """
         raise NotImplementedError
 

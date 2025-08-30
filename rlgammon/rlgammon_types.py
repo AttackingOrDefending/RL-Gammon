@@ -24,7 +24,7 @@ ActionPolicyList = list[tuple[int, float]]
 ActionInfoTuple = tuple[int | ActionGNU, Any]
 
 # Open Spiel
-Feature = list[float]
+Feature = list[float] | NDArray[Any]
 
 MovePart = tuple[int, int]
 MoveDict = dict[int, set[MovePart]]
