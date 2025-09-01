@@ -22,9 +22,10 @@ class IterationTrainer(BaseTrainer):
 
     def generate_episode_data(self, buffer: BaseBuffer, agent: TrainableAgent) -> int:
         """
-        TODO.
+        Play 1 episode in the environment to generate training data.
 
-        :param agent:
+        :param buffer: buffer to store generated episode data
+        :param agent: agent used to interact with the environment
         """
         env = pyspiel.load_game("backgammon(scoring_type=full_scoring)")
         explorer = self.create_explorer_from_parameters()
@@ -67,10 +68,9 @@ class IterationTrainer(BaseTrainer):
 
     def train(self, agent: TrainableAgent) -> None:
         """
-        TODO.
+        Train the provided agent with an iteration style training.
 
-        :param agent:
-        :return:
+        :param agent: agent to train
         """
         session_id = uuid.uuid4()
 
@@ -84,7 +84,7 @@ class IterationTrainer(BaseTrainer):
             for _ in range(self.parameters["episodes_per_iteration"]):
                 total_steps += self.generate_episode_data(buffer, agent)
 
-            # Train on the entire dataset -> TODO
+            # Train on the entire dataset
             batch = buffer.get_all_elements()
             for i in range(buffer.get_num_elements()):
                 state = batch["state"][i]

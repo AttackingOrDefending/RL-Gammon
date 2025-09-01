@@ -147,7 +147,11 @@ class Logger:
         self.num_items, self.load_interval, self.load_step = 0, 0, 0
 
     def get_interval_from_trainer(self) -> str:
-        """TODO."""
+        """
+        Helper function to get the interval name string based on the training session type.
+
+        :return: interval name string
+        """
         if self.trainer_type == TrainerType.ITERATION_TRAINER:
             return "iterations"
         return "episodes"

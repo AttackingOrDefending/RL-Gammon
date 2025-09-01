@@ -36,16 +36,17 @@ class BaseTrainer:
         """Constructor for the BaseTrainer containing the parameters for the trainer."""
         self.parameters: dict[str, Any] = {}
 
-    def create_buffer_from_parameters(self, env: pyspiel.Game) -> BaseBuffer:
+    def create_buffer_from_parameters(self, game: pyspiel.Game) -> BaseBuffer:
         """
         Create a new buffer of the type provided in the parameters.
 
-        :param env: TODO
+        :param game: the pyspiel game instance
         :return: buffer of the type provided in the parameters
         """
         match self.parameters["buffer"]:
             case PossibleBuffers.UNIFORM:
-                buffer = UniformBuffer(env.observation_tensor_shape(), env.num_distinct_actions(), self.parameters["buffer_capacity"])
+                buffer = UniformBuffer(game.observation_tensor_shape(), game.num_distinct_actions(),
+                                       self.parameters["buffer_capacity"])
             case _:
                 raise WrongBufferTypeError
         return buffer

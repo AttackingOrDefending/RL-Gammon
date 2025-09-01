@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class TrainerType(Enum):
-    """TODO."""
+    """Enumeration of possible trainer types."""
 
     STEP_TRAINER = "ST"
     ITERATION_TRAINER = "IT"
