@@ -20,7 +20,7 @@ class IterationTrainer(BaseTrainer):
         """Construct the trainer by initializing its parameters in the BaseTrainer class."""
         super().__init__()
 
-    def generate_episode_data(self, buffer: BaseBuffer, agent: TrainableAgent) -> None:
+    def generate_episode_data(self, buffer: BaseBuffer, agent: TrainableAgent) -> int:
         """
         TODO.
 

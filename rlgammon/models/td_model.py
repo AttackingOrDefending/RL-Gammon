@@ -89,4 +89,4 @@ class TDModel(BaseModel):
             self.lr_scheduler.step()
             self.lr = self.lr_scheduler.get_last_lr()[0]
         self.lr_step_current_counter += 1
-        return td_error
+        return td_error.detach()

@@ -54,7 +54,11 @@ class BaseAgent:
 
     @staticmethod
     def roll_dice(state: BackgammonState) -> None:
-        """TODO."""
+        """
+        Perform a dice roll in the provided 'dice roll' state.
+
+        :param state: state of the game in the internal pyspiel format.
+        """
         outcomes = state.chance_outcomes()
         action_list, prob_list = zip(*outcomes, strict=False)
         action = np.random.choice(action_list, p=prob_list)

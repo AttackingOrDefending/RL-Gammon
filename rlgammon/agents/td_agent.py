@@ -11,7 +11,7 @@ import torch as th
 from rlgammon.agents.agent_errors.agent_errors import EligibilityTracesNotInitializedError
 from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.environment import BackgammonEnv  # type: ignore[attr-defined]
-from rlgammon.models.model_types import ActivationList, LayerList
+from rlgammon.models.model_types import ActivationList, LayerList, StandardOutput
 from rlgammon.models.td_model import TDModel
 from rlgammon.rlgammon_types import INF, NEG_INF, WHITE, ActionInfoTuple, ActionSetGNU, Feature
 from utils.utils import copy
@@ -46,7 +46,7 @@ class TDAgent(TrainableAgent):
         self.setup = True
         self.model.init_eligibility_traces()
 
-    def evaluate_position(self, state: Feature, decay: bool = False) -> th.Tensor:
+    def evaluate_position(self, state: Feature, decay: bool = False) -> StandardOutput:
         """
         Evaluate the given position using the agent model.
 
@@ -56,18 +56,17 @@ class TDAgent(TrainableAgent):
         """
         return self.model(state) * self.gamma if decay else self.model(state)
 
-
     def train(self, _: Any, reward: int, state: Feature, next_state: Feature, done: bool) -> float:
         """
-        Update the weights of the model according to the td algorithm.
-        If the state is terminal use reward for next state value, else use the model estimation. TODO.
+        Train the model according to the td algorithm.
+        If the state is terminal (done=True), use reward for next state value, else use the model estimation.
 
-        :param action_info:
-        :param reward:
-        :param state:
-        :param next_state:
-        :param done:
-        :return: loss associated with the update
+        :param _: unused parameter included for compatibility
+        :param reward: reward obtained by the agent
+        :param state: state of the game
+        :param next_state: state of the game after performing the action
+        :param done: flag indicating whether the game is over
+        :return: td-loss associated with the update
         """
         # Raise an error if training is attempted without prior initialization of eligibility traces
         if not self.setup:

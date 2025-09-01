@@ -6,3 +6,5 @@ ActivationList = list[th.nn.ReLU | th.nn.Sigmoid | th.nn.Tanh | th.nn.Softmax] |
 
 BaseOutput = th.Tensor
 ActorCriticOutput = tuple[th.Tensor, th.Tensor]
+StandardOutput = th.Tensor
+

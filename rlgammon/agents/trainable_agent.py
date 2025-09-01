@@ -6,6 +6,7 @@ from uuid import UUID
 import torch as th
 
 from rlgammon.agents.base_agent import BaseAgent
+from rlgammon.models.model_types import ActorCriticOutput, StandardOutput
 from rlgammon.rlgammon_types import Feature
 
 
@@ -13,7 +14,7 @@ class TrainableAgent(BaseAgent):
     """Base class for all trainable agents in the backgammon game."""
 
     @abstractmethod
-    def evaluate_position(self, state: Feature, decay: bool = False) -> th.Tensor:
+    def evaluate_position(self, state: Feature, decay: bool = False) -> StandardOutput | ActorCriticOutput:
         """
         Evaluate the given position.
 
@@ -26,19 +27,19 @@ class TrainableAgent(BaseAgent):
     @abstractmethod
     def train(self, action_info: Any, reward: int, state: Feature, next_state: Feature, done: bool) -> float:
         """
-        Train the agent from the given buffer. TODO.
+        Train the agent using data generated through interactions with the environment.
 
-        :param action_info:
-        :param reward:
-        :param state:
-        :param next_state:
-        :param done:
+        :param action_info: additional info generated when choosing moves; e.g. MCTS policy
+        :param reward: reward received at the current state
+        :param state: current state of the game
+        :param next_state: state of the game after performing the choosen move
+        :param done: boolean flag indicating whether the game is over
         :return: loss associated with the update
         """
         raise NotImplementedError
 
     @abstractmethod
-    def save(self, training_session_id: UUID, session_save_count: int, main_filename: str | None = None) -> None:
+    def save(self, training_session_id: UUID, session_save_count: int, main_filename: str) -> None:
         """
         Save the agent model.
 

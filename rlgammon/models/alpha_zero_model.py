@@ -28,7 +28,7 @@ class AlphaZeroModel(MCTSModel):
         policy_np /= np.sum(policy_np)
         return value_np, policy_np
 
-    def update_weights(self, mcts_probs: th.Tensor, reward: th.Tensor, state: Feature, _: Feature) -> float:
+    def update_weights(self, mcts_probs: th.Tensor, reward: th.Tensor, state: Feature, _: Feature, __: bool) -> float:
         """TODO."""
         critic_pred_values, actor_pred_probs = self.forward(state)
 
