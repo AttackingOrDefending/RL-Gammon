@@ -75,16 +75,14 @@ class BaseBuffer:
     def get_all_elements(self) -> BufferData:
         """
         Get all elements stored in the buffer.
+
         :return: all elements stored in the buffer
         """
         raise NotImplementedError
 
     @abstractmethod
-    def create_dataset(self) :
-        """
-        Create a PyTorch dataset.
-        :return: PyTorch dataset
-        """
+    def create_dataset(self)  -> None:
+        """."""
         raise NotImplementedError
 
     @abstractmethod
@@ -112,7 +110,11 @@ class BaseBuffer:
         raise NotImplementedError
 
     def get_num_elements(self) -> int:
-        """TODO."""
+        """
+        Calculate the number of elements in the buffer.
+
+        :return: number of elements in the buffer
+        """
         return min(self.update_counter, self.capacity)
 
     def contains_state(self, state: Input) -> bool:

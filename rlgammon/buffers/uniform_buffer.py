@@ -25,7 +25,7 @@ class UniformBuffer(BaseBuffer):
         super().__init__(action_shape, capacity)
 
     def record(self, state: Input, next_state: Input, action: MovePart,
-               reward: float, done: bool, player: int, player_after: int, action_info: Any) -> None:  # noqa: ANN401
+               reward: float, done: bool, player: int, player_after: int, action_info: Any) -> None:
         """
         Store the environment observation into the buffer.
 
@@ -86,11 +86,15 @@ class UniformBuffer(BaseBuffer):
             "done": batch_done,
             "player": batch_player,
             "player_after": batch_player_after,
-            "action_info": batch_action_info
+            "action_info": batch_action_info,
         }
 
     def get_all_elements(self) -> BufferData:
-        """TODO."""
+        """
+        Get all elements stored in the buffer.
+
+        :return: all elements stored in the buffer
+        """
         return {
             "state": self.state_buffer,
             "next_state": self.new_state_buffer,
@@ -99,11 +103,12 @@ class UniformBuffer(BaseBuffer):
             "done": self.done_buffer,
             "player": self.player_buffer,
             "player_after": self.player_after_buffer,
-            "action_info": self.action_info_buffer
+            "action_info": self.action_info_buffer,
         }
 
-    def create_dataset(self):
-        pass
+    def create_dataset(self) -> None:
+        """."""
+        raise NotImplementedError
 
     def clear(self) -> None:
         """Clear the contents of the buffer by filling all numpy arrays with zeros and resetting the update counter."""

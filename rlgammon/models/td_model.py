@@ -50,14 +50,14 @@ class TDModel(BaseModel):
 
     def update_weights(self, _: Any, reward: th.Tensor, state: Feature, next_state: Feature, done: bool) -> float:
         """
-        Update the weights of the model from the provided state-values.TODO.
+        Update weights according to the td-lambda algorithm.
 
-        :param action_info:
-        :param reward:
-        :param state:
-        :param next_state:
-        :param done:
-        :return: loss encountered in the update
+        :param _: unused parameter included for compatibility
+        :param reward: reward obtained by the agent
+        :param state: current state of the game
+        :param next_state: state after performing the chosen action
+        :param done: boolean flag indicating if the game is over
+        :return: td-error of the update
         """
         p = self.forward(state)
         p_next = self.forward(next_state) * self.gamma

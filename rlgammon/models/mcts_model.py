@@ -32,10 +32,11 @@ class MCTSModel(ActorCriticModel):
     @abstractmethod
     def inference(self, state: Feature, mask: NDArray[np.bool]) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
         """
-        TODO.
+        Get the model value, and the chosen policy for the given state.
+        A mask is used to prevent illegal actions.
 
-        :param state:
-        :param mask:
-        :return:
+        :param state: current state of the game
+        :param mask: mask to prevent illegal actions
+        :return: value for the state, masked policy
         """
         raise NotImplementedError

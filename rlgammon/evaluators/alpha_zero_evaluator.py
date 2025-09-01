@@ -11,10 +11,13 @@ from rlgammon.rlgammon_types import WHITE, ActionPolicyList
 
 
 class AlphaZeroEvaluator(mcts.Evaluator):  # type: ignore[misc]
-    """TODO."""
+    """Class implementing an alpha-zero style evaluator for MCTS."""
 
     def __init__(self, model: AlphaZeroModel | None = None) -> None:
-        """TODO."""
+        """
+        Construct an alpha-zero style evaluator for MCTS, by storing an alpha-zero model.
+        This is an optional parameter in the constructor. It can be added later.
+        """
         self.model = model
 
     def provide_model(self, model: AlphaZeroModel) -> None:
@@ -27,10 +30,11 @@ class AlphaZeroEvaluator(mcts.Evaluator):  # type: ignore[misc]
 
     def inference(self, state: pyspiel.BackgammonState) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
         """
-        TODO.
+        Get the model value, and the chosen policy for the given state.
+        A mask is used to prevent illegal actions.
 
         :param state: current state in the pyspiel format
-        :return:
+        :return: value for the state, masked policy
         """
         if self.model is None:
             raise ModelNotProvidedToEvaluatorError
@@ -41,9 +45,9 @@ class AlphaZeroEvaluator(mcts.Evaluator):  # type: ignore[misc]
 
     def evaluate(self, state: pyspiel.BackgammonState) -> NDArray[np.float32]:
         """
-        TODO.
+        Get the model value for the given state; used to evaluate nodes in MCTS.
 
-        :param state:
+        :param state: current state in the pyspiel format
         :return:
         """
         value, _ = self.inference(state)
@@ -51,9 +55,9 @@ class AlphaZeroEvaluator(mcts.Evaluator):  # type: ignore[misc]
 
     def prior(self, state: pyspiel.BackgammonState) -> ActionPolicyList:
         """
-        TODO.
+        Get the model policy for the given state; used to choose next nodes in MCTS.
 
-        :param state:
+        :param state: current state in the pyspiel format
         :return:
         """
         if state.is_chance_node():

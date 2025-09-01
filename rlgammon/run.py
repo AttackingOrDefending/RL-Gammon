@@ -12,8 +12,6 @@ from rlgammon.evaluators.alpha_zero_evaluator import AlphaZeroEvaluator
 from rlgammon.trainer.iteration_trainer import IterationTrainer
 from rlgammon.trainer.step_trainer import StepTrainer
 
-# TODO Adjust MCTS float data types based on the accuracy used in the model (float32 / float64)
-
 ARGUMENT_COUNT = 3
 
 if __name__ == "__main__":

@@ -30,11 +30,12 @@ class AlphaZeroModel(MCTSModel):
 
     def inference(self, state: Feature, mask: NDArray[np.bool]) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
         """
-        TODO.
+        Get the model value, and the chosen policy for the given state.
+        A mask is used to prevent illegal actions.
 
-        :param state:
-        :param mask:
-        :return:
+        :param state: current state of the game
+        :param mask: mask of legal states (1 == legal, 0 == illegal)
+        :return: value for the state, masked policy
         """
         value, policy = self.forward(state)
         value_np = value.detach().numpy()
