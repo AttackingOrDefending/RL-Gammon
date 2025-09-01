@@ -45,8 +45,7 @@ class BaseTrainer:
         """
         match self.parameters["buffer"]:
             case PossibleBuffers.UNIFORM:
-                buffer = UniformBuffer(game.observation_tensor_shape(), game.num_distinct_actions(),
-                                       self.parameters["buffer_capacity"])
+                buffer = UniformBuffer(game.num_distinct_actions(), self.parameters["buffer_capacity"])
             case _:
                 raise WrongBufferTypeError
         return buffer

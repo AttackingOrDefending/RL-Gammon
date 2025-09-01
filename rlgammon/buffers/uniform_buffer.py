@@ -15,15 +15,14 @@ from rlgammon.rlgammon_types import Input, MovePart
 class UniformBuffer(BaseBuffer):
     """Class implementing a buffer with uniform sampling."""
 
-    def __init__(self, observation_shape: tuple[int, ...], action_shape: int, capacity: int) -> None:
+    def __init__(self, action_shape: int, capacity: int) -> None:
         """
         Constructor for the UniformBuffer, that initializes a base buffer for storing observations.
 
-        :param observation_shape: the shape of the environment states.
         :param action_shape: the shape of the environment actions.
         :param capacity: the number of samples that can maximally be stored in the buffer
         """
-        super().__init__(observation_shape, action_shape, capacity)
+        super().__init__(action_shape, capacity)
 
     def record(self, state: Input, next_state: Input, action: MovePart,
                reward: float, done: bool, player: int, player_after: int, action_info: Any) -> None:  # noqa: ANN401

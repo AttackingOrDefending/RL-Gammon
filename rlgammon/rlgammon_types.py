@@ -25,6 +25,7 @@ ActionInfoTuple = tuple[int | ActionGNU, Any]
 
 # Open Spiel
 Feature = list[float] | NDArray[Any]
+ObservationShape = (198,)
 
 MovePart = tuple[int, int]
 MoveDict = dict[int, set[MovePart]]

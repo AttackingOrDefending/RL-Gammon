@@ -7,13 +7,13 @@ from uuid import UUID
 import numpy as np
 
 from rlgammon.buffers.buffer_types import BufferBatch, BufferData
-from rlgammon.rlgammon_types import Input, MovePart
+from rlgammon.rlgammon_types import Input, MovePart, ObservationShape
 
 
 class BaseBuffer:
     """Base class for all buffers used for training."""
 
-    def __init__(self, observation_shape: tuple[int, ...], action_shape: int, capacity: int) -> None:
+    def __init__(self, action_shape: int, capacity: int) -> None:
         """
         Constructor for the BaseBuffer, that initializes the counter, and all the numpy arrays for storing data.
 
@@ -25,8 +25,8 @@ class BaseBuffer:
         self.update_counter = 0
         self.action_shape = action_shape
 
-        self.state_buffer = np.zeros(shape=(self.capacity, 198), dtype=np.float32)  # TODO NOT HARDCODE
-        self.new_state_buffer = np.zeros(shape=(self.capacity, 198), dtype=np.float32)
+        self.state_buffer = np.zeros(shape=(self.capacity, *ObservationShape), dtype=np.float32)
+        self.new_state_buffer = np.zeros(shape=(self.capacity, *ObservationShape), dtype=np.float32)
         self.action_buffer = np.zeros(shape=(self.capacity, action_shape), dtype=np.int32)
         self.reward_buffer = np.zeros(shape=self.capacity, dtype=np.float32)
         self.done_buffer = np.zeros(shape=self.capacity, dtype=np.bool)
@@ -73,12 +73,18 @@ class BaseBuffer:
 
     @abstractmethod
     def get_all_elements(self) -> BufferData:
-        """TODO."""
+        """
+        Get all elements stored in the buffer.
+        :return: all elements stored in the buffer
+        """
         raise NotImplementedError
 
     @abstractmethod
-    def create_dataset(self):
-        """TODO."""
+    def create_dataset(self) :
+        """
+        Create a PyTorch dataset.
+        :return: PyTorch dataset
+        """
         raise NotImplementedError
 
     @abstractmethod
