@@ -1,9 +1,7 @@
 """Base class for all models used in agents."""
 from abc import abstractmethod
-import random
 from typing import Any
 
-import numpy as np
 import torch as th
 from torch import nn
 
@@ -11,7 +9,6 @@ from rlgammon.models.model_types import ActivationList, BaseOutput, LayerList
 from rlgammon.models.raw_model import RawModel
 from rlgammon.rlgammon_types import Feature
 
-# TODO FIND A WAY TO INCORPORATE VALUE AND POLICY HEAD INTO THIS MODEL
 
 class BaseModel(nn.Module):
     """Class defining the interface of all models or implementing their common functionalities."""
@@ -50,16 +47,15 @@ class BaseModel(nn.Module):
         return self.model(x)  # type: ignore[no-any-return]
 
     @abstractmethod
-    # def update_weights(self, p: th.Tensor, p_next: th.Tensor | int) -> float:
     def update_weights(self, action_info: Any, reward: th.Tensor, state: Feature, next_state: Feature, done: bool) -> float:
         """
-        Update the weights of the model from the provided state-values.TODO.
+        Update the weights of the model from the provided state-values.
 
-        :param action_info:
-        :param reward:
-        :param state:
-        :param next_state:
-        :param done:
+        :param action_info: additional info generated when choosing moves; e.g. MCTS policy
+        :param reward: reward received at the current state
+        :param state: current state of the game
+        :param done: boolean flag indicating whether the game is over
+        :param done: boolean flag indicating whether the episode has ended
         :return: loss encountered in the update
         """
         raise NotImplementedError

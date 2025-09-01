@@ -1,4 +1,4 @@
-"""TODO."""
+"""File implementing a generic actor-critic style model."""
 import torch as th
 
 from rlgammon.models.model_types import ActivationList, ActorCriticOutput, LayerList
@@ -7,12 +7,23 @@ from rlgammon.rlgammon_types import Feature
 
 
 class ActorCriticModel(th.nn.Module):
-    """TODO."""
+    """Class implementing a generic actor-critic style model."""
 
     def __init__(self, lr: float, base_layer_list: LayerList, base_activation_list: ActivationList,
                  policy_layer_list: LayerList, policy_activation_list: ActivationList,
                  value_layer_list: LayerList, value_activation_list: ActivationList) -> None:
-        """TODO."""
+        """
+        Construct a generic actor-critic style model by combining 3 networks: base, policy and value networks,
+        and then initializing td specific parameters.
+
+        :param lr: learning rate
+        :param base_layer_list: list of layers to use in the base (shared) network
+        :param base_activation_list: list of activations to use in the base (shared) network
+        :param policy_layer_list: list of layers to use in the policy network
+        :param policy_activation_list: list of activations to use in the policy network
+        :param value_layer_list: list of layers to use in the value network
+        :param value_activation_list: list of activations to use in the value network
+        """
         super().__init__()
         self.base = RawModel(base_layer_list, base_activation_list)
         self.policy_head = RawModel(policy_layer_list, policy_activation_list)
@@ -27,7 +38,12 @@ class ActorCriticModel(th.nn.Module):
         self.lr_scheduler = th.optim.lr_scheduler.ExponentialLR(optimizer=self.optimizer, gamma=self.decay_rate)
 
     def forward(self, x: Feature | th.Tensor) -> ActorCriticOutput:
-        """TODO."""
+        """
+        Forward pass of the actor-critic style model.
+
+        :param x: input data to the model
+        :return: two separate outputs: value and policy for the input
+        """
         # Process state - mcts gives one element list of raw observations (len = 200) from environment
         # Need the observation of len = 198 -> no dice
         base = self.base(x)
