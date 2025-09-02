@@ -25,7 +25,7 @@ REQUIRED_PARAMETERS: list[tuple[str, type]] = [
     ("logger_name", str),
     ("save_progress", bool),
     ("iterations", int),
-    ("episodes_per_iteration", int)
+    ("episodes_per_iteration", int),
 ]
 
 

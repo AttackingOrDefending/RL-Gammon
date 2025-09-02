@@ -5,7 +5,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from rlgammon.models.actor_critic_model import ActorCriticModel
-from rlgammon.models.model_types import ActivationList, ActorCriticOutput, LayerList
+from rlgammon.models.model_types import ActivationList, LayerList
 from rlgammon.rlgammon_types import Feature
 
 

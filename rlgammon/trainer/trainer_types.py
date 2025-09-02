@@ -1,3 +1,5 @@
+"""File implementing type aliases for trainers."""
+
 from enum import Enum
 
 

@@ -6,7 +6,6 @@ import pyspiel
 
 from rlgammon.models.alpha_zero_model import AlphaZeroModel
 from rlgammon.models.model_errors.model_errors import ModelNotProvidedToEvaluatorError
-from rlgammon.models.model_types import ActorCriticOutput
 from rlgammon.rlgammon_types import WHITE, ActionPolicyList
 
 

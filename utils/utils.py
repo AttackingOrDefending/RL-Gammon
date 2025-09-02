@@ -3,7 +3,7 @@ import pickle
 from typing import Any
 
 
-def copy(item: Any) -> Any:  # noqa: ANN401
+def copy(item: Any) -> Any:
     """
     Return a deepcopy of the provided environment.
 

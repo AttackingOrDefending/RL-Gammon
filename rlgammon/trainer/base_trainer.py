@@ -5,9 +5,7 @@ from pathlib import Path
 from typing import Any
 from uuid import UUID
 
-import numpy as np
 import pyspiel  # type: ignore[import-not-found]
-from pyspiel import BackgammonState
 
 from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.buffers import BaseBuffer, UniformBuffer

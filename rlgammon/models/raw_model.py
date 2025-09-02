@@ -44,7 +44,6 @@ class RawModel(nn.Module):
         :return: model output
         """
         x = th.FloatTensor(x)
-        # x = th.tensor(x, requires_grad=True)
         for i, layer in enumerate(self.linears):
             x = layer(x)
             if i < self.num_activations:
