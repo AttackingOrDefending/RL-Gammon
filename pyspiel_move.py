@@ -3,6 +3,8 @@ import pyspiel
 import re
 
 def slash_to_px_distance(move_str, player=1):
+    move_str = move_str.replace("Bar", "25")
+    move_str = move_str.replace("Off", "0")
     # Keep only allowed tokens
     move_str = re.sub(r"[^0-9/BarOff ]", "", move_str, flags=re.IGNORECASE)
 
@@ -41,8 +43,6 @@ if __name__ == "__main__":
     for action in actions:
         action_string = state.action_to_string(state.current_player(), action)
         s = action_string.split(" - ")[1]
-        s = s.replace("Bar", "25")
-        s = s.replace("Off", "0")
         print(s)
         print(slash_to_px_distance(s))
         print("")

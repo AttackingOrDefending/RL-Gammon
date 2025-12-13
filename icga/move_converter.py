@@ -125,7 +125,7 @@ if __name__ == "__main__":
     # Move 0 Dist is 2. Dice are 4, 2.
     # Move 0 used Low Roll (2). Offset = 676.
     # ID = 16 + (18 * 26) + 676 = 16 + 468 + 676 = 1160.
-    s1 = "P0-1-P12-6"
+    s1 = "P19-4-P17-2"
     id1 = converter.encode(s1)
     print(f"String:  {s1}")
     print(f"Encoded: {id1} (Expected 1160)")

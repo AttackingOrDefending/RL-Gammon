@@ -9,12 +9,13 @@ from converter import flipped_to_normal_moves
 game = pyspiel.load_game("backgammon(scoring_type=full_scoring)")
 state = game.new_initial_state()
 
-moves = [6, 1160, 15, 135, 595, 4, 986, 16, 324, 324, 3, 1109, 8, 1272, 0, 1168, 0, 569, 2, 648, 4, 267, 11, 11, 14, 527,
-         4, 979, 14, 249, 3, 999, 6, 830, 6, 979, 0, 420, 17, 24, 442, 5, 596, 5, 518, 6, 1090, 18, 96, 81, 18, 648, 254,
-         5, 697, 0, 37, 11, 882, 2, 239, 12, 730, 17, 224, 135, 9, 674, 14, 150, 4, 492, 19, 140, 410, 16, 1351, 7, 221, 9, 674,
-         10]
-moves = [6, 1160, 15]
+#moves = [6, 1160, 15, 135, 595, 4, 986, 16, 324, 324, 3, 1109, 8, 1272, 0, 1168, 0, 569, 2, 648, 4, 267, 11, 11, 14, 527,
+#         4, 979, 14, 249, 3, 999, 6, 830, 6, 979, 0, 420, 17, 24, 442, 5, 596, 5, 518, 6, 1090, 18, 96, 81, 18, 648, 254,
+#         5, 697, 0, 37, 11, 882, 2, 239, 12, 730, 17, 224, 135, 9, 674, 14, 150, 4, 492, 19, 140, 410, 16, 1351, 7, 221, 9, 674,
+#         10]
+moves = [6, 1160, 15, 135, 595, 4, 986, 16, 324, 324, 3, 1109, 8, ]
 think = True
+move_to_convert = 'P25-2-P23-6'
 
 for m in moves:
     state.apply_action(m)
@@ -29,10 +30,40 @@ if state.is_chance_node():
 else:
     # Decision node: sample action for the single current player
     actions = state.legal_actions(state.current_player())
+    cors = []
     for action in actions:
         action_string = state.action_to_string(state.current_player(), action)
         discord = slash_to_px_distance(action_string.split(" - ")[1])
+        if move_to_convert:
+            d1 = discord
+            d2 = discord.split('-')
+            d2 = d2[2:] + d2[:2]
+            d2 = '-'.join(d2)
+            if state.current_player() == WHITE:
+                d1 = d1.split('-')
+                ts = []
+                for t in d1:
+                    if t.startswith('P'):
+                        ts.append('P' + str(25 - int(t[1:])))
+                    else:
+                        ts.append(t)
+                d1 = '-'.join(ts)
+                d2 = d2.split('-')
+                ts = []
+                for t in d2:
+                    if t.startswith('P'):
+                        ts.append('P' + str(25 - int(t[1:])))
+                    else:
+                        ts.append(t)
+                d2 = '-'.join(ts)
+            if d1 == move_to_convert:
+                cors.append((action, action_string, 1))
+            if d2 == move_to_convert:
+                cors.append((action, action_string, 2))
         print("Player ", state.current_player(), " action: ", action_string, "int: ", action, "    discord:", discord)
+    print('---------------------------------------------------------------------')
+    for cor in cors:
+        print("Converted move: ", cor[1], " int: ", cor[0], " order: ", cor[2])
 
     if think:
         agent = TDAgent("/mnt/c/Users/panti/PycharmProjects/RL-Gammon/rlgammon/agents/saved_agents/td-backgammon-cd3f053a-1c5e-490e-ad7f-feceba70802c-(124).pt")
