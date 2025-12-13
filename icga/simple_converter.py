@@ -9,7 +9,7 @@ think = True
 
 
 
-moves = [6, 1160, 15, ]
+moves = []
 move_to_convert = '''
 
 P23-1-P10-2
@@ -35,7 +35,7 @@ else:
     cors = []
     for action in actions:
         action_string = state.action_to_string(state.current_player(), action)
-        discord = ""
+        discord = "pass"
         try:
             discord = slash_to_px_distance(action_string.split(" - ")[1])
             if move_to_convert:
@@ -72,19 +72,23 @@ else:
         print("Converted move: ", cor[1], " order: ", cor[2], " int: ", cor[0])
 
     if think:
-        agent = TDAgent("/mnt/c/Users/panti/PycharmProjects/RL-Gammon/rlgammon/agents/saved_agents/td-backgammon-cd3f053a-1c5e-490e-ad7f-feceba70802c-(309).pt")
+        agent = TDAgent("/mnt/c/Users/panti/PycharmProjects/RL-Gammon/rlgammon/agents/saved_agents/td-backgammon-cd3f053a-1c5e-490e-ad7f-feceba70802c-(400).pt")
         action, evaluation = agent.choose_move(actions, state, return_eval=True)
         action_string = state.action_to_string(state.current_player(), action)
-        discord = slash_to_px_distance(action_string.split(" - ")[1])
-        if state.current_player() == WHITE:
-            discord = discord.split('-')
-            ts = []
-            for t in discord:
-                if t.startswith('P'):
-                    ts.append('P'+str(25 - int(t[1:])))
-                else:
-                    ts.append(t)
-            discord = '-'.join(ts)
+        discord = "pass"
+        try:
+            slash_to_px_distance(action_string.split(" - ")[1])
+            if state.current_player() == WHITE:
+                discord = discord.split('-')
+                ts = []
+                for t in discord:
+                    if t.startswith('P'):
+                        ts.append('P'+str(25 - int(t[1:])))
+                    else:
+                        ts.append(t)
+                discord = '-'.join(ts)
+        except Exception as e:
+            print("Error converting move: ", action_string, " error: ", e)
 
         print(f"-----------------------------------------------------------------")
         print("Player ", state.current_player(), " chosen action: ", action_string, "int: ", action, "    discord:", discord)
