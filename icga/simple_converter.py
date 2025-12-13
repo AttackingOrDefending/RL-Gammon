@@ -8,7 +8,11 @@ from rlgammon.rlgammon_types import WHITE, ActionGNU, ActionSetGNU, Features
 game = pyspiel.load_game("backgammon(scoring_type=full_scoring)")
 state = game.new_initial_state()
 
-moves = [0, 11, 13]
+moves = [6, 1160, 15, 135, 595, 4, 986, 16, 324, 324, 3, 1109, 8, 1272, 0, 1168, 0, 569, 2, 648, 4, 267, 11, 11, 14, 527,
+         4, 979, 14, 249, 3, 999, 6, 830, 6, 979, 0, 420, 17, 24, 442, 5, 596, 5, 518, 6, 1090, 18, 96, 81, 18, 648, 254,
+         5, 697, 0, 37, 11, 882, 2, 239, 12, 730, 17, 224, 135, 9, 674, 14, 150, 4, 492, 19, 140, 410, 16, 1351, 7, 221, 9, 674,
+         10]
+moves = [1]
 think = True
 
 for m in moves:
@@ -29,7 +33,7 @@ else:
         print("Player ", state.current_player(), " action: ", action_string, "int: ", action)
 
     if think:
-        agent = TDAgent("/mnt/c/Users/panti/PycharmProjects/RL-Gammon/rlgammon/agents/saved_agents/td-backgammon-cd3f053a-1c5e-490e-ad7f-feceba70802c-(20).pt")
+        agent = TDAgent("/mnt/c/Users/panti/PycharmProjects/RL-Gammon/rlgammon/agents/saved_agents/td-backgammon-cd3f053a-1c5e-490e-ad7f-feceba70802c-(101).pt")
         action, evaluation = agent.choose_move(actions, state, return_eval=True)
         action_string = state.action_to_string(state.current_player(), action)
         print("Player ", state.current_player(), " chosen action: ", action_string, "int: ", action)
