@@ -9,10 +9,7 @@ think = True
 
 
 
-moves = [11, 962, 6, 142, 6, 1142, 6, 142, 13, 694, 10, 137, 2, 536, 17, 189, 246, 5, 986, 1, 606, 6, 986, 18,
-         517, 168, 1, 986, 2, 327, 8, 700, 9, 1192, 6, 1054, 14, 301,
-         8, 726, 17, 165, 219, 4, 876, 13, 164, 3, 1110, 0, 83, 9, 1189, 0, 86, 4, 1035, 15, 81, 108,
-         1, 1165, 11, 812, 17, 42, 512, 5, 54, 0, 799, 16, 54, 54, 5, 850, 7, 57, 0, 581, 18, 81]
+moves = [6, 1160, 15, ]
 move_to_convert = '''
 
 P23-1-P10-2
@@ -76,7 +73,9 @@ else:
 
     if think:
         agent = TDAgent("/mnt/c/Users/panti/PycharmProjects/RL-Gammon/rlgammon/agents/saved_agents/td-backgammon-cd3f053a-1c5e-490e-ad7f-feceba70802c-(309).pt")
+        actions = []
         action, evaluation = agent.choose_move(actions, state, return_eval=True)
+        actions.append(action)
         action_string = state.action_to_string(state.current_player(), action)
         discord = slash_to_px_distance(action_string.split(" - ")[1])
         if state.current_player() == WHITE:
@@ -89,6 +88,26 @@ else:
                     ts.append(t)
             discord = '-'.join(ts)
 
+        state2 = state.clone()
+        state2.apply_action(action)
+        if not state2.is_terminal():
+            action2, evaluation2 = agent.choose_move(actions, state2, return_eval=True)
+            action_string2 = state2.action_to_string(state2.current_player(), action2)
+            discord2 = slash_to_px_distance(action_string2.split(" - ")[1])
+            if state2.current_player() == WHITE:
+                discord2 = discord2.split('-')
+                ts = []
+                for t in discord2:
+                    if t.startswith('P'):
+                        ts.append('P' + str(25 - int(t[1:])))
+                    else:
+                        ts.append(t)
+                discord2 = '-'.join(ts)
+            action_string += " " + action_string2
+            discord += " " + discord2
+            evaluation = evaluation2
+            actions.append(action2)
+
         print(f"-----------------------------------------------------------------")
-        print("Player ", state.current_player(), " chosen action: ", action_string, "int: ", action, "    discord:", discord)
+        print("Player ", state.current_player(), " chosen action: ", action_string, "int: ", actions, "    discord:", discord)
         print("Evaluation: ", evaluation, "Our side eval: ", evaluation if state.current_player() == WHITE else -evaluation)
