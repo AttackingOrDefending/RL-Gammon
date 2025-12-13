@@ -11,6 +11,7 @@ import requests
 from rlgammon.environment.backgammon import BLACK, NUM_POINTS, WHITE, Backgammon as Game, assert_board
 from rlgammon.environment.backgammon_env import SCREEN_H, SCREEN_W, STATE_H, STATE_W
 from rlgammon.environment.rendering import Viewer
+from rlgammon.search.search import Search
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -246,7 +247,8 @@ def evaluate_vs_gnubg(agent, env, n_episodes):
 
     for episode in range(n_episodes):
         observation, first_roll = env.reset()
-        t = time.time()
+        time_limit_sec = 0.1
+        search = Search(agent)
         for i in count():
             if first_roll:
                 roll = first_roll
@@ -257,7 +259,9 @@ def evaluate_vs_gnubg(agent, env, n_episodes):
                 roll = env.gnubg.roll
 
             actions = env.get_valid_actions(roll)
-            action = agent.choose_move(actions, env)
+
+            # action = agent.choose_move(actions, env)
+            action = search.best_action(env, depth=1, start_time=time.time(), time_limit_sec=time_limit_sec)
 
             observation_next, reward, done, info = env.step(action)
 
