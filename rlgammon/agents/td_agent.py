@@ -66,7 +66,8 @@ class TDAgent(TrainableAgent):
         return self.model.update_weights(p, p_next)
 
     def choose_move(self, actions: list[int] | ActionSetGNU,
-                    state: pyspiel.BackgammonState | BackgammonEnv) -> int | ActionGNU:
+                    state: pyspiel.BackgammonState | BackgammonEnv,
+                    return_eval=False) -> int | ActionGNU:
         """
         Chooses a move to make given the current board and dice roll, which goes to the state with maximal value.
 
@@ -98,6 +99,8 @@ class TDAgent(TrainableAgent):
             elif reward < best_value:
                 best_value = reward
                 best_action = action
+        if return_eval:
+            return best_action, best_value
         return best_action
 
     def save(self, training_session_id: UUID, session_save_count: int, main_filename: str = "td-backgammon") -> None:
@@ -112,7 +115,7 @@ class TDAgent(TrainableAgent):
         agent_file_path = pathlib.Path(__file__).parent
         agent_file_path = agent_file_path.joinpath("saved_agents/")
         agent_file_path.mkdir(parents=True, exist_ok=True)
-        th.save(self.model.state_dict(), agent_file_path.joinpath(agent_main_filename))
+        th.save(self.model, agent_file_path.joinpath(agent_main_filename))
 
     def load(self, agent_main_filename: str) -> th.nn.Module:
         """

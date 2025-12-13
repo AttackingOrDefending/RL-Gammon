@@ -1,0 +1,36 @@
+from open_spiel.python import games  # pylint: disable=unused-import
+import pyspiel
+import random
+import numpy as np
+from rlgammon.agents.td_agent import TDAgent
+from rlgammon.rlgammon_types import WHITE, ActionGNU, ActionSetGNU, Features
+
+game = pyspiel.load_game("backgammon(scoring_type=full_scoring)")
+state = game.new_initial_state()
+
+moves = [0, 11, 13]
+think = True
+
+for m in moves:
+    state.apply_action(m)
+
+if state.is_chance_node():
+    outcomes = state.chance_outcomes()
+    num_actions = len(outcomes)
+    print("Chance node, got " + str(num_actions) + " outcomes")
+    action_list, prob_list = zip(*outcomes)
+    for action, prob in outcomes:
+        print("Action: ", state.action_to_string(state.current_player(), action), " Probability: ", prob, "int: ", action)
+else:
+    # Decision node: sample action for the single current player
+    actions = state.legal_actions(state.current_player())
+    for action in actions:
+        action_string = state.action_to_string(state.current_player(), action)
+        print("Player ", state.current_player(), " action: ", action_string, "int: ", action)
+
+    if think:
+        agent = TDAgent("/mnt/c/Users/panti/PycharmProjects/RL-Gammon/rlgammon/agents/saved_agents/td-backgammon-cd3f053a-1c5e-490e-ad7f-feceba70802c-(20).pt")
+        action, evaluation = agent.choose_move(actions, state, return_eval=True)
+        action_string = state.action_to_string(state.current_player(), action)
+        print("Player ", state.current_player(), " chosen action: ", action_string, "int: ", action)
+        print("Evaluation: ", evaluation, "Our side eval: ", evaluation if state.current_player() == WHITE else -evaluation)
