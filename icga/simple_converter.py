@@ -34,10 +34,11 @@ else:
         print("Player ", state.current_player(), " action: ", action_string, "int: ", action, "    discord:", discord)
 
     if think:
-        agent = TDAgent("/mnt/c/Users/panti/PycharmProjects/RL-Gammon/rlgammon/agents/saved_agents/td-backgammon-cd3f053a-1c5e-490e-ad7f-feceba70802c-(101).pt")
+        agent = TDAgent("/mnt/c/Users/panti/PycharmProjects/RL-Gammon/rlgammon/agents/saved_agents/td-backgammon-cd3f053a-1c5e-490e-ad7f-feceba70802c-(124).pt")
         action, evaluation = agent.choose_move(actions, state, return_eval=True)
         action_string = state.action_to_string(state.current_player(), action)
         discord = slash_to_px_distance(action_string.split(" - ")[1])
 
+        print(f"-----------------------------------------------------------------")
         print("Player ", state.current_player(), " chosen action: ", action_string, "int: ", action, "    discord:", discord)
         print("Evaluation: ", evaluation, "Our side eval: ", evaluation if state.current_player() == WHITE else -evaluation)

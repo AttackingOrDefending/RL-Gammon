@@ -32,16 +32,17 @@ def slash_to_px_distance(move_str, player=1):
 
 
 
-game = pyspiel.load_game("backgammon(scoring_type=full_scoring)")
-state = game.new_initial_state()
-state.apply_action(1)
+if __name__ == "__main__":
+    game = pyspiel.load_game("backgammon(scoring_type=full_scoring)")
+    state = game.new_initial_state()
+    state.apply_action(1)
 
-actions = state.legal_actions(state.current_player())
-for action in actions:
-    action_string = state.action_to_string(state.current_player(), action)
-    s = action_string.split(" - ")[1]
-    s = s.replace("Bar", "25")
-    s = s.replace("Off", "0")
-    print(s)
-    print(slash_to_px_distance(s))
-    print("")
+    actions = state.legal_actions(state.current_player())
+    for action in actions:
+        action_string = state.action_to_string(state.current_player(), action)
+        s = action_string.split(" - ")[1]
+        s = s.replace("Bar", "25")
+        s = s.replace("Off", "0")
+        print(s)
+        print(slash_to_px_distance(s))
+        print("")
