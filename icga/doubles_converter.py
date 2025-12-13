@@ -73,10 +73,10 @@ else:
 
     if think:
         agent = TDAgent("/mnt/c/Users/panti/PycharmProjects/RL-Gammon/rlgammon/agents/saved_agents/td-backgammon-cd3f053a-1c5e-490e-ad7f-feceba70802c-(309).pt")
-        actions = []
+        moves = []
         action, evaluation = agent.choose_move(actions, state, return_eval=True)
-        actions.append(action)
         action_string = state.action_to_string(state.current_player(), action)
+        moves.append(action)
         discord = slash_to_px_distance(action_string.split(" - ")[1])
         if state.current_player() == WHITE:
             discord = discord.split('-')
@@ -104,10 +104,18 @@ else:
                         ts.append(t)
                 discord2 = '-'.join(ts)
             action_string += " " + action_string2
-            discord += " " + discord2
+            d = discord.split('-')[1]
+            pos = []
+            for i, p in enumerate(discord.split('-')):
+                if i % 2 == 0:
+                    pos.append(p)
+            for i, p in enumerate(discord2.split('-')):
+                if i % 2 == 0:
+                    pos.append(p)
+            discord = d + '-' + '-'.join(pos)
             evaluation = evaluation2
-            actions.append(action2)
+            moves.append(action2)
 
         print(f"-----------------------------------------------------------------")
-        print("Player ", state.current_player(), " chosen action: ", action_string, "int: ", actions, "    discord:", discord)
+        print("Player ", state.current_player(), " chosen action: ", action_string, "int: ", moves, "    discord:", discord)
         print("Evaluation: ", evaluation, "Our side eval: ", evaluation if state.current_player() == WHITE else -evaluation)

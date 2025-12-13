@@ -3,6 +3,8 @@ import pyspiel
 import re
 
 def slash_to_px_distance(move_str, player=1):
+    if move_str.endswith('(2)'):
+        move_str = move_str[:-3] + ' ' + move_str[:-3]
     move_str = move_str.replace("Pass", "")
     move_str = move_str.replace("Bar", "25")
     move_str = move_str.replace("Off", "0")
