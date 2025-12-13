@@ -48,7 +48,7 @@ class Search:
         if decision_ply <= 0:
             # leaf evaluation with NN
             features = state_with_dice.observation_tensor(WHITE)[:198]
-            best_move = agent.choose_move(state_with_dice.legal_actions(), state_with_dice)
+            best_move = self.agent.choose_move(state_with_dice.legal_actions(), state_with_dice)
             return self.agent.evaluate_position(features).detach().numpy(), best_move
 
         moves = state_with_dice.legal_actions()
