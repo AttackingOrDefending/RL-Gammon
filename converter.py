@@ -84,8 +84,10 @@ def flipped_to_normal_moves(move_str, player=1):
             i += 2  # Move to next pair
         return " ".join(moves)
 
-move = "P4-1-P19-1"
-player = 1
 
-print(flipped_to_normal_moves(move, player))
+if __name__ == "__main__":
+    move = "P4-1-P19-1"
+    player = 1
+
+    print(flipped_to_normal_moves(move, player))
 
