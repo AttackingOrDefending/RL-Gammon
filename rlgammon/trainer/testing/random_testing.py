@@ -1,10 +1,13 @@
 """Testing class with a random agent."""
+import time
+
 import numpy as np
 import pyspiel  # type: ignore[import-not-found]
 
 from rlgammon.agents.base_agent import BaseAgent
 from rlgammon.agents.random_agent import RandomAgent
 from rlgammon.rlgammon_types import BLACK, WHITE
+from rlgammon.search.search import Search
 from rlgammon.trainer.testing.base_testing import BaseTesting
 
 
@@ -36,8 +39,10 @@ class RandomTesting(BaseTesting):
         env = pyspiel.load_game("backgammon(scoring_type=full_scoring)")
         agent.set_color(WHITE)
         self.testing_agent.set_color(BLACK)
+        time_limit_sec = 0.2
         for _test_game in range(self.episodes_in_test):
             state = env.new_initial_state()
+            search = Search(agent)
             while not state.is_terminal():
                 if state.is_chance_node():
                     outcomes = state.chance_outcomes()
@@ -52,7 +57,8 @@ class RandomTesting(BaseTesting):
                     legal_actions = state.legal_actions()
 
                     if current_player == agent.color:
-                        action = agent.choose_move(legal_actions, state)
+                        action = search.best_action(state, depth=10, start_time=time.time(), time_limit_sec=time_limit_sec)
+                        # action = agent.choose_move(legal_actions, state)
                     else:
                         action = self.testing_agent.choose_move(legal_actions, state)
 
