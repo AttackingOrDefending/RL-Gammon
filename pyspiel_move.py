@@ -3,8 +3,12 @@ import pyspiel
 import re
 
 def slash_to_px_distance(move_str, player=1):
+    move_str = move_str.replace("Pass", "")
     move_str = move_str.replace("Bar", "25")
     move_str = move_str.replace("Off", "0")
+    move_str = move_str.strip()
+    if not move_str:
+        return "pass"
     # Keep only allowed tokens
     move_str = re.sub(r"[^0-9/BarOff ]", "", move_str, flags=re.IGNORECASE)
 
