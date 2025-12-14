@@ -9,7 +9,7 @@ think = True
 
 
 
-moves = [12]
+moves = [17, 220, 12, 297, 4, 993, 5, 468, 5, 1280, 12, 778, 1, 862, 17, ]
 move_to_convert = '''
 
 P23-1-P10-2
@@ -72,7 +72,7 @@ else:
         print("Converted move: ", cor[1], " order: ", cor[2], " int: ", cor[0])
 
     if think:
-        agent = TDAgent("/mnt/c/Users/panti/PycharmProjects/RL-Gammon/rlgammon/agents/saved_agents/td-backgammon-cd3f053a-1c5e-490e-ad7f-feceba70802c-(400).pt")
+        agent = TDAgent("/mnt/c/Users/panti/PycharmProjects/RL-Gammon/rlgammon/agents/saved_agents/td-backgammon-cd3f053a-1c5e-490e-ad7f-feceba70802c-(1575).pt")
         moves = []
         action, evaluation = agent.choose_move(actions, state, return_eval=True)
         action_string = state.action_to_string(state.current_player(), action)
@@ -91,6 +91,7 @@ else:
         state2 = state.clone()
         state2.apply_action(action)
         if not state2.is_terminal():
+            actions = state2.legal_actions(state2.current_player())
             action2, evaluation2 = agent.choose_move(actions, state2, return_eval=True)
             action_string2 = state2.action_to_string(state2.current_player(), action2)
             discord2 = slash_to_px_distance(action_string2.split(" - ")[1])
