@@ -1,8 +1,8 @@
 import pyspiel
 from rlgammon.agents.td_agent import TDAgent
 from rlgammon.rlgammon_types import WHITE
-from pyspiel_move import slash_to_px_distance
-from converter import flipped_to_normal_moves
+from icga.pyspiel_move import slash_to_px_distance
+
 game = pyspiel.load_game("backgammon(scoring_type=full_scoring)")
 state = game.new_initial_state()
 think = True
