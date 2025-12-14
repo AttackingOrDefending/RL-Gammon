@@ -9,10 +9,13 @@ think = True
 
 
 
-moves = [17, 220, 12, 297, 4, 993, 5, 468, 5, 1280, 12, 778, 1, 862, 17, ]
+moves = [14, 297, 18, 621, 324, 17, 486, 17, 9, 85, 2, 648, 8, 1012, 10, 538, 4, 993, 0, 94, 13, 1012, 0, 349, 2,
+         889, 10, 1116, 2, 409, 2, 24, 4, 1060, 10, 484, 8, 1253, 11, 1350, 12, 900, 15, 24, 297, 1, 1351, 15, 27, 324,
+         0, 232, 16, 351, 486, 7, 1255, 8, 405, 13, 492, 10, 537, 13, 1175, 7, 1346, 3, 851, 10, 1351, 20, 162, 352, 6,
+         158, 8, 206, 13, ]
 move_to_convert = '''
 
-P23-1-P10-2
+P15-6-P8-2
 
 '''
 
@@ -90,7 +93,7 @@ else:
 
         state2 = state.clone()
         state2.apply_action(action)
-        if not state2.is_terminal():
+        if not state2.is_chance_node():
             actions = state2.legal_actions(state2.current_player())
             action2, evaluation2 = agent.choose_move(actions, state2, return_eval=True)
             action_string2 = state2.action_to_string(state2.current_player(), action2)
@@ -117,6 +120,7 @@ else:
             evaluation = evaluation2
             moves.append(action2)
 
+        moves = ', '.join(map(str, moves))
         print(f"-----------------------------------------------------------------")
-        print("Player ", state.current_player(), " chosen action: ", action_string, "int: ", moves, "    discord:", discord)
         print("Evaluation: ", evaluation, "Our side eval: ", evaluation if state.current_player() == WHITE else -evaluation)
+        print("Player ", state.current_player(), " chosen action: ", action_string, "int: ", moves, "    discord:", discord)

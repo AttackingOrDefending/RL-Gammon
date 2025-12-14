@@ -9,13 +9,15 @@ think = True
 
 
 
-moves = [17, 220, 12, 297, 4, 993, 5, 468, 5, 1280, 12, 778, 1, 862, 17, 440, 11, 4, 1220, 7, ]
+moves = [14, 156, 2, 621, 4, 427, 15, 135, 108, 14, 156, 7, 1218, 6, 401, 9, 336, 19, 302, 427, 6, 139, 4, 979, 19, 383, 410,
+         7, 973, 15, 272, 324, 1, 1109, 0, 272, 8, 1109, 3, 85, 4, 1031, 1, 137, 5, 588, 3, 193, 13, 1163, 7, 167,
+         13, 1162, 17, 219, 243, 5, 593, 15, 162, 162, 15, 616, 593, 0, 191, 3, 1189, 0, 158, 9, 1214, 8, 809, 2, 1162,
+         5, 28, 1, 1241, 11, 135, 13, 538, 13, 83, 9, 1189, 1, 2, 10, 594, 8, 109, 20, 621]
 move_to_convert = '''
 
-P23-1-P10-2
+P22-3-P20-1
 
 '''
-
 
 
 move_to_convert = move_to_convert.strip()
@@ -91,5 +93,5 @@ else:
             print("Error converting move: ", action_string, " error: ", e)
 
         print(f"-----------------------------------------------------------------")
-        print("Player ", state.current_player(), " chosen action: ", action_string, "int: ", action, "    discord:", discord)
         print("Evaluation: ", evaluation, "Our side eval: ", evaluation if state.current_player() == WHITE else -evaluation)
+        print("Player ", state.current_player(), " chosen action: ", action_string, "int: ", action, "    discord:", discord)
