@@ -57,8 +57,8 @@ class RandomTesting(BaseTesting):
                     legal_actions = state.legal_actions()
 
                     if current_player == agent.color:
-                        action = search.best_action(state, depth=10, start_time=time.time(), time_limit_sec=time_limit_sec)
-                        # action = agent.choose_move(legal_actions, state)
+                        #action = search.best_action(state, depth=10, start_time=time.time(), time_limit_sec=time_limit_sec)
+                        action = agent.choose_move(legal_actions, state)
                     else:
                         action = self.testing_agent.choose_move(legal_actions, state)
 

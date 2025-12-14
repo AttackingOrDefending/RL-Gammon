@@ -72,7 +72,7 @@ else:
         print("Converted move: ", cor[1], " order: ", cor[2], " int: ", cor[0])
 
     if think:
-        agent = TDAgent("/mnt/c/Users/panti/PycharmProjects/RL-Gammon/rlgammon/agents/saved_agents/td-backgammon-cd3f053a-1c5e-490e-ad7f-feceba70802c-(1575).pt")
+        agent = TDAgent("/mnt/c/Users/panti/PycharmProjects/RL-Gammon/rlgammon/agents/saved_agents/td-backgammon-cd3f053a-1c5e-490e-ad7f-feceba70802c-(1999).pt")
         moves = []
         action, evaluation = agent.choose_move(actions, state, return_eval=True)
         action_string = state.action_to_string(state.current_player(), action)
