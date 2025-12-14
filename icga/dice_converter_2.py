@@ -16,6 +16,8 @@ def dice_conv(dice_string, first_move):
 
 
 if __name__ == "__main__":
+    first_move = True
+
     while True:
         move = input("Discord dice: ")
 

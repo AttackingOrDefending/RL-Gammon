@@ -67,12 +67,13 @@ class TDAgent(TrainableAgent):
 
     def choose_move(self, actions: list[int] | ActionSetGNU,
                     state: pyspiel.BackgammonState | BackgammonEnv,
-                    return_eval=False) -> int | ActionGNU:
+                    return_eval: bool=False) -> int | ActionGNU:
         """
         Chooses a move to make given the current board and dice roll, which goes to the state with maximal value.
 
         :param actions: set of all possible actions to choose from.
         :param state: the current state of the game.
+        :param return_eval: whether to return the model evaluation value or not.
         :return: the chosen move to make.
         """
         best_action = None

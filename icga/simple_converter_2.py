@@ -1,7 +1,7 @@
 import pyspiel
 
 from icga.dice_converter_2 import dice_conv
-from pyspiel_move import slash_to_px_distance
+from icga.pyspiel_move import slash_to_px_distance
 from rlgammon.agents.td_agent import TDAgent
 from rlgammon.rlgammon_types import WHITE
 from rlgammon.search.search2 import Search

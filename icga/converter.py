@@ -86,8 +86,8 @@ def flipped_to_normal_moves(move_str, player=1):
 
 
 if __name__ == "__main__":
-    move = "3-P2-P17-P20-P19"
-    player = 2
-
-    print(flipped_to_normal_moves(move, player))
+    player = int(input("Player: "))
+    while True:
+        move = input("Convert move: ")
+        print(flipped_to_normal_moves(move, player))
 
