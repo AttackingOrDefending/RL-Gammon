@@ -19,6 +19,10 @@ StateGNU = NDArray[np.float32]
 # OPEN SPIEL
 Features = list[float]
 
+Player = int
+Action = int
+ChanceOutcome = tuple[int, float]
+
 MovePart = tuple[int, int]
 MoveDict = dict[int, set[MovePart]]
 Move = list[MovePart]

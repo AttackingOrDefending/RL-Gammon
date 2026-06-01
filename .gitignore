@@ -176,3 +176,6 @@ cython_debug/
 /rlgammon/buffers/saved_buffers/
 
 old/
+# ...but keep the archived ICGA utilities, which intentionally live in icga/old/.
+!icga/old/
+!icga/old/**

@@ -1,0 +1,20 @@
+# Example ICGA transcript (the opening of a real game).
+#
+# One token per line. Each token is either a dice roll "a-b", a checker move in
+# ICGA notation, or "pass". Blank lines, '#' comments (whole-line or inline) and
+# referee-style "N. player X : <token>" lines are all accepted (only the part
+# after ':' is read) -- see the two annotated lines below.
+#
+# This transcript ends right after a dice roll, so it is player 0's turn. Run:
+#   python3 -m icga.auto_play --file icga/example_game.txt
+# and the tool prints player 0's recommended move in ICGA format.
+
+1. chance   : 4-3
+2. player 0 : P12-3-P12-4
+3-6
+P24-6-P6-3
+3-3                      # doubles roll
+3-P19-P19-P12-P15        # ...one token, four checkers
+1-3
+P25-1-P6-3               # player 1 enters from the bar (their bar = P25)
+5-6

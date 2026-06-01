@@ -2,10 +2,8 @@
 
 import random
 
-import pyspiel  # type: ignore[import-not-found]
-
 from rlgammon.agents.base_agent import BaseAgent
-from rlgammon.environment import BackgammonEnv  # type: ignore[attr-defined]
+from rlgammon.game.backgammon_protocol import GameState
 from rlgammon.rlgammon_types import ActionGNU, ActionSetGNU
 
 
@@ -16,12 +14,12 @@ class RandomAgent(BaseAgent):
         """A random agent needs no setup, therefore the function does nothing."""
 
     def choose_move(self, actions: list[int] | ActionSetGNU,
-                    state: pyspiel.BackgammonState | BackgammonEnv) -> int | ActionGNU: # noqa: ARG002
+                    state: GameState) -> int | ActionGNU:  # noqa: ARG002
         """
         Choose a random move from the legal moves.
 
         :param actions: set of all possible actions to choose from.
-        :param state: the current state of the game or environment with the current state if GNU
+        :param state: the current game state (unused by the random agent)
         :return: random action from the list of valid actions
         """
         return random.choice(list(actions))

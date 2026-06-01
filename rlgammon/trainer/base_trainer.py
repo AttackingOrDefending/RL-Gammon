@@ -9,6 +9,7 @@ from rlgammon.agents.trainable_agent import TrainableAgent
 from rlgammon.exploration import BaseExploration, EpsilonGreedyExploration
 from rlgammon.exploration.exploration_types import PossibleExploration
 from rlgammon.exploration.no_exploration import NoExploration
+from rlgammon.planning.planning_types import SearchConfig
 from rlgammon.trainer.logger.logger import Logger
 from rlgammon.trainer.testing.base_testing import BaseTesting
 from rlgammon.trainer.testing.gnu_testing import GNUTesting
@@ -27,6 +28,8 @@ class BaseTrainer:
     def __init__(self) -> None:
         """Constructor for the BaseTrainer containing the parameters for the trainer."""
         self.parameters: dict[str, Any] = {}
+        # Optional separate search budget used only by RANDOM testing ("think deeper at test time").
+        self.eval_search_config: SearchConfig | None = None
 
     def create_logger_from_parameters(self, training_session_id: UUID) -> Logger:
         """
@@ -48,7 +51,8 @@ class BaseTrainer:
         """
         match self.parameters["testing_type"]:
             case PossibleTesting.RANDOM:
-                testing = RandomTesting(self.parameters["episodes_in_test"])
+                testing = RandomTesting(self.parameters["episodes_in_test"],
+                                        eval_search=self.eval_search_config)
             case PossibleTesting.GNU:
                 testing = GNUTesting(self.parameters["episodes_in_test"])  # type: ignore[assignment]
             case _:

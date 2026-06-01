@@ -76,7 +76,7 @@ class Logger:
         :param logging_choice: determine the x-axis of the graph
         """
         # Set up plt figure parameters
-        fig, ax = plt.subplots(figsize=(10, 10))
+        _fig, ax = plt.subplots(figsize=(10, 10))
         ax.xaxis.set_tick_params(labelsize=16)
         ax.yaxis.set_tick_params(labelsize=16)
         ax.set_ylabel("win rate (%)", fontsize=16)

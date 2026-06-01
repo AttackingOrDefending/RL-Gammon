@@ -4,10 +4,16 @@ import time
 import uuid
 
 import numpy as np
-import pyspiel  # type: ignore[import-not-found]
+import torch as th
 from tqdm import tqdm
 
 from rlgammon.agents.trainable_agent import TrainableAgent
+from rlgammon.game import (
+    PossibleEngine,
+    apply_sampled_chance,
+    board_features,
+    create_game,
+)
 from rlgammon.rlgammon_types import WHITE
 from rlgammon.trainer.base_trainer import BaseTrainer
 from rlgammon.trainer.trainer_errors.trainer_errors import NoParametersError
@@ -25,12 +31,14 @@ class StepTrainer(BaseTrainer):
         Train the provided agent with the parameters provided at the Trainer constructor.
 
         :param agent: agent to be trained
+        :raises NoParametersError: if the trainer has not been given parameters yet
         """
         if not self.is_ready_for_training():
             raise NoParametersError
 
         session_id = uuid.uuid4()
-        env = pyspiel.load_game("backgammon(scoring_type=full_scoring)")
+        game = create_game(PossibleEngine.OPEN_SPIEL)
+        rng = np.random.default_rng()
 
         explorer = self.create_explorer_from_parameters()
         testing = self.create_testing_from_parameters()
@@ -42,38 +50,32 @@ class StepTrainer(BaseTrainer):
 
             agent.episode_setup()
 
-            state = env.new_initial_state()
-            outcomes = state.chance_outcomes()
-            action_list, prob_list = zip(*outcomes)  # noqa: B905
-            action = np.random.choice(action_list, p=prob_list)
-            state.apply_action(action)
+            state = game.new_initial_state()
+            apply_sampled_chance(state, rng)
 
             while not state.is_terminal():
-                # Remove the last 2 elements, which are the dice. Always from white perspective.
-                features = state.observation_tensor(WHITE)[:198]
+                # Always evaluate from the WHITE perspective to keep the bootstrap consistent.
+                features = board_features(state, WHITE)
 
                 p = agent.evaluate_position(features)
                 legal_actions = state.legal_actions()
 
                 action = (explorer.explore(legal_actions)
                     if explorer.should_explore() else agent.choose_move(legal_actions, state))
+                assert isinstance(action, int)
                 state.apply_action(action)
 
                 if state.is_terminal():
-                    # Terminal state, use actual reward (negative is black wins).
-                    reward = state.returns()[WHITE]
+                    # Terminal state, use the actual WHITE-centric reward (negative means black wins).
+                    reward = th.tensor(state.returns()[WHITE], dtype=p.dtype)
                     _ = agent.train(p, reward)
                 else:
-                    if not state.is_terminal() and state.is_chance_node():
-                        # Always roll the dice, so that the side to move is included in the input.
-                        outcomes = state.chance_outcomes()
-                        action_list, prob_list = zip(*outcomes, strict=False)
-                        action = np.random.choice(action_list, p=prob_list)
-                        state.apply_action(action)
+                    if state.is_chance_node():
+                        # Resolve the pending dice roll so the side to move is included in the input.
+                        apply_sampled_chance(state, rng)
 
-                    # Remove the last 2 elements, which are the dice. Always from white perspective.
-                    next_features = state.observation_tensor(WHITE)[:198]
-                    p_next = agent.evaluate_position(next_features, decay=True)
+                    next_features = board_features(state, WHITE)
+                    p_next = agent.evaluate_position(next_features)
                     _ = agent.train(p, p_next)
                 total_steps += 1
 
